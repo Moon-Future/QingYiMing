@@ -1,4 +1,4 @@
-export const prdData = [
+export const prdDataSift = [
   {
     'name': '木托盘',
     'unit': '个',

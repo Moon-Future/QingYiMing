@@ -24,20 +24,50 @@
       </div>
     </div>
     <div class="product-operate">
-      <el-button type="primary" size="mini">新增</el-button>
+      <el-button type="primary" size="mini" v-show="!addFlag" @click="goAdd">新增</el-button>
+      <el-button type="primary" size="mini" v-show="addFlag" @click="goBack">返回</el-button>
     </div>
-    <div class="product-table" ref="productTable">
-      <el-table border :data="prdData" :height="height">
+    <div class="product-table-sift" ref="productTable" v-show="!addFlag">
+      <el-table border size="mini" :data="prdDataSift" :max-height="height">
+        <el-table-column
+          type="selection"
+          width="55">
+        </el-table-column>
         <el-table-column prop="name" label="产品"></el-table-column>
         <el-table-column prop="unit" label="单位"></el-table-column>
         <el-table-column prop="qty" label="数量"></el-table-column>
       </el-table>
     </div>
+    <div class="product-table-add" v-show="addFlag">
+      <el-table border size="mini" :data="prdDataAdd" :max-height="`${height - 50}`">
+        <el-table-column
+          type="selection"
+          width="55">
+        </el-table-column>
+        <el-table-column prop="name" label="产品">
+          <template slot-scope="scope">
+            <el-input v-model="scope.row.name" placeholder="输入产品名"></el-input>
+          </template>
+        </el-table-column>
+        <el-table-column prop="unit" label="单位">
+          <template slot-scope="scope">
+            <el-select v-model="scope.row.unit" filterable clearable placeholder="请选择或输入单位">
+              <el-option
+                v-for="item in options" :label="item.label" :value="item.value" :key="item.value">
+              </el-option>
+            </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column prop="qty" label="数量"></el-table-column>
+      </el-table>
+      <el-button class="btn-add" type="danger" size="medium" @click="addRow">新增</el-button>
+      <el-button class="btn-submit" type="success" size="medium">提交</el-button>
+    </div>
   </div>
 </template>
 
 <script>
-  import { prdData } from 'common/js/data'
+  import { prdDataSift } from 'common/js/data'
   export default {
     data() {
       return {
@@ -88,8 +118,10 @@
             }
           }]
         },
-        prdData: [],
-        height: 500
+        prdDataSift: [],
+        prdDataAdd: [],
+        height: 500,
+        addFlag: false
       }
     },
     mounted() {
@@ -97,13 +129,35 @@
         const windowH = window.innerHeight
         const offsetTop = this.$refs.productTable.offsetTop
         this.height = windowH - offsetTop - 100
-        this.prdData = prdData
+        this.prdDataSift = prdDataSift
       })
+    },
+    methods: {
+      goAdd() {
+        this.addFlag = true
+        this.prdDataAdd = [
+          {
+            name: '',
+            unit: '',
+            qty: ''
+          }
+        ]
+      },
+      goBack() {
+        this.addFlag = false
+      },
+      addRow() {
+        this.prdDataAdd.push({
+          name: '',
+          unit: '',
+          qty: ''
+        })
+      }
     }
   }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   @import 'common/css/variable.scss';
 
   .product-container {
@@ -123,10 +177,27 @@
     .product-operate {
       text-align: left;
       margin-bottom: 10px;
+      button {
+        margin: 0;
+      }
     }
-    .product-table {
-      th {
-        font-weight: bold;
+    .product-table-sift, .product-table-add {
+      img {
+        width: 25px;
+        height: 25px;
+      }
+      th, td {
+        text-align: center;
+      }
+    }
+    .product-table-add {
+      .btn-add {
+        width: 100%;
+      }
+      .btn-submit {
+        position: absolute;
+        right: 0;
+        margin: 10px;
       }
     }
   }
