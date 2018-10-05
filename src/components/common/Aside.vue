@@ -1,0 +1,124 @@
+<template>
+  <div class="aside-container">
+    <div class="user-message">
+      <div class="user-avatar">
+        <img src="https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=2176837628,926516992&fm=27&gp=0.jpg" alt="">
+      </div>
+      <div class="user-name">
+        陈亮
+      </div>
+    </div>
+    <el-menu class="aside-menu"
+      :default-active="activeIndex"
+      background-color="#324157"
+      text-color="#fff"
+      active-text-color="#E9F01D"
+      router>
+      <template v-for="item in items">
+        <template v-if="item.subs">
+          <el-submenu :key="item.index" :index="item.index">
+            <template slot="title">
+              <icon-font :icon="item.icon" :fontSize="32"></icon-font>
+              <span>{{ item.title }}</span>
+            </template>
+            <el-menu-item v-for="(subItem, i) in item.subs" :key="i" :index="subItem.index">{{ subItem.title }}</el-menu-item>
+          </el-submenu>
+        </template>
+        <template v-else>
+          <el-menu-item :key="item.index" :index="item.index">
+            <icon-font :icon="item.icon" :fontSize="32"></icon-font>
+            <span>{{ item.title }}</span>
+          </el-menu-item>
+        </template>
+      </template>
+    </el-menu>
+  </div>
+</template>
+
+<script>
+  import IconFont from 'components/common/Iconfont'
+  export default {
+    data() {
+      return {
+        activeIndex: '0',
+        items: [
+          {
+            icon: 'icon-tree',
+            index: 'product',
+            title: '产品'
+          },
+          {
+            icon: 'icon-dingdan',
+            index: '2',
+            title: '订单管理',
+            subs: [
+              {
+                index: 'articles',
+                title: '最新订单'
+              },
+              {
+                index: 'markdown',
+                title: '历史订单'
+              }
+            ]
+          },
+          {
+            icon: 'icon-kucunguanli',
+            index: '3',
+            title: '库存管理',
+            subs: [
+              {
+                index: 'articles',
+                title: '入库'
+              },
+              {
+                index: 'markdown',
+                title: '出货'
+              }
+            ]
+          }
+        ]
+      }
+    },
+    components: {
+      IconFont
+    }
+  }
+</script>
+
+<style lang="scss" scoped>
+  @import 'common/css/variable.scss';
+
+  .aside-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 250px;
+    text-align: left;
+    display: flex;
+    flex-flow: column;
+    background-color: $color-deepgray;
+    .user-message {
+      padding: 10px 0;
+      margin: auto;
+      .user-avatar {
+        width: 100px;
+        height: 100px;
+        img {
+          width: 100%;
+          border-radius: 50%;
+        }
+      }
+      .user-name {
+        text-align: center;
+        margin-top: 10px;
+        color: $color-white;
+      }
+    }
+    .aside-menu {
+      height: 100%;
+      border: none;
+    }
+  }
+</style>
