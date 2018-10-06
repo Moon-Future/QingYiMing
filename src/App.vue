@@ -10,7 +10,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
   @import 'common/css/reset.scss';
   #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -26,6 +26,16 @@ export default {
   }
   table th, table td {
     text-align: center !important;
+    &.no-padding {
+      padding: initial !important;
+      .cell {
+        padding-left: initial !important;
+        padding-right: initial !important;
+      }
+    }
+    input {
+      padding: initial !important;
+    }
   }
   .subWait {
     background-color: #c0c0c0;

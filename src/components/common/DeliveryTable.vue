@@ -1,17 +1,17 @@
 <template>
   <div class="deliverytable-container">
-    <el-table border size="mini" :data="tableData">
+    <el-table border size="mini" :data="tableData" cell-class-name="no-padding">
       <el-table-column
         type="selection"
-        width="50">
+        width="35">
       </el-table-column>
       <template v-for="(item, i) in field">
-        <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="item.input">
+        <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="item.input" :width="item.width ? item.width : ''">
           <template slot-scope="scope">
             <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder"></el-input>
           </template>
         </el-table-column>
-        <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="!item.input"></el-table-column>
+        <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="!item.input" :width="item.width ? item.width : ''"></el-table-column>
       </template>
     </el-table>
   </div>
@@ -38,26 +38,4 @@
 
 <style lang="scss" scoped>
   @import 'common/css/variable.scss';
-
-  .delivery-container {
-    .print-wrapper {
-      width: 80%;
-      border: 1px solid $color-gray;
-      padding: 20px 150px;
-      margin: auto;
-      box-sizing: border-box;
-      .delivery-title {
-        font-weight: bold;
-        font-size: $font-size-large-x;
-        margin-bottom: 10px;
-      }
-      .delivery-message {
-        display: flex;
-        justify-content: space-between;
-        .delivery-number span {
-          margin-left: 10px;
-        }
-      }
-    }
-  }
 </style>

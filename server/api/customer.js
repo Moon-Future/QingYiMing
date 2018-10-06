@@ -87,4 +87,13 @@ router.post('/getOptions', async (ctx) => {
   }
 })
 
+router.get('/getCustomerList', async (ctx) => {
+  try {
+    customer = await Customer.distinct('customer').exec();
+    ctx.body = customer
+  } catch(err) {
+    ctx.body = 'err'
+  }
+})
+
 module.exports = router
