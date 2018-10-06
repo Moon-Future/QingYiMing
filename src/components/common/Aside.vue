@@ -2,11 +2,9 @@
   <div class="aside-container">
     <div class="user-message">
       <div class="user-avatar">
-        <img src="https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=2176837628,926516992&fm=27&gp=0.jpg" alt="">
+        <img :src="avatar" alt="">
       </div>
-      <div class="user-name">
-        陈亮
-      </div>
+      <div class="user-name">{{ user }}</div>
     </div>
     <el-menu class="aside-menu"
       :default-active="activeIndex"
@@ -40,12 +38,20 @@
   export default {
     data() {
       return {
+        user: '情义明木业有限公司',
+        // avatar: 'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=2176837628,926516992&fm=27&gp=0.jpg',
+        avatar: '	https://qingyiming-1255423800.cos.ap-chengdu.myqcloud.com/QingYiMing.JPG',
         activeIndex: '0',
         items: [
           {
             icon: 'icon-tree',
             index: 'product',
             title: '产品'
+          },
+          {
+            icon: 'icon-customer',
+            index: 'customer',
+            title: '客户管理'
           },
           {
             icon: 'icon-dingdan',
@@ -68,11 +74,11 @@
             title: '库存管理',
             subs: [
               {
-                index: 'articles',
+                index: 'entry',
                 title: '入库'
               },
               {
-                index: 'markdown',
+                index: 'delivery',
                 title: '出货'
               }
             ]
@@ -105,8 +111,10 @@
       .user-avatar {
         width: 100px;
         height: 100px;
+        margin: auto;
         img {
-          width: 100%;
+          width: 100px;
+          height: 100px;
           border-radius: 50%;
         }
       }

@@ -1,8 +1,7 @@
 <template>
-  <div class="product-container">
+  <div class="customer-container">
     <search :showElements="showElements"></search>
     <v-table
-      ref="customerTable"
       :tableOptions="tableOptions"
       @goAdd="goAdd"
       @goBack="goBack"
@@ -23,20 +22,29 @@
     data() {
       return {
         showElements: {
-          product: {'allow-create': true, placeholder: '请选择或输入产品名'},
+          customer: {'allow-create': true, placeholder: '请选择或输入客户'},
+          product: true,
           time: true,
           searchBtn: true
         },
-        options: {},
+        customerOptions: {},
+        prdOptions: {},
         tableOptions: {
           field: [
-            { prop: 'name', label: '名称', required: true, input: true, placeholder: '输入产品名' },
-            { prop: 'model', label: '型号', required: true, input: true, placeholder: '输入产品型号' },
-            { prop: 'unit', label: '单位', required: true, select: true, 'allow-create': true, options: [], placeholder: '请选择或输入'}
+            { prop: 'customer', label: '客户', required: true, select: true, 'allow-create': true, options: [], placeholder: '请选择或输入客户名' },
+            { prop: 'model', label: '型号', required: true, select: true, options: [], placeholder: '请选择产品' },
+            { prop: 'nun', label: '编码', input: true, placeholder: '输入产品编码' }
+          ],
+          fieldSift: [
+            { prop: 'customer', label: '客户' },
+            { prop: 'name', label: '产品名称' },
+            { prop: 'model', label: '型号' },
+            { prop: 'nun', label: '编码' },
+            { prop: 'unit', label: '单位' }
           ],
           dataSift: [],
           dataAdd: [
-            { name: '木托盘', model: '', unit: '' }
+            {  customer: '', name: '木托盘', model: '', nun: '', unit: '' }
           ],
           subWait: false,
           addFlag: false
@@ -44,11 +52,11 @@
       }
     },
     created() {
-      this.getProduct()
+      this.getCustomer()
     },
     methods: {
-      getProduct() {
-        this.$http.post(apiUrl.getProduct, {
+      getCustomer() {
+        this.$http.post(apiUrl.getCustomer, {
 
         }).then(res => {
           if (res.data.code === 200) {
@@ -62,55 +70,46 @@
         this.tableOptions.addFlag = true
         this.tableOptions.dataAdd = [
           {
-            name: '木托盘',
+            customer: '',
             model: '',
-            unit: ''
+            nun: ''
           }
         ]
-        this.$http.post(apiUrl.getUnit).then(res => {
-          this.options = {}
-          this.tableOptions.field[2].options = []
+        this.$http.post(apiUrl.getOptions).then(res => {
+          this.customerOptions = {}
+          this.prdOptions = {}
+          this.tableOptions.field[0].options = []
+          this.tableOptions.field[1].options = []
           if (res.data.code === 200) {
-            res.data.message.forEach(ele => {
-              this.tableOptions.field[2].options.push({value: ele._id, label: ele.name})
-              this.options[ele._id] ? false : this.options[ele._id] = ele.name
+            const customer = res.data.message.customer
+            const product = res.data.message.product
+            customer.forEach(ele => {
+              this.tableOptions.field[0].options.push({value: ele._id, label: ele.customer})
+              this.customerOptions[ele._id] ? false : this.customerOptions[ele._id] = ele.customer
+            })
+            product.forEach(ele => {
+              this.tableOptions.field[1].options.push({value: ele._id, label: ele.model})
+              this.prdOptions[ele._id] ? false : this.prdOptions[ele._id] = ele
             })
           }
         })
       },
       goBack() {
         this.tableOptions.addFlag = false
-        this.getProduct()
+        this.getCustomer()
       },
       addRow() {
         this.tableOptions.dataAdd.push({
-          name: '木托盘',
+          customer: '',
           model: '',
-          unit: ''
+          nun: ''
         })
       },
       handleEdit() {
 
       },
-      submitDelete({flag, row, index, addFlag}) {
-        if (addFlag) {
+      submitDelete({flag, row, index}) {
 
-        } else {
-          let subData = flag ? [row] : ''
-          this.$http.post(apiUrl.deleteProduct, {
-            data: subData
-          }).then(res => {
-            if (res.data.code === 200) {
-              this.$message({
-                type: 'success',
-                message: res.data.message
-              })
-              this.tableOptions.dataSift.splice(index, 1)
-            }
-          }).catch(err => {
-
-          })
-        }
       },
       submitAdd() {
         if (this.tableOptions.subWait) {
@@ -129,12 +128,17 @@
         }
 
         this.tableOptions.dataAdd.forEach(ele => {
-          if (this.options[ele.unit]) {
-            ele.unitId = ele.unit
-            ele.unit = this.options[ele.unit]
+          if (this.customerOptions[ele.customer]) {
+            ele.customerId = ele.customer
+            ele.customer = this.customerOptions[ele.customer]
           }
+          const options = this.prdOptions[ele.model]
+          ele.name = options.name
+          ele.unit = options.unit
+          ele.model = options.model
         })
-        this.$http.post(apiUrl.insertProduct, {
+        
+        this.$http.post(apiUrl.insertCustomer, {
           data: this.tableOptions.dataAdd
         }).then((res) => {
           if (res.data.code === 200) {
@@ -162,24 +166,15 @@
             })
           }
           this.tableOptions.subWait = false
-          this.$refs.customerTable.$el.goBack()
+          this.goBack()
         }).catch(err => {
 
         })
       },
       checkData() {
-        let modelList = []
         for (let i = 0, len = this.tableOptions.dataAdd.length; i < len; i++) {
           const item = this.tableOptions.dataAdd[i]
-          if (modelList.indexOf(item.model) !== -1) {
-            return '型号重复'
-          } else {
-            modelList.push(item.model)
-          }
-        }
-        for (let i = 0, len = this.tableOptions.dataAdd.length; i < len; i++) {
-          const item = this.tableOptions.dataAdd[i]
-          if (item.name === '' || item.model === '' || item.unit === '') {
+          if (item.customer === '' || item.model === '') {
             return '* 为必填字段'
           }
         }
@@ -196,24 +191,4 @@
 
 <style lang="scss" scoped>
   @import 'common/css/variable.scss';
-
-  .product-container {
-    .product-operate {
-      text-align: left;
-      margin-bottom: 10px;
-      button {
-        margin: 0;
-      }
-    }
-    .product-table-add {
-      .btn-add {
-        width: 100%;
-      }
-      .btn-submit {
-        position: absolute;
-        right: 0;
-        margin: 10px;
-      }
-    }
-  }
 </style>

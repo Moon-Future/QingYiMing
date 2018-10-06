@@ -3,6 +3,8 @@ import Router from 'vue-router'
 import Login from '@/components/pages/Login'
 import Home from '@/components/pages/Home'
 import Product from '@/components/pages//Product'
+import Customer from '@/components/pages//Customer'
+import Delivery from '@/components/pages//Delivery'
 
 Vue.use(Router)
 
@@ -21,6 +23,16 @@ export default new Router({
           path: '/product',
           name: 'Product',
           component: Product
+        },
+        {
+          path: '/customer',
+          name: 'Customer',
+          component: Customer
+        },
+        {
+          path: '/delivery',
+          name: 'Delivery',
+          component: Delivery
         }
       ]
     },
