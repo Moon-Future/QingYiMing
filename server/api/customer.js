@@ -62,25 +62,17 @@ router.post('/getOptions', async (ctx) => {
     let customer
     let product
     if (!data) {
-      customer = await Customer.find({}).exec()
+      customer = await Customer.distinct('customer').exec()
       product = await Product.find({}).exec()
     } else {
       if (data.customer) {
-        customer = await Customer.find({}).exec()
+        customer = await Customer.distinct('customer').exec()
       }
       if (data.product) {
         product = await Product.find({}).exec()
       }
     }
-    let list = []
-    let obj = {}
-    customer.forEach(ele => {
-      if (!obj[ele.customer]) {
-        list.push(ele)
-        obj[ele.customer] = true
-      }
-    })
-    let result = {customer: list, product: product || []}
+    let result = {customer: customer || [], product: product || []}
     ctx.body = {code: 200, message: result}
   } catch(err) {
     ctx.body = {code: 500, message: err}

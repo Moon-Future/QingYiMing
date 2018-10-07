@@ -6,7 +6,7 @@
       <el-button type="danger" size="mini" @click="submitDelete(false)">删除</el-button>
     </div>
     <div class="table-sift" ref="tableSift" v-show="!this.tableOptions.addFlag">
-      <el-table border size="mini" :data="dataSift" :max-height="height">
+      <el-table v-loading="loading" border size="mini" :data="dataSift" :max-height="height">
         <el-table-column
           type="selection"
           width="55">
@@ -59,6 +59,10 @@
       tableOptions: {
         type: Object,
         default: {}
+      },
+      loading: {
+        type: Boolean,
+        default: false
       }
     },
     data() {

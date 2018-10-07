@@ -91,7 +91,7 @@
           if (res.data.code === 200) {
             const customer = res.data.message.customer
             customer.forEach(ele => {
-              this.customerOptions.push({value: ele.customer, label: ele.customer})
+              this.customerOptions.push({value: ele, label: ele})
             })
           }
         })

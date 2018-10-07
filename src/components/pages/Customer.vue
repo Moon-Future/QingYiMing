@@ -3,6 +3,7 @@
     <search :showElements="showElements"></search>
     <v-table
       :tableOptions="tableOptions"
+      :loading="loading"
       @goAdd="goAdd"
       @goBack="goBack"
       @addRow="addRow"
@@ -48,7 +49,8 @@
           ],
           subWait: false,
           addFlag: false
-        }
+        },
+        loading: false
       }
     },
     created() {
@@ -56,14 +58,14 @@
     },
     methods: {
       getCustomer() {
-        this.$http.post(apiUrl.getCustomer, {
-
-        }).then(res => {
+        this.loading = true
+        this.$http.post(apiUrl.getCustomer).then(res => {
+          this.loading = false
           if (res.data.code === 200) {
             this.tableOptions.dataSift = res.data.message
           }
         }).catch(err => {
-
+          this.loading = false
         })
       },
       goAdd() {
