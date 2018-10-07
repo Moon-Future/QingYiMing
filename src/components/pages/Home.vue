@@ -33,7 +33,7 @@
       this.$nextTick(() => {
         const windowH = window.innerHeight
         const offsetTop = this.$refs.homeContent.offsetTop
-        this.$refs.homeContent.style.maxHeight = `${windowH - offsetTop - 70}px`
+        this.$refs.homeContent.style.height = `${windowH - offsetTop - 70}px`
         // this.height = windowH - offsetTop - 100
       })
     },

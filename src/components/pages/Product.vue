@@ -94,9 +94,9 @@
       handleEdit() {
 
       },
-      submitDelete({flag, row, index, addFlag}) {
-        if (addFlag) {
-
+      submitDelete({flag, row, index}) {
+        if (this.tableOptions.addFlag) {
+          this.tableOptions.dataAdd.splice(index, 1)
         } else {
           let subData = flag ? [row] : ''
           this.$http.post(apiUrl.deleteProduct, {

@@ -7,10 +7,16 @@
     </search>
     <div class="delivery-content">
       <div class="select-table">
-        <el-table border size="mini" :data="tableData" @selection-change="selectionChange">
-          <el-table-column type="selection" width="35"></el-table-column>
-          <el-table-column v-for="(item, i) in selectField" :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
-        </el-table>
+        <el-popover
+          placement="right"
+          width="400"
+          trigger="click">
+          <el-table border size="mini" :data="tableData" @selection-change="selectionChange">
+            <el-table-column type="selection" width="35"></el-table-column>
+            <el-table-column v-for="(item, i) in selectField" :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
+          </el-table>
+          <el-button type="primary" slot="reference">物流清单</el-button>
+        </el-popover>
       </div>
       <div class="print-wrapper">
         <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
@@ -156,9 +162,8 @@
 
   .delivery-container {
     .delivery-content {
-      // display: flex;
       .select-table {
-
+        text-align: left;
       }
       .print-wrapper {
         width: 22.3cm;
@@ -166,7 +171,6 @@
         padding: 0.48cm 1.1cm 0.42cm 1.8cm;
         border: 1px solid $color-deepgray;
         margin-top: 10px;
-        // margin: auto;
         box-sizing: border-box;
         .delivery-title {
           font-weight: bold;
@@ -185,6 +189,7 @@
         .delivery-footer {
           display: flex;
           margin-top: 10px;
+          margin-bottom: 20px;
           justify-content: space-between;
           padding: 0 10px;
           .provider-company {

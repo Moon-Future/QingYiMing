@@ -108,7 +108,11 @@
 
       },
       submitDelete({flag, row, index}) {
-
+        if (this.tableOptions.addFlag) {
+          this.tableOptions.dataAdd.splice(index, 1)
+        } else {
+          
+        }
       },
       submitAdd() {
         if (this.tableOptions.subWait) {

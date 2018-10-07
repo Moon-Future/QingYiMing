@@ -3,10 +3,10 @@
     <div class="btn-operate">
       <el-button type="primary" size="mini" v-show="!this.tableOptions.addFlag" @click="goAdd">新增</el-button>
       <el-button type="primary" size="mini" v-show="this.tableOptions.addFlag" @click="goBack">返回</el-button>
-      <el-button type="danger" size="mini" @click="submitDelete(false)">删除</el-button>
+      <!-- <el-button type="danger" size="mini" @click="submitDelete(false)">删除</el-button> -->
     </div>
     <div class="table-sift" ref="tableSift" v-show="!this.tableOptions.addFlag">
-      <el-table v-loading="loading" fit border size="mini" :data="dataSift" :max-height="height">
+      <el-table v-loading="loading" fit border size="mini" :data="dataSift" :max-height="height" @select="selectionChange">
         <el-table-column
           type="selection"
           width="55">
@@ -42,8 +42,13 @@
           <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="!item.input && !item.select">
           </el-table-column>
         </template>
+        <el-table-column width="100" label="操作">
+          <template slot-scope="scope">
+            <el-button size="mini" type="danger" @click="submitDelete(true, scope.row, scope.$index)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
-      <el-button class="btn-add" type="danger" size="medium" @click="addRow">新增</el-button>
+      <el-button class="btn-add" type="primary" size="medium" @click="addRow">新增</el-button>
       <el-button class="btn-submit" type="success" size="medium" v-show="!subWait" @click="submitAdd">提交</el-button>
       <el-button class="btn-submit" type="info" size="medium" v-show="subWait" :loading="true">提交中</el-button>
     </div>
@@ -102,6 +107,9 @@
       },
       submitAdd() {
         this.$emit('submitAdd')
+      },
+      selectionChange() {
+        console.log(arguments)
       }
     },
     watch: {
