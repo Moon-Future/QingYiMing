@@ -28,7 +28,6 @@
           time: true,
           searchBtn: true
         },
-        customerOptions: {},
         prdOptions: {},
         tableOptions: {
           field: [
@@ -37,11 +36,11 @@
             { prop: 'nun', label: '编码', input: true, placeholder: '输入产品编码' }
           ],
           fieldSift: [
-            { prop: 'customer', label: '客户' },
+            { prop: 'customer', label: '客户', minWidth: 100 },
             { prop: 'name', label: '产品名称' },
             { prop: 'model', label: '型号' },
             { prop: 'nun', label: '编码' },
-            { prop: 'unit', label: '单位' }
+            { prop: 'unit', label: '单位', minWidth: 30 }
           ],
           dataSift: [],
           dataAdd: [
@@ -78,7 +77,6 @@
           }
         ]
         this.$http.post(apiUrl.getOptions).then(res => {
-          this.customerOptions = {}
           this.prdOptions = {}
           this.tableOptions.field[0].options = []
           this.tableOptions.field[1].options = []
@@ -86,8 +84,7 @@
             const customer = res.data.message.customer
             const product = res.data.message.product
             customer.forEach(ele => {
-              this.tableOptions.field[0].options.push({value: ele._id, label: ele.customer})
-              this.customerOptions[ele._id] ? false : this.customerOptions[ele._id] = ele.customer
+              this.tableOptions.field[0].options.push({value: ele, label: ele})
             })
             product.forEach(ele => {
               this.tableOptions.field[1].options.push({value: ele._id, label: ele.model})
@@ -130,10 +127,6 @@
         }
 
         this.tableOptions.dataAdd.forEach(ele => {
-          if (this.customerOptions[ele.customer]) {
-            ele.customerId = ele.customer
-            ele.customer = this.customerOptions[ele.customer]
-          }
           const options = this.prdOptions[ele.model]
           ele.name = options.name
           ele.unit = options.unit

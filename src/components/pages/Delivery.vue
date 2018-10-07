@@ -156,7 +156,7 @@
 
   .delivery-container {
     .delivery-content {
-      display: flex;
+      // display: flex;
       .select-table {
 
       }
@@ -164,8 +164,9 @@
         width: 22.3cm;
         height: 9.4cm;
         padding: 0.48cm 1.1cm 0.42cm 1.8cm;
-        border: 1px solid $color-gray;
-        margin: auto;
+        border: 1px solid $color-deepgray;
+        margin-top: 10px;
+        // margin: auto;
         box-sizing: border-box;
         .delivery-title {
           font-weight: bold;

@@ -6,15 +6,15 @@
       <el-button type="danger" size="mini" @click="submitDelete(false)">删除</el-button>
     </div>
     <div class="table-sift" ref="tableSift" v-show="!this.tableOptions.addFlag">
-      <el-table v-loading="loading" border size="mini" :data="dataSift" :max-height="height">
+      <el-table v-loading="loading" fit border size="mini" :data="dataSift" :max-height="height">
         <el-table-column
           type="selection"
           width="55">
         </el-table-column>
         <template v-for="(item, i) in fieldSift">
-          <el-table-column :prop="item.prop" :label="item.label" :key="i"></el-table-column>
+          <el-table-column :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i"></el-table-column>
         </template>
-        <el-table-column label="操作">
+        <el-table-column width="150" label="操作">
           <template slot-scope="scope">
             <el-button size="mini" @click="handleEdit(scope.row, scope.$index)">编辑</el-button>
             <el-button size="mini" type="danger" @click="submitDelete(true, scope.row, scope.$index)">删除</el-button>
@@ -23,7 +23,7 @@
       </el-table>
     </div>
     <div class="table-add" v-show="this.tableOptions.addFlag">
-      <el-table border size="mini" :data="dataAdd" :max-height="`${height - 50}`">
+      <el-table border size="mini" :data="dataAdd" :max-height="`${height - 50}`" cell-class-name="no-padding">
         <el-table-column
           type="selection"
           width="35">

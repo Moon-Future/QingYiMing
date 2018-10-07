@@ -31,6 +31,9 @@ export default {
       .cell {
         padding-left: initial !important;
         padding-right: initial !important;
+        .el-select {
+          width: 100% !important;
+        }
       }
     }
     input {

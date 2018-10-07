@@ -9,7 +9,7 @@
           <el-breadcrumb-item :to="{ path: '/product' }">产品</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
-      <div class="home-content">
+      <div class="home-content" ref="homeContent">
         <div class="home-descr" v-show="homeFlag">
           主页面 - 介绍
         </div>
@@ -30,6 +30,12 @@
     },
     created() {
       this.homeFlag = this.$route.name === 'Home' ? true : false
+      this.$nextTick(() => {
+        const windowH = window.innerHeight
+        const offsetTop = this.$refs.homeContent.offsetTop
+        this.$refs.homeContent.style.maxHeight = `${windowH - offsetTop - 70}px`
+        // this.height = windowH - offsetTop - 100
+      })
     },
     watch: {
       $route(to, from) {
@@ -59,6 +65,7 @@
       }
       .home-content {
         padding: 10px;
+        overflow: auto;
       }
     }
   }
