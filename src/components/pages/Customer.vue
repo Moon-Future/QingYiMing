@@ -1,7 +1,7 @@
 <template>
   <div class="customer-container">
     <search :showElements="showElements"></search>
-    <v-table
+    <base-table
       :tableOptions="tableOptions"
       :loading="loading"
       @goAdd="goAdd"
@@ -10,14 +10,14 @@
       @submitDelete="submitDelete"
       @submitAdd="submitAdd"
       >
-    </v-table>
+    </base-table>
   </div>
 </template>
 
 <script>
   import IconFont from 'components/common/Iconfont'
   import Search from 'components/common/Search'
-  import vTable from 'components/common/Table'
+  import BaseTable from 'components/common/BaseTable'
   import apiUrl from '@/serviceAPI.config.js'
   export default {
     data() {
@@ -183,7 +183,7 @@
     components: {
       IconFont,
       Search,
-      vTable
+      BaseTable
     }
   }
 </script>

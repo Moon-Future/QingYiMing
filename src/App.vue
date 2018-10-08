@@ -27,7 +27,7 @@ export default {
   table th, table td {
     text-align: center !important;
     &.no-padding {
-      padding: initial !important;
+      // padding: 6px !important;
       .cell {
         padding-left: initial !important;
         padding-right: initial !important;

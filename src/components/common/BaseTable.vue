@@ -1,12 +1,12 @@
 <template>
   <div class="table-container">
     <div class="btn-operate">
-      <el-button type="primary" size="mini" v-show="!this.tableOptions.addFlag" @click="goAdd">新增</el-button>
-      <el-button type="primary" size="mini" v-show="this.tableOptions.addFlag" @click="goBack">返回</el-button>
+      <el-button type="primary" size="mini" v-show="!this.addFlag" @click="goAdd">新增</el-button>
+      <el-button type="primary" size="mini" v-show="this.addFlag" @click="goBack">返回</el-button>
       <!-- <el-button type="danger" size="mini" @click="submitDelete(false)">删除</el-button> -->
     </div>
-    <div class="table-sift" ref="tableSift" v-show="!this.tableOptions.addFlag">
-      <el-table v-loading="loading" fit border size="mini" :data="dataSift" :max-height="height" @select="selectionChange">
+    <div class="table-sift" ref="tableSift" v-show="!this.addFlag">
+      <el-table v-loading="loading" fit border size="mini" :data="this.tableOptions.dataSift" :max-height="height">
         <el-table-column
           type="selection"
           width="55">
@@ -22,19 +22,19 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="table-add" v-show="this.tableOptions.addFlag">
+    <div class="table-add" v-show="this.addFlag">
       <el-table border size="mini" :data="dataAdd" :max-height="`${height - 50}`" cell-class-name="no-padding">
         <el-table-column
           type="selection"
           width="35">
         </el-table-column>
-        <template v-for="(item, i) in field">
+        <template v-for="(item, i) in fieldAdd">
           <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select">
             <template slot-scope="scope">
               <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder"></el-input>
               <el-select size="mini" v-if="item.select" v-model="scope.row[item.prop]" :filterable="item['allow-create'] || item.filterable" :allow-create="item['allow-create']" clearable :placeholder="item.placeholder">
                 <el-option
-                  v-for="option in item.options" :label="option.label" :value="option.value" :key="option.value">
+                  v-for="option in item.options" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
               </el-select>
             </template>
@@ -72,12 +72,21 @@
     },
     data() {
       return {
-        field: [],
-        fieldSift: [],
-        dataSift: [],
         dataAdd: [],
         height: 500,
-        subWait: false
+        subWait: false,
+        addFlag: false
+      }
+    },
+    computed: {
+      fieldSift() {
+        return this.tableOptions.fieldSift || this.tableOptions.fieldAdd
+      },
+      fieldAdd() {
+        return this.tableOptions.fieldAdd
+      },
+      addTemplate() {
+        return this.tableOptions.addTemplate
       }
     },
     mounted() {
@@ -86,40 +95,107 @@
         const offsetTop = this.$refs.tableSift.offsetTop
         this.height = windowH - offsetTop - 100
       })
-      this.field = this.tableOptions.field
-      this.fieldSift = this.tableOptions.fieldSift || this.tableOptions.field
     },
     methods: {
       goAdd() {
+        this.addFlag = true
+        this.dataAdd.splice(0, this.dataAdd.length)
+        this.dataAdd.push(JSON.parse(JSON.stringify(this.addTemplate)))
         this.$emit('goAdd')
       },
       goBack() {
+        this.addFlag = false
         this.$emit('goBack')
       },
       addRow() {
-        this.$emit('addRow')
+        this.dataAdd.push(JSON.parse(JSON.stringify(this.addTemplate)))
       },
       handleEdit() {
 
       },
-      submitDelete(flag, row, index) {
-        this.$emit('submitDelete', {flag, row, index})
+      submitDelete({flag, row, index}) {
+        if (this.addFlag) {
+          this.dataAdd.splice(index, 1)
+        } else {
+          let subData = flag ? [row] : ''
+          console.log('data', this.dataAdd)
+          return
+          this.$http.post(this.tableOptions.deleteApi, {
+            data: subData
+          }).then(res => {
+            if (res.data.code === 200) {
+              this.$message({
+                type: 'success',
+                message: res.data.message
+              })
+              this.dataSift.splice(index, 1)
+            }
+          }).catch(err => {
+
+          })
+        }
       },
       submitAdd() {
-        this.$emit('submitAdd')
+        if (this.subWait) {
+          return
+        }
+        const check = this.checkData()
+        if (check !== true) {
+          this.$message({
+            type: 'error',
+            message: check
+          })
+          return
+        }
+        this.subWait = true
+        this.$http.post(this.tableOptions.addApi, {
+          data: this.dataAdd
+        }).then((res) => {
+          if (res.data.code === 200) {
+            const message = res.data.message
+            const repeat = res.data.repeat
+            this.$message({
+              type: repeat ? 'error' : 'success',
+              message: res.data.message
+            })
+            this.goBack()
+          } else {
+            this.$message({
+              type: 'error',
+              message: '提交失败'
+            })
+          }
+          this.subWait = false
+        }).catch(err => {
+
+        })
       },
-      selectionChange() {
-        console.log(arguments)
-      }
-    },
-    watch: {
-      tableOptions: {
-        handler() {
-          this.dataSift = this.tableOptions.dataSift
-          this.dataAdd = this.tableOptions.dataAdd
-          this.subWait = this.tableOptions.subWait
-        },
-        deep: true
+      checkData() {
+        let modelList = []
+        for (let i = 0, len = this.dataAdd.length; i < len; i++) {
+          const item = this.dataAdd[i]
+          for (let j = 0, len = this.fieldAdd.length; j < len; j++) {
+            if (this.fieldAdd[j].required && item[this.fieldAdd[j].prop] == '') {
+              return '* 为必填字段'
+            }
+          }
+        }
+        if (this.tableOptions.checkRepeat) {
+          const field = this.tableOptions.checkRepeat.field
+          for (let i = 0, len = this.dataAdd.length; i < len; i++) {
+            const item = this.dataAdd[i]
+            let txt = ''
+            field.forEach(ele => {
+              txt += item[ele] + ','
+            })
+            if (modelList.indexOf(txt) !== -1) {
+              return this.tableOptions.checkRepeat.message
+            } else {
+              modelList.push(txt)
+            }
+          }
+        }
+        return true
       }
     },
     components: {

@@ -1,7 +1,6 @@
 const Router = require('koa-router')
 const router = new Router()
-const Product = require('../database/schema/product')
-const { insertUnit } = require('./unit')
+const query = require('../database/init')
 
 router.post('/insertProduct', async (ctx) => {
   try {
@@ -9,28 +8,19 @@ router.post('/insertProduct', async (ctx) => {
     let result = []
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
-      const product = await Product.find({model: item.model}).exec()
+      const currentTime = new Date().getTime()
+      const product = await query(`SELECT * FROM product WHERE model = '${item.model}'`)
       if (product.length !== 0) {
-        result.push(item)
+        result.push(item.model)
         continue
       }
-      if (item.unitId === undefined) {
-        await insertUnit(item.unit)
-      }
-      const oneProduct = new Product({
-        name: item.name,
-        model: item.model,
-        unit: item.unit,
-        createTime: new Date().getTime()
-      })
-      oneProduct.save().then(() => {
-
-			}).catch(err => {
-
-			})
+      await query(`INSERT INTO product (name, model, unitId, provider, createTime) VALUES ('${item.name}', '${item.model}', ${item.unit}, ${1}, ${currentTime})`)
     }
-    result = result.length === 0 ? '新增成功' : result
-    ctx.body = {code: 200, message: result}
+    if (result.length === 0) {
+      ctx.body = {code: 200, message: '新增成功'}
+    } else {
+      ctx.body = {code: 200, message: `型号 ${result.join(', ')} 已存在`, repeat: true}
+    }
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }
@@ -39,7 +29,7 @@ router.post('/insertProduct', async (ctx) => {
 router.post('/getProduct', async (ctx) => {
   try {
     const data = ctx.request.body.data
-    const product = await Product.find({}).exec()
+    const product = await query(`SELECT p.name, p.model, u.name as unit, c.name as provider FROM product p, unit u, company c WHERE p.unitId = u.id AND p.provider = c.id`)
     ctx.body = {code: 200, message: product}
   } catch(err) {
     ctx.body = {code: 500, message: err}
