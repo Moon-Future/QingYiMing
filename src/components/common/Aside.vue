@@ -19,7 +19,10 @@
               <icon-font :icon="item.icon" :fontSize="32"></icon-font>
               <span>{{ item.title }}</span>
             </template>
-            <el-menu-item v-for="(subItem, i) in item.subs" :key="i" :index="subItem.index">{{ subItem.title }}</el-menu-item>
+            <el-menu-item v-for="(subItem, i) in item.subs" :key="i" :index="subItem.index">
+              <icon-font :icon="subItem.icon" :fontSize="32"></icon-font>
+              <span>{{ subItem.title }}</span>
+            </el-menu-item>
           </el-submenu>
         </template>
         <template v-else>
@@ -45,17 +48,39 @@
         items: [
           {
             icon: 'icon-tree',
-            index: 'product',
-            title: '产品'
+            index: '1',
+            title: '基础信息',
+            subs: [
+              {
+                icon: 'icon-tree',
+                index: 'product',
+                title: '产品',
+              },
+              {
+                index: 'company',
+                title: '公司'
+              },
+              {
+                index: 'unit',
+                title: '单位'
+              }
+            ]
           },
           {
             icon: 'icon-customer',
-            index: 'customer',
-            title: '客户管理'
+            index: '2',
+            title: '客户管理',
+            subs: [
+              {
+                icon: 'icon-customer',
+                index: 'customer',
+                title: '客户供应',
+              }
+            ]
           },
           {
             icon: 'icon-dingdan',
-            index: '2',
+            index: '3',
             title: '订单管理',
             subs: [
               {
@@ -70,7 +95,7 @@
           },
           {
             icon: 'icon-kucunguanli',
-            index: '3',
+            index: '4',
             title: '库存管理',
             subs: [
               {
@@ -105,6 +130,7 @@
     display: flex;
     flex-flow: column;
     background-color: $color-deepgray;
+    overflow-y: auto;
     .user-message {
       padding: 10px 0;
       margin: auto;
