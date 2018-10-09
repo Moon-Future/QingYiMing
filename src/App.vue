@@ -12,6 +12,7 @@ export default {
 
 <style lang="scss">
   @import 'common/css/reset.scss';
+  @import 'common/css/global.scss';
   #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -19,26 +20,5 @@ export default {
     text-align: center;
     color: #2c3e50;
     height: 100%;
-  }
-  .field-required::after {
-    content: ' *';
-    color: red;
-  }
-  table th, table td {
-    text-align: center !important;
-    &.no-padding {
-      .cell {
-        .el-select {
-          width: 100% !important;
-        }
-      }
-    }
-    input {
-      padding: initial !important;
-    }
-  }
-  .subWait {
-    background-color: #c0c0c0;
-    cursor: wait;
   }
 </style>
