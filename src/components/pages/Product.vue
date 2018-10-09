@@ -2,7 +2,6 @@
   <div class="product-container">
     <search :showElements="showElements"></search>
     <base-table
-      ref="customerTable"
       :loading="loading"
       :tableOptions="tableOptions"
       @goBack="getProduct"
@@ -13,7 +12,6 @@
 </template>
 
 <script>
-  import IconFont from 'components/common/Iconfont'
   import Search from 'components/common/Search'
   import BaseTable from 'components/common/BaseTable'
   import apiUrl from '@/serviceAPI.config.js'
@@ -64,33 +62,8 @@
       }
     },
     components: {
-      IconFont,
       Search,
       BaseTable
     }
   }
 </script>
-
-<style lang="scss" scoped>
-  @import 'common/css/variable.scss';
-
-  .product-container {
-    .product-operate {
-      text-align: left;
-      margin-bottom: 10px;
-      button {
-        margin: 0;
-      }
-    }
-    .product-table-add {
-      .btn-add {
-        width: 100%;
-      }
-      .btn-submit {
-        position: absolute;
-        right: 0;
-        margin: 10px;
-      }
-    }
-  }
-</style>

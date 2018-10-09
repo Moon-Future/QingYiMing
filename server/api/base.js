@@ -1,5 +1,4 @@
 const request = require('request')
-const iconv = require('iconv-lite')
 
 function ajax(url, flag = false) {
   return new Promise((resolve, reject) => {
@@ -17,23 +16,6 @@ function ajax(url, flag = false) {
   })
 }
 
-function ajaxSuggest(url) {
-  // const url = `http://suggestion.baidu.com/?wd=${value}&action=opensearch`
-  return new Promise((resolve, reject) => {
-    request({
-      url,
-      encoding: null,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8'
-      }
-    }, (err, res, body) => {
-      if (err) {
-        throw new Error(err)
-      }
-      resolve(JSON.parse(iconv.decode(body, 'gbk'))[1])
-    })
-  })
-}
 
 function getRandom(start, end, size) {
   let allRandms = []
@@ -47,22 +29,7 @@ function getRandom(start, end, size) {
   return size == 1 ? allRandms[0] : allRandms.slice(0, size)
 }
 
-function formatDataSong(data, params) {
-  const result = {
-    id: data[params.id] || '',
-    name: data[params.name] || '',
-    src: data[params.src] || '',
-    character: data[params.character] || '',
-    characterID: data[params.characterID] || '',
-    bgimg: data[params.bgimg] || '',
-    coverimg: data[params.coverimg] || ''
-  }
-  return result
-}
-
 module.exports = {
   ajax,
-  ajaxSuggest,
-  getRandom,
-  formatDataSong
+  getRandom
 }

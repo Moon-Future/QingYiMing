@@ -113,13 +113,11 @@
       handleEdit() {
 
       },
-      submitDelete({flag, row, index}) {
+      submitDelete(flag, row, index) {
         if (this.addFlag) {
           this.dataAdd.splice(index, 1)
         } else {
           let subData = flag ? [row] : ''
-          console.log('data', this.dataAdd)
-          return
           this.$http.post(this.tableOptions.deleteApi, {
             data: subData
           }).then(res => {
@@ -128,7 +126,7 @@
                 type: 'success',
                 message: res.data.message
               })
-              this.dataSift.splice(index, 1)
+              this.$emit('delete', index)
             }
           }).catch(err => {
 
