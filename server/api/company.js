@@ -29,7 +29,12 @@ router.post('/insertCompany', async (ctx) => {
 router.post('/getCompany', async (ctx) => {
   try {
     const data = ctx.request.body.data
-    const company = await query(`SELECT * FROM company`)
+    let company
+    if (data && data.type === 0) {
+      company = await query(`SELECT * FROM company WHERE type = 0`)
+    } else {
+      company = await query(`SELECT * FROM company`)
+    }
     ctx.body = {code: 200, message: company}
   } catch(err) {
     ctx.body = {code: 500, message: err}

@@ -2,7 +2,7 @@
   <div class="search-container" v-if="showElements">
     <div class="search-condition">
       <el-select 
-        v-model="customer"
+        v-model="customerId"
         @change="changeCustomer"
         :filterable="showElements && showElements.customer && (showElements.customer.filterable || showElements.customer['allow-create'])"
         :allow-create="showElements && showElements.customer && showElements.customer['allow-create']"
@@ -56,7 +56,7 @@
     },
     data() {
       return {
-        customer: '',
+        customerId: '',
         prdName: '',
         prdOptions: [],
         time: '',
@@ -91,7 +91,14 @@
     },
     methods: {
       changeCustomer() {
-        this.$emit('changeCustomer', this.customer)
+        let customer
+        for (let i = 0, len = this.customerOptions.length; i < len; i++) {
+          if (this.customerOptions[i].value === this.customerId) {
+            customer = this.customerOptions[i].label
+            break
+          }
+        }
+        this.$emit('changeCustomer', {customerId: this.customerId, customer})
       }
     }
   }

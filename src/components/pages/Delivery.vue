@@ -8,29 +8,31 @@
     <div class="delivery-content">
       <div class="select-table">
         <el-popover
+          :value="listShowFlag"
+          @hide="hideList"
           placement="right"
           width="400"
           trigger="click">
-          <el-table border size="mini" :data="tableData" @selection-change="selectionChange">
+          <el-table ref="listTable" border size="mini" :data="tableData" @selection-change="selectionChange" @select="select" @select-all="selectAll">
             <el-table-column type="selection" width="35"></el-table-column>
             <el-table-column v-for="(item, i) in selectField" :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
           </el-table>
           <el-button type="primary" slot="reference">物料清单</el-button>
         </el-popover>
-        <el-button type="primary" slot="reference" @click="print">打印</el-button>
+        <el-button slot="reference" @click="print">打印 <icon-font icon="icon-dayinji"></icon-font></el-button>
       </div>
       <div ref="printWrapper">
-        <div class="print-wrapper" :class="printFlag ? 'print-template' : ''">
-          <div class="delivery-title">--</div>
+        <div class="print-wrapper" :class="hasSelected ? 'print-wrapper-border' : ''">
+          <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
           <div class="delivery-message">
-            <div class="receive-company">--: {{ receiveCompany }}</div>
+            <div class="receive-company">收货单位: {{ receiveCompany }}</div>
             <div class="delivery-number">
               <span>送货日期: {{ deliveryTime.getFullYear() }} 年 {{ deliveryTime.getMonth() + 1 }} 月 {{ deliveryTime.getDate() }} 日</span>
               <span>NO: {{ '03' }}</span>
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
-            <el-table size="mini" width="22.3cm" show-summary :summary-method="getSummaries" :data="selectData">
+            <el-table :border="!hasSelected" size="mini" width="22.3cm" show-summary :summary-method="getSummaries" :data="selectData">
               <template v-for="(item, i) in field">
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="item.input" :width="item.width ? item.width : ''">
                   <template slot-scope="scope">
@@ -49,7 +51,7 @@
             </el-table>
           </div>
           <div class="delivery-footer">
-            <div class="delivery-company">送货人: --</div>
+            <div class="delivery-company">送货人: 情义明</div>
             <div class="receive-psn">收货人: </div>
             <div class="receive-time"><span>年</span><span>月</span><span>日</span></div>
             <div class="provider-company">供货单位（盖章）</div>
@@ -74,41 +76,7 @@
         },
         customerOptions: [],
         tableData: [],
-        selectData: [
-          {
-            nun: '13234342',
-            name: '书本',
-            model: '1#',
-            nuit: '个',
-            qty: '23',
-            qtyReceive: '66',
-            time: '2018-10-09',
-            lot: '2',
-            mark: 'mark'
-          },
-          {
-            nun: '13234342',
-            name: '书本',
-            model: '1#',
-            nuit: '个',
-            qty: '23',
-            qtyReceive: '66',
-            time: '2018-10-09',
-            lot: '2',
-            mark: 'mark'
-          },
-          {
-            nun: '13234342',
-            name: '书本',
-            model: '1#',
-            nuit: '个',
-            qty: '23',
-            qtyReceive: '66',
-            time: '2018-10-09',
-            lot: '2',
-            mark: 'mark'
-          }
-        ],
+        selectData: [],
         selectField: [
           {prop: 'name', label: '产品名称'},
           {prop: 'model', label: '规格型号'},
@@ -127,11 +95,18 @@
         ],
         deliveryTime: new Date(),
         receiveCompany: '',
-        printFlag: false
+        printFlag: false,
+        listShowFlag: false,
+        maxRow: 5
+      }
+    },
+    computed: {
+      hasSelected() {
+        return this.selectData.length === 0 ? false : true
       }
     },
     created() {
-      // this.getOptions()
+      this.getCompany()
     },
     methods: {
       print() {
@@ -150,23 +125,23 @@
           }, 50)
         })
       },
-      getOptions() {
-        this.$http.post(apiUrl.getOptions, {
-          data: {customer: true}
+      getCompany() {
+        this.$http.post(apiUrl.getCompany, {
+          data: {type: 0}
         }).then(res => {
           this.customerOptions = []
           if (res.data.code === 200) {
-            const customer = res.data.message.customer
+            const customer = res.data.message
             customer.forEach(ele => {
-              this.customerOptions.push({value: ele, label: ele})
+              this.customerOptions.push({value: ele.id, label: ele.name})
             })
           }
         })
       },
-      changeCustomer(customer) {
+      changeCustomer({customerId, customer}) {
         this.receiveCompany = customer
-        this.$http.post(apiUrl.getCustomer, {
-          data: {customer}
+        this.$http.post(apiUrl.getSupply, {
+          data: {customerId}
         }).then(res => {
           if (res.data.code === 200) {
             this.tableData = res.data.message
@@ -174,13 +149,33 @@
             this.tableData.forEach(ele => {
               ele.time = dateFormat(productionTime, 'yyyy-MM-dd')
             })
+            this.listShowFlag = true
           }
         }).catch(err => {
 
         })
       },
+      hideList() {
+        this.listShowFlag = false
+      },
       selectionChange(data) {
         this.selectData = data
+      },
+      select(selection, row) {
+        if (this.selectData.length === this.maxRow + 1) {
+          this.$refs.listTable.toggleRowSelection(row, false);
+          this.$message(`最多可选 ${this.maxRow} 条`)
+        }
+      },
+      selectAll(selection) {
+        const len = selection.length
+        if (len > this.maxRow) {
+          for (let i = len - 1; i >= this.maxRow; i--) {
+            this.$refs.listTable.toggleRowSelection(selection[i], false);
+            selection.splice(i, 1)
+          }
+        }
+
       },
       getSummaries(param) {
         const { columns, data } = param;
@@ -242,6 +237,7 @@
       font-weight: bold;
       font-size: $font-size-large-x;
       margin-bottom: 10px;
+      text-align: center;
     }
     .delivery-message {
       display: flex;

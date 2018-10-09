@@ -2,11 +2,11 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '@/components/pages/Login'
 import Home from '@/components/pages/Home'
-import Product from '@/components/pages//Product'
+import Product from '@/components/pages/Product'
 import Unit from '@/components/pages//Unit'
-import Company from '@/components/pages//Company'
-import Supply from '@/components/pages//Supply'
-import Delivery from '@/components/pages//Delivery'
+import Company from '@/components/pages/Company'
+import Supply from '@/components/pages/Supply'
+import Delivery from '@/components/pages/Delivery'
 
 Vue.use(Router)
 

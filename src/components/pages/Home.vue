@@ -1,6 +1,6 @@
 <template>
   <div class="home-container">
-    <!-- <Aside></Aside> -->
+    <Aside></Aside>
     <Header></Header>
     <div class="home-right">
       <div class="home-breadcrumb">

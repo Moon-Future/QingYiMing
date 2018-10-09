@@ -42,12 +42,11 @@
     data() {
       return {
         user: '情义明木业有限公司',
-        // avatar: 'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=2176837628,926516992&fm=27&gp=0.jpg',
         avatar: '	https://qingyiming-1255423800.cos.ap-chengdu.myqcloud.com/QingYiMing.JPG',
         activeIndex: '0',
         items: [
           {
-            icon: 'icon-tree',
+            icon: 'icon-ziliaofenlei',
             index: '1',
             title: '基础信息',
             subs: [
@@ -57,10 +56,12 @@
                 title: '产品',
               },
               {
+                icon: 'icon-gongsi',
                 index: 'company',
                 title: '公司'
               },
               {
+                icon: 'icon-measurementunit',
                 index: 'unit',
                 title: '单位'
               }
@@ -72,8 +73,8 @@
             title: '客户管理',
             subs: [
               {
-                icon: 'icon-customer',
-                index: 'customer',
+                icon: 'icon-supply',
+                index: 'supply',
                 title: '客户供应',
               }
             ]
@@ -84,11 +85,13 @@
             title: '订单管理',
             subs: [
               {
-                index: 'articles',
+                icon: 'icon-order',
+                index: 'order',
                 title: '最新订单'
               },
               {
-                index: 'markdown',
+                icon: 'icon-order-history',
+                index: 'orderHistory',
                 title: '历史订单'
               }
             ]
@@ -99,10 +102,12 @@
             title: '库存管理',
             subs: [
               {
+                icon: 'icon-ruku',
                 index: 'entry',
                 title: '入库'
               },
               {
+                icon: 'icon-shenqingfahuo',
                 index: 'delivery',
                 title: '出货'
               }

@@ -15,7 +15,7 @@
           <el-table-column :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i"></el-table-column>
         </template>
         <el-table-column width="150" label="操作">
-          <template slot-scope="scope">
+          <template slot-scope="scope" v-if="scope.row.type != 1">
             <el-button size="mini" @click="handleEdit(scope.row, scope.$index)">编辑</el-button>
             <el-button size="mini" type="danger" @click="submitDelete(true, scope.row, scope.$index)">删除</el-button>
           </template>

@@ -11,9 +11,10 @@ const apiUrl = {
   getCompany: 'api/company/getCompany',
   deleteCompany: 'api/company/deleteCompany',
 
-  getOptions: 'api/customer/getOptions',
-  insertCustomer: 'api/Customer/insertCustomer',
-  getCustomer: 'api/Customer/getCustomer',
+  getOptions: 'api/supply/getOptions',
+  insertSupply: 'api/supply/insertSupply',
+  getSupply: 'api/supply/getSupply',
+  deleteSupply: 'api/supply/deleteSupply',
 }
 
 module.exports = apiUrl
