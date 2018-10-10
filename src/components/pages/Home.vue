@@ -1,7 +1,7 @@
 <template>
   <div class="home-container">
-    <Aside></Aside>
-    <Header></Header>
+    <Aside :userInfo="userInfo"></Aside>
+    <Header :userInfo="userInfo"></Header>
     <div class="home-right">
       <div class="home-breadcrumb">
         <el-breadcrumb separator-class="el-icon-arrow-right">
@@ -13,7 +13,7 @@
         <div class="home-descr" v-show="homeFlag">
           主页面 - 介绍
         </div>
-        <router-view></router-view>
+        <router-view :userInfo="userInfo"></router-view>
       </div>
     </div>
   </div>
@@ -22,11 +22,29 @@
 <script>
   import Aside from 'components/common/Aside'
   import Header from 'components/common/Header'
+  import apiUrl from '@/serviceAPI.config.js'
   export default {
     data() {
       return {
-        homeFlag: true
+        homeFlag: true,
+        userInfo: {}
       }
+    },
+    beforeCreate() {
+      this.$http.post(apiUrl.getSession).then(res => {
+        if (res.data.code === 200) {
+          this.userInfo = res.data.message
+        } else {
+          this.$message({
+            message: res.data.message,
+            duration: 1000
+          })
+          this.$router.push({path: '/login'})
+        }
+      }).catch(err => {
+        this.$router.push({path: '/login'})
+        this.$message.error(res.data.message)
+      })
     },
     created() {
       this.homeFlag = this.$route.name === 'Home' ? true : false

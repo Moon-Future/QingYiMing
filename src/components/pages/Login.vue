@@ -151,6 +151,7 @@
           this.subWait = false
           if (res.data.code === 200) {
             this.$message.success(res.data.message)
+            this.$router.push({path: '/'})
           } else {
             this.$message.error(res.data.message)
           }

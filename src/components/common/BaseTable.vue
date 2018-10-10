@@ -1,7 +1,7 @@
 <template>
   <div class="table-container">
     <div class="btn-operate">
-      <el-button type="primary" size="mini" v-show="!this.addFlag" @click="goAdd">新增</el-button>
+      <el-button v-if="userInfo && userInfo.root === 1" type="primary" size="mini" v-show="!this.addFlag" @click="goAdd">新增</el-button>
       <el-button type="primary" size="mini" v-show="this.addFlag" @click="goBack">返回</el-button>
       <!-- <el-button type="danger" size="mini" @click="submitDelete(false)">删除</el-button> -->
     </div>
@@ -14,7 +14,7 @@
         <template v-for="(item, i) in fieldSift">
           <el-table-column :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i"></el-table-column>
         </template>
-        <el-table-column width="150" label="操作">
+        <el-table-column v-if="userInfo && userInfo.root === 1" width="150" label="操作">
           <template slot-scope="scope" v-if="scope.row.type != 1">
             <el-button size="mini" @click="handleEdit(scope.row, scope.$index)">编辑</el-button>
             <el-button size="mini" type="danger" @click="submitDelete(true, scope.row, scope.$index)">删除</el-button>
@@ -42,7 +42,7 @@
           <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="!item.input && !item.select">
           </el-table-column>
         </template>
-        <el-table-column width="100" label="操作">
+        <el-table-column v-if="userInfo && userInfo.root === 1" width="100" label="操作">
           <template slot-scope="scope">
             <el-button size="mini" type="danger" @click="submitDelete(true, scope.row, scope.$index)">删除</el-button>
           </template>
@@ -68,6 +68,10 @@
       loading: {
         type: Boolean,
         default: false
+      },
+      userInfo: {
+        type: Object,
+        default: null
       }
     },
     data() {

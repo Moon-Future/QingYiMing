@@ -2,9 +2,9 @@
   <div class="aside-container">
     <div class="user-message">
       <div class="user-avatar">
-        <img :src="avatar" alt="">
+        <img :src="userInfo.avatar || avatar" alt="">
       </div>
-      <div class="user-name">{{ user }}</div>
+      <div class="user-name">{{ userInfo.name || user }}</div>
     </div>
     <el-menu class="aside-menu"
       :default-active="activeIndex"
@@ -39,6 +39,12 @@
 <script>
   import IconFont from 'components/common/Iconfont'
   export default {
+    props: {
+      userInfo: {
+        type: Object,
+        default: null
+      }
+    },
     data() {
       return {
         user: '情义明木业有限公司',

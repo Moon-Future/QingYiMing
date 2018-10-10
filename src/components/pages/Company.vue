@@ -3,6 +3,7 @@
     <base-table
       :loading="loading"
       :tableOptions="tableOptions"
+      :userInfo="userInfo"
       @goBack="getCompany"
       @delete="deleteRow"
       >
@@ -14,6 +15,12 @@
   import BaseTable from 'components/common/BaseTable'
   import apiUrl from '@/serviceAPI.config.js'
   export default {
+    props: {
+      userInfo: {
+        type: Object,
+        default: null
+      }
+    },
     data() {
       return {
         tableOptions: {

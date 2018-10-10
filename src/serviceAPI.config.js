@@ -17,7 +17,9 @@ const apiUrl = {
   deleteSupply: 'api/supply/deleteSupply',
 
   register: 'api/user/register',
-  login: 'api/user/login'
+  login: 'api/user/login',
+  logout: 'api/user/logout',
+  getSession: 'api/user/getSession'
 }
 
 module.exports = apiUrl

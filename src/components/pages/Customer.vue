@@ -2,8 +2,9 @@
   <div class="customer-container">
     <search :showElements="showElements"></search>
     <base-table
-      :tableOptions="tableOptions"
       :loading="loading"
+      :tableOptions="tableOptions"
+      :userInfo="userInfo"
       @goAdd="goAdd"
       @goBack="goBack"
       @addRow="addRow"
@@ -20,6 +21,12 @@
   import BaseTable from 'components/common/BaseTable'
   import apiUrl from '@/serviceAPI.config.js'
   export default {
+    props: {
+      userInfo: {
+        type: Object,
+        default: null
+      }
+    },
     data() {
       return {
         showElements: {
