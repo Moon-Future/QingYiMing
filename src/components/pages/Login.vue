@@ -7,27 +7,51 @@
       <h1>情义明</h1>
       <div class="form-wrapper">
         <el-form :rules="rules" :model="form">
-          <el-form-item prop="user">
-            <el-input class="form-input" placeholder="用户" v-model="form.user">
+          <el-form-item prop="account">
+            <el-input class="form-input" clearable maxlength="20" placeholder="用户" v-model="form.account">
               <template slot="prepend">
-                <svg class="iconfont" aria-hidden="true">
-                  <use xlink:href="#icon-yonghu"></use>
-                </svg>
+                <icon-font icon="icon-yonghu"></icon-font>
               </template>
             </el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input class="form-input" type="password" placeholder="密码" v-model="form.password">
+            <el-input class="form-input" type="password" maxlength="20" clearable placeholder="密码" v-model="form.password">
               <template slot="prepend">
-                <svg class="iconfont" aria-hidden="true">
-                  <use xlink:href="#icon-mima"></use>
-                </svg>
+                <icon-font icon="icon-mima"></icon-font>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password" v-show="registerFlag">
+            <el-input class="form-input" type="password" maxlength="20" clearable placeholder="确认密码" v-model="form.rePassword">
+              <template slot="prepend">
+                <icon-font icon="icon-mima"></icon-font>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password" v-show="registerFlag">
+            <el-input class="form-input" maxlength="20" clearable placeholder="昵称" v-model="form.name">
+              <template slot="prepend">
+                昵称
               </template>
             </el-input>
           </el-form-item>
         </el-form>
-        <div class="login-button">
-          <el-button type="primary">登陆</el-button>
+        <div class="login-button" v-show="!registerFlag">
+          <el-button 
+            type="primary" 
+            :loading="subWait" 
+            :class="subWait ? 'subWait' : ''" 
+            @click="login">登陆</el-button>
+        </div>
+        <div class="register-button">
+          <el-button 
+            type="success" 
+            :loading="subWait && registerFlag" 
+            :class="subWait && registerFlag ? 'subWait' : ''" 
+            @click="register">注册</el-button>
+        </div>
+        <div class="back-button" v-show="registerFlag">
+          <el-button type="primary" @click="back">返回</el-button>
         </div>
         <div class="login-footer">
 
@@ -38,22 +62,119 @@
 </template>
 
 <script>
+  import IconFont from 'components/common/Iconfont'
+  import apiUrl from '@/serviceAPI.config.js'
+  const crypto = require('crypto')
   export default {
     data() {
       return {
         form: {
-          user: '',
-          password: ''
+          account: '',
+          password: '',
+          rePassword: '',
+          name: ''
         },
         rules: {
-          user: [
+          account: [
             {required: true, message: '请输入用户名', trigger: 'blur'}
           ],
           password: [
             {required: true, message: '请输入密码', trigger: 'blur'}
+          ],
+          rePassword: [
+            {required: true, message: '两次输入密码不同', trigger: 'blur'}
+          ],
+          name: [
+            {required: true, message: '请输入昵称', trigger: 'blur'}
           ]
-        }
+        },
+        registerFlag: false,
+        subWait: false
       }
+    },
+    methods: {
+      register() {
+        if (!this.registerFlag) {
+          this.registerFlag = true
+          this.clear()
+          return
+        }
+        if (this.subWait) {
+          return
+        }
+        if (this.form.account === '' || this.form.password === '' || this.form.rePassword === '' || this.form.name === '') {
+          this.$message.error('请补充完整数据')
+          return
+        }
+        if (this.form.password !== this.form.rePassword) {
+          this.$message.error('两次输入密码不同')
+          return
+        }
+        this.subWait = true
+        this.$http.post(apiUrl.register, {
+          data: {
+            account: this.form.account,
+            password: crypto.createHash('sha1').update(this.form.password.trim()).digest('hex'),
+            name: this.form.name,
+          }
+        }).then(res => {
+          this.subWait = false
+          if (res.data.code === 200) {
+            this.$message.success(res.data.message)
+            this.registerFlag = false
+            this.form.password = ''
+            this.form.rePassword = ''
+            this.form.name = ''
+          } else {
+            this.$message.error(res.data.message)
+          }
+        }).catch(err => {
+          this.subWait = false
+          this.$message.error('服务器君傲娇啦😭')
+        })
+      },
+      login() {
+        if (this.subWait) {
+          return
+        }
+        if (this.form.account === '' || this.form.password === '') {
+          this.$message({type: 'error', message: '请输入用户和密码'})
+          return
+        }
+        this.subWait = true
+        this.$http.post(apiUrl.login, {
+          data: {
+            account: this.form.account,
+            password: crypto.createHash('sha1').update(this.form.password.trim()).digest('hex')
+          }
+        }).then(res => {
+          this.subWait = false
+          if (res.data.code === 200) {
+            this.$message.success(res.data.message)
+          } else {
+            this.$message.error(res.data.message)
+          }
+        }).catch(err => {
+          this.subWait = false
+          this.$message.error('服务器君傲娇啦😭')
+        })
+      },
+      back() {
+        if (this.subWait) {
+          return
+        }
+        this.registerFlag = false
+        this.clear()
+      },
+      clear() {
+        this.form.account = ''
+        this.form.password = ''
+        this.form.rePassword = ''
+        this.form.name = ''
+      }
+    },
+    components: {
+      IconFont
     }
   }
 </script>
@@ -88,10 +209,7 @@
         padding: 10px 0;
       }
       .form-wrapper {
-        .form-input {
-          padding: 10px 0;
-        }
-        .login-button {
+        .login-button, .register-button, .back-button {
           display: flex;
           flex-flow: column;
           padding: 10px 0;

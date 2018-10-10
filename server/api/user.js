@@ -1,0 +1,41 @@
+const Router = require('koa-router')
+const router = new Router()
+const query = require('../database/init')
+
+router.post('/register', async (ctx) => {
+  try {
+    const data = ctx.request.body.data
+    const name = data.name
+    const account = data.account
+    const password = data.password
+    const result = await query(`SELECT * FROM user WHERE account = '${account}'`)
+    if (result.length !== 0) {
+      ctx.body = {code: 500, message: `用户 ${account} 已存在`}
+      return
+    }
+    await query(`INSERT INTO user (name, account, password, root, createTime) VALUES ( '${name}', '${account}', '${password}', ${0}, ${new Date().getTime()} )`)
+    ctx.body = {code: 200, message: '注册成功'}
+  } catch(err) {
+    ctx.body = {code: 500, message: err}
+  }
+})
+
+router.post('/login', async (ctx) => {
+  try {
+    const data = ctx.request.body.data
+    const account = data.account
+    const password = data.password
+    const result = await query(`SELECT * FROM user WHERE account = '${account}'`)
+    if (result.length === 0) {
+      ctx.body = {code: 500, message: '用户不存在'}
+    } else if(result[0].password !== password) {
+      ctx.body = {code: 500, message: '密码错误'}
+    } else {
+      ctx.body = {code: 200, message: '登陆成功'}
+    }
+  } catch(err) {
+    ctx.body = {code: 500, message: err}
+  }
+})
+
+module.exports = router

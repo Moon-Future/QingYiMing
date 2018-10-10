@@ -15,6 +15,9 @@ const apiUrl = {
   insertSupply: 'api/supply/insertSupply',
   getSupply: 'api/supply/getSupply',
   deleteSupply: 'api/supply/deleteSupply',
+
+  register: 'api/user/register',
+  login: 'api/user/login'
 }
 
 module.exports = apiUrl
