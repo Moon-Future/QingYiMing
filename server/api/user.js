@@ -1,20 +1,21 @@
 const Router = require('koa-router')
 const router = new Router()
 const query = require('../database/init')
+const ROOT = '0409'
 
 router.post('/register', async (ctx) => {
   try {
-    console.log(ctx.session)
     const data = ctx.request.body.data
     const name = data.name
     const account = data.account
     const password = data.password
+    const root = data.root
     const result = await query(`SELECT * FROM user WHERE account = '${account}'`)
     if (result.length !== 0) {
       ctx.body = {code: 500, message: `用户 ${account} 已存在`}
       return
     }
-    await query(`INSERT INTO user (name, account, password, root, createTime) VALUES ( '${name}', '${account}', '${password}', ${0}, ${new Date().getTime()} )`)
+    await query(`INSERT INTO user (name, account, password, root, createTime) VALUES ( '${name}', '${account}', '${password}', ${root == ROOT ? 1 : 0}, ${new Date().getTime()} )`)
     ctx.body = {code: 200, message: '注册成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}

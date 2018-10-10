@@ -45,12 +45,17 @@
         default: null
       }
     },
+    computed: {
+      items() {
+        return this.userInfo.root == 1 ? this.items1 : this.items0
+      }
+    },
     data() {
       return {
         user: '情义明木业有限公司',
         avatar: '	https://qingyiming-1255423800.cos.ap-chengdu.myqcloud.com/QingYiMing.JPG',
         activeIndex: '0',
-        items: [
+        items1: [
           {
             icon: 'icon-ziliaofenlei',
             index: '1',
@@ -58,17 +63,17 @@
             subs: [
               {
                 icon: 'icon-tree',
-                index: 'product',
+                index: '/product',
                 title: '产品',
               },
               {
                 icon: 'icon-gongsi',
-                index: 'company',
+                index: '/company',
                 title: '公司'
               },
               {
                 icon: 'icon-measurementunit',
-                index: 'unit',
+                index: '/unit',
                 title: '单位'
               }
             ]
@@ -80,7 +85,7 @@
             subs: [
               {
                 icon: 'icon-supply',
-                index: 'supply',
+                index: '/supply',
                 title: '客户供应',
               }
             ]
@@ -92,12 +97,12 @@
             subs: [
               {
                 icon: 'icon-order',
-                index: 'order',
+                index: '/order',
                 title: '最新订单'
               },
               {
                 icon: 'icon-order-history',
-                index: 'orderHistory',
+                index: '/orderHistory',
                 title: '历史订单'
               }
             ]
@@ -108,16 +113,28 @@
             title: '库存管理',
             subs: [
               {
-                icon: 'icon-ruku',
-                index: 'entry',
-                title: '入库'
+                icon: 'icon-shenqingfahuo',
+                index: '/inventory/delivery',
+                title: '打印送货单'
               },
               {
-                icon: 'icon-shenqingfahuo',
-                index: 'delivery',
-                title: '出货'
+                icon: 'icon-history',
+                index: '/inventory/history',
+                title: '历史送货单'
               }
             ]
+          }
+        ],
+        items0: [
+          {
+            icon: 'icon-shenqingfahuo',
+            index: 'inventory/delivery',
+            title: '打印送货单'
+          },
+          {
+            icon: 'icon-history',
+            index: 'inventory/history',
+            title: '历史送货单'
           }
         ]
       }

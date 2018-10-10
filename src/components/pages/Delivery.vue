@@ -13,7 +13,7 @@
           placement="right"
           width="400"
           trigger="click">
-          <el-table ref="listTable" border size="mini" :data="tableData" @selection-change="selectionChange" @select="select" @select-all="selectAll">
+          <el-table ref="listTable" border size="mini" max-height="300" :data="tableData" @selection-change="selectionChange" @select="select" @select-all="selectAll">
             <el-table-column type="selection" width="35"></el-table-column>
             <el-table-column v-for="(item, i) in selectField" :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
           </el-table>
@@ -97,7 +97,7 @@
         receiveCompany: '',
         printFlag: false,
         listShowFlag: false,
-        maxRow: 5
+        maxRow: 8
       }
     },
     computed: {
@@ -235,8 +235,8 @@
     }
     .delivery-title {
       font-weight: bold;
-      font-size: $font-size-large-x;
-      margin-bottom: 10px;
+      font-size: $font-size-large;
+      margin-bottom: 5px;
       text-align: center;
     }
     .delivery-message {

@@ -42,7 +42,7 @@ export default new Router({
           component: Supply
         },
         {
-          path: '/delivery',
+          path: '/inventory/delivery',
           name: 'Delivery',
           component: Delivery
         }

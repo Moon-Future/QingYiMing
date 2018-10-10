@@ -83,7 +83,6 @@
       }
       .home-content {
         padding: 10px;
-        overflow: auto;
       }
     }
   }

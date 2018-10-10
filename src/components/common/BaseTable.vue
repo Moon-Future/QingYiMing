@@ -91,6 +91,9 @@
       },
       addTemplate() {
         return this.tableOptions.addTemplate
+      },
+      deleteMessage() {
+        return this.tableOptions.deleteMessage || '此操作将永久删除该数据,并且与至相关的数据也会被删除, 是否继续?'
       }
     },
     mounted() {
@@ -115,26 +118,31 @@
         this.dataAdd.push(JSON.parse(JSON.stringify(this.addTemplate)))
       },
       handleEdit() {
-
+        
       },
       submitDelete(flag, row, index) {
         if (this.addFlag) {
           this.dataAdd.splice(index, 1)
         } else {
-          let subData = flag ? [row] : ''
-          this.$http.post(this.tableOptions.deleteApi, {
-            data: subData
-          }).then(res => {
-            if (res.data.code === 200) {
-              this.$message({
-                type: 'success',
-                message: res.data.message
-              })
-              this.$emit('delete', index)
-            }
-          }).catch(err => {
-
-          })
+          this.$confirm(this.deleteMessage, '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            let subData = flag ? [row] : ''
+            this.$http.post(this.tableOptions.deleteApi, {
+              data: subData
+            }).then(res => {
+              if (res.data.code === 200) {
+                this.$message.success(res.data.message);
+                this.$emit('delete', index)
+              }
+            }).catch(err => {
+              this.$message.error('服务器君傲娇啦😭')
+            })
+          }).catch(() => {
+            this.$message.info('已取消删除!');      
+          });
         }
       },
       submitAdd() {

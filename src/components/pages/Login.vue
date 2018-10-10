@@ -21,20 +21,29 @@
               </template>
             </el-input>
           </el-form-item>
-          <el-form-item prop="password" v-show="registerFlag">
-            <el-input class="form-input" type="password" maxlength="20" clearable placeholder="确认密码" v-model="form.rePassword">
-              <template slot="prepend">
-                <icon-font icon="icon-mima"></icon-font>
-              </template>
-            </el-input>
-          </el-form-item>
-          <el-form-item prop="password" v-show="registerFlag">
-            <el-input class="form-input" maxlength="20" clearable placeholder="昵称" v-model="form.name">
-              <template slot="prepend">
-                昵称
-              </template>
-            </el-input>
-          </el-form-item>
+          <div v-show="registerFlag">
+            <el-form-item prop="password">
+              <el-input class="form-input" type="password" maxlength="20" clearable placeholder="确认密码" v-model="form.rePassword">
+                <template slot="prepend">
+                  <icon-font icon="icon-mima"></icon-font>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="name">
+              <el-input class="form-input" maxlength="20" clearable placeholder="昵称" v-model="form.name">
+                <template slot="prepend">
+                  昵称
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="root">
+              <el-input class="form-input" maxlength="20" clearable placeholder="可以为空" v-model="form.root">
+                <template slot="prepend">
+                  管理员验证码
+                </template>
+              </el-input>
+            </el-form-item>
+          </div>
         </el-form>
         <div class="login-button" v-show="!registerFlag">
           <el-button 
@@ -72,7 +81,8 @@
           account: '',
           password: '',
           rePassword: '',
-          name: ''
+          name: '',
+          root: ''
         },
         rules: {
           account: [
@@ -89,7 +99,8 @@
           ]
         },
         registerFlag: false,
-        subWait: false
+        subWait: false,
+        checked: false
       }
     },
     methods: {
@@ -116,6 +127,7 @@
             account: this.form.account,
             password: crypto.createHash('sha1').update(this.form.password.trim()).digest('hex'),
             name: this.form.name,
+            root: this.form.root
           }
         }).then(res => {
           this.subWait = false

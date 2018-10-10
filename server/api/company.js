@@ -14,7 +14,7 @@ router.post('/insertCompany', async (ctx) => {
         result.push(item.name)
         continue
       }
-      await query(`INSERT INTO company (name, alias, type, createTime) VALUES ('${item.name}', '${item.alias}', ${0}, ${currentTime})`)
+      await query(`INSERT INTO company (name, alias, type, createTime, deleteOr) VALUES ('${item.name}', '${item.alias}', ${0}, ${currentTime}, 0)`)
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -31,9 +31,9 @@ router.post('/getCompany', async (ctx) => {
     const data = ctx.request.body.data
     let company
     if (data && data.type === 0) {
-      company = await query(`SELECT * FROM company WHERE type = 0`)
+      company = await query(`SELECT * FROM company WHERE type = 0 AND deleteOr != 1`)
     } else {
-      company = await query(`SELECT * FROM company`)
+      company = await query(`SELECT * FROM company WHERE deleteOr != 1`)
     }
     ctx.body = {code: 200, message: company}
   } catch(err) {
@@ -48,7 +48,8 @@ router.post('/deleteCompany', async (ctx) => {
     data.forEach(ele => {
       ids.push(ele.id)
     })
-    await query(`DELETE FROM company WHERE id IN ( ${ids.join()} )`)
+    // await query(`DELETE FROM company WHERE id IN ( ${ids.join()} )`)
+    await query(`UPDATE company SET deleteOr = 1 WHERE id IN ( ${ids.join()} )`)
     ctx.body = {code: 200, message: '删除成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
