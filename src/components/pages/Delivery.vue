@@ -28,7 +28,7 @@
             <div class="receive-company">收货单位: {{ receiveCompany }}</div>
             <div class="delivery-number">
               <span>送货日期: {{ deliveryTime.getFullYear() }} 年 {{ deliveryTime.getMonth() + 1 }} 月 {{ deliveryTime.getDate() }} 日</span>
-              <span>NO: {{ '03' }}</span>
+              <span>NO: {{ no }}</span>
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
@@ -83,26 +83,30 @@
           {prop: 'nun', label: '物料编码'}
         ],
         field: [
-          {prop: 'nun', label: '物料编码'},
-          {prop: 'name', label: '产品名称'},
+          {prop: 'nun', label: '物料编码', 'width': '80'},
+          {prop: 'name', label: '产品名称', width: '70'},
           {prop: 'model', label: '规格型号'},
-          {prop: 'unit', label: '单位', width: '50'},
-          {prop: 'qty', label: '数量', width: '60', input: true, noPadding: true},
+          {prop: 'unit', label: '单位', width: '40'},
+          {prop: 'qty', label: '数量', width: '50', input: true, noPadding: true},
           {prop: 'qtyReceive', label: '实收数量', width: '70', input: true},
-          {prop: 'time', label: '生产日期', width: '90'},
-          {prop: 'lot', label: '生产批次', input: true},
-          {prop: 'mark', label: '备注', input: true}
+          {prop: 'time', label: '生产日期', width: '70'},
+          {prop: 'lot', label: '生产批次', input: true, width: '60'},
+          {prop: 'mark', label: '备注', input: true, width: '50'}
         ],
         deliveryTime: new Date(),
         receiveCompany: '',
         printFlag: false,
         listShowFlag: false,
-        maxRow: 8
+        maxRow: 8,
+        counter: {number: 1}
       }
     },
     computed: {
       hasSelected() {
         return this.selectData.length === 0 ? false : true
+      },
+      no() {
+        return this.counter.number < 10 ? `0${this.counter.number}` : this.counter.number
       }
     },
     created() {
@@ -127,10 +131,13 @@
               cancelButtonText: '未打印',
               type: 'info'
             }).then(() => {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
-              });
+              this.$http.post(apiUrl.saveDelivery, {
+                data: {counter: this.counter}
+              }).then(res => {
+
+              }).catch(err => {
+
+              })
             }).catch(() => {
               this.$message({
                 type: 'info',
@@ -146,7 +153,12 @@
         }).then(res => {
           this.customerOptions = []
           if (res.data.code === 200) {
-            const customer = res.data.message
+            const customer = res.data.message.company
+            const number = res.data.message.number
+            if (number.length !== 0) {
+              number[0].number = Number(number[0].number) + 1
+              this.counter = number[0]
+            }
             customer.forEach(ele => {
               this.customerOptions.push({value: ele.id, label: ele.name})
             })
@@ -175,6 +187,7 @@
       },
       selectionChange(data) {
         this.selectData = data
+        console.log('selectData', data)
       },
       select(selection, row) {
         if (this.selectData.length === this.maxRow + 1) {

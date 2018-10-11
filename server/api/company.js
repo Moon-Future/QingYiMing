@@ -30,12 +30,14 @@ router.post('/getCompany', async (ctx) => {
   try {
     const data = ctx.request.body.data
     let company
+    let number
     if (data && data.type === 0) {
       company = await query(`SELECT * FROM company WHERE type = 0 AND off != 1`)
+      number = await query(`SELECT * FROM counter WHERE type = 'delivery'`)
     } else {
       company = await query(`SELECT * FROM company WHERE off != 1`)
     }
-    ctx.body = {code: 200, message: company}
+    ctx.body = {code: 200, message: {company, number}}
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }

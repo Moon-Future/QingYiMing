@@ -18,10 +18,13 @@
 .print-wrapper {
   table {
     td, th {
-      padding: 0px 0 !important;
+      padding: initial !important;
       input {
         height: 16px !important;
       }
+    }
+    .cell {
+      padding: initial !important;
     }
   }
   &.print-wrapper-border {

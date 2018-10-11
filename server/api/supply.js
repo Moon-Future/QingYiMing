@@ -36,7 +36,7 @@ router.post('/getSupply', async (ctx) => {
         SELECT s.id, s.nun, c.name as customer, p.name as product, p.model, u.name as unit 
         FROM supply s, company c, product p, unit u 
         WHERE s.customer = c.id AND s.product = p.id AND p.unitId = u.id
-        AND c.off != 1
+        AND s.off != 1
         `
       )
     } else {
@@ -46,7 +46,7 @@ router.post('/getSupply', async (ctx) => {
         SELECT s.id, s.nun, c.name as customer, p.name as name, p.model, u.name as unit 
         FROM supply s, company c, product p, unit u 
         WHERE s.customer = ${customerId} AND s.customer = c.id AND s.product = p.id AND p.unitId = u.id
-        AND c.off != 1
+        AND s.off != 1
         `
       )
     }

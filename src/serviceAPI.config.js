@@ -20,6 +20,8 @@ const apiUrl = {
   deleteSupply: 'api/supply/deleteSupply',
   updSupply: 'api/supply/updSupply',
 
+  saveDelivery: 'api/delivery/saveDelivery',
+
   register: 'api/user/register',
   login: 'api/user/login',
   logout: 'api/user/logout',
