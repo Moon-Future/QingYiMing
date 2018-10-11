@@ -9,7 +9,7 @@ router.post('/insertCompany', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const currentTime = new Date().getTime()
-      const company = await query(`SELECT * FROM company WHERE name = '${item.name}'`)
+      const company = await query(`SELECT * FROM company WHERE name = '${item.name}' AND off != 1`)
       if (company.length !== 0) {
         result.push(item.name)
         continue
@@ -34,10 +34,15 @@ router.post('/getCompany', async (ctx) => {
     if (data && data.type === 0) {
       company = await query(`SELECT * FROM company WHERE type = 0 AND off != 1`)
       number = await query(`SELECT * FROM counter WHERE type = 'delivery'`)
+      if (number.length === 0) {
+        await query(`INSERT INTO counter (number, type) VALUES (0, 'delivery')`)
+        number = await query(`SELECT * FROM counter WHERE type = 'delivery'`)
+      }
+      ctx.body = {code: 200, message: {company, number}}
     } else {
       company = await query(`SELECT * FROM company WHERE off != 1`)
+      ctx.body = {code: 200, message: company}
     }
-    ctx.body = {code: 200, message: {company, number}}
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }
@@ -60,8 +65,8 @@ router.post('/deleteCompany', async (ctx) => {
 router.post('/updCompany', async (ctx) => {
   try {
     const data = ctx.request.body.data
-    const check = await query(`SELECT * FROM company WHERE name = '${data.name}'`)
-    if (check.length !== 0) {
+    const check = await query(`SELECT * FROM company WHERE name = '${data.name}' AND off != 1`)
+    if (check.length !== 0 && check[0].id != data.id) {
       ctx.body = {code: 500, message: `公司 ${data.name} 已存在`}
       return
     }

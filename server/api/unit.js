@@ -9,7 +9,7 @@ router.post('/insertUnit', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const currentTime = new Date().getTime()
-      const unit = await query(`SELECT * FROM unit WHERE name = '${item.name}'`)
+      const unit = await query(`SELECT * FROM unit WHERE name = '${item.name}' AND off != 1`)
       if (unit.length !== 0) {
         result.push(item.name)
         continue
@@ -52,8 +52,8 @@ router.post('/deleteUnit', async (ctx) => {
 router.post('/updUnit', async (ctx) => {
   try {
     const data = ctx.request.body.data
-    const check = await query(`SELECT * FROM unit WHERE name = '${data.name}'`)
-    if (check.length !== 0) {
+    const check = await query(`SELECT * FROM unit WHERE name = '${data.name}' AND off != 1`)
+    if (check.length !== 0 && check[0].id != data.id) {
       ctx.body = {code: 500, message: `单位 ${data.name} 已存在`}
       return
     }

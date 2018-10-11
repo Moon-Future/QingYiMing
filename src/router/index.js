@@ -6,7 +6,8 @@ import Product from '@/components/pages/Product'
 import Unit from '@/components/pages//Unit'
 import Company from '@/components/pages/Company'
 import Supply from '@/components/pages/Supply'
-import Delivery from '@/components/pages/Delivery'
+import Delivery from '@/components/pages/inventory/Delivery'
+import DeliveryHistory from '@/components/pages/inventory/History'
 
 Vue.use(Router)
 
@@ -22,17 +23,17 @@ export default new Router({
       component: Home,
       children: [
         {
-          path: '/product',
+          path: '/baseinfo/product',
           name: 'Product',
           component: Product
         },
         {
-          path: '/company',
+          path: '/baseinfo/company',
           name: 'Company',
           component: Company
         },
         {
-          path: '/unit',
+          path: '/baseinfo/unit',
           name: 'Unit',
           component: Unit
         },
@@ -45,6 +46,11 @@ export default new Router({
           path: '/inventory/delivery',
           name: 'Delivery',
           component: Delivery
+        },
+        {
+          path: '/inventory/history',
+          name: 'DeliveryHistory',
+          component: DeliveryHistory
         }
       ]
     },

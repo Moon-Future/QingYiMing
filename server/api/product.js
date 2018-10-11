@@ -9,7 +9,7 @@ router.post('/insertProduct', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const currentTime = new Date().getTime()
-      const product = await query(`SELECT * FROM product WHERE model = '${item.model}'`)
+      const product = await query(`SELECT * FROM product WHERE model = '${item.model}' AND off != 1`)
       if (product.length !== 0) {
         result.push(item.model)
         continue
@@ -53,8 +53,8 @@ router.post('/deleteProduct', async (ctx) => {
 router.post('/updProduct', async (ctx) => {
   try {
     const data = ctx.request.body.data
-    const check = await query(`SELECT * FROM product WHERE model = '${data.model}'`)
-    if (check.length !== 0) {
+    const check = await query(`SELECT * FROM product WHERE model = '${data.model}' AND off != 1`)
+    if (check.length !== 0 && check[0].id != data.id) {
       ctx.body = {code: 500, message: `型号 ${data.model} 已存在`}
       return
     }

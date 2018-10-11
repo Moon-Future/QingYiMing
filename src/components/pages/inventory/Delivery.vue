@@ -11,7 +11,6 @@
           :value="listShowFlag"
           @hide="hideList"
           placement="right"
-          width="400"
           trigger="click">
           <el-table ref="listTable" border size="mini" max-height="300" :data="tableData" @selection-change="selectionChange" @select="select" @select-all="selectAll">
             <el-table-column type="selection" width="35"></el-table-column>
@@ -32,7 +31,7 @@
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
-            <el-table :border="!hasSelected" size="mini" width="22.3cm" show-summary :summary-method="getSummaries" :data="selectData">
+            <el-table :border="!hasSelected" size="mini" show-summary :summary-method="getSummaries" :data="selectData">
               <template v-for="(item, i) in field">
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="item.input" :width="item.width ? item.width : ''">
                   <template slot-scope="scope">
@@ -79,7 +78,7 @@
         selectData: [],
         selectField: [
           {prop: 'name', label: '产品名称'},
-          {prop: 'model', label: '规格型号'},
+          {prop: 'model', label: '规格型号', width: '250'},
           {prop: 'nun', label: '物料编码'}
         ],
         field: [
@@ -88,10 +87,10 @@
           {prop: 'model', label: '规格型号'},
           {prop: 'unit', label: '单位', width: '40'},
           {prop: 'qty', label: '数量', width: '50', input: true, noPadding: true},
-          {prop: 'qtyReceive', label: '实收数量', width: '70', input: true},
-          {prop: 'time', label: '生产日期', width: '70'},
+          {prop: 'qtyR', label: '实收数量', width: '70', input: true},
+          {prop: 'ptime', label: '生产日期', width: '80'},
           {prop: 'lot', label: '生产批次', input: true, width: '60'},
-          {prop: 'mark', label: '备注', input: true, width: '50'}
+          {prop: 'remark', label: '备注', input: true, width: '50'}
         ],
         deliveryTime: new Date(),
         receiveCompany: '',
@@ -114,6 +113,10 @@
     },
     methods: {
       print() {
+        if (this.selectData.length === 0) {
+          this.$message.error('请先选择数据')
+          return
+        }
         this.printFlag = true
         this.$nextTick(() => {
           setTimeout(() => {
@@ -129,21 +132,19 @@
             this.$confirm('是否已打印？', '请确认', {
               confirmButtonText: '已打印',
               cancelButtonText: '未打印',
+              closeOnClickModal: false,
+              closeOnPressEscape: false,
+              showClose: false,
               type: 'info'
             }).then(() => {
               this.$http.post(apiUrl.saveDelivery, {
-                data: {counter: this.counter}
+                data: {counter: this.counter, deliveryData: this.dataFormat(this.selectData)}
               }).then(res => {
 
               }).catch(err => {
 
               })
-            }).catch(() => {
-              this.$message({
-                type: 'info',
-                message: '已取消删除'
-              });          
-            });
+            })
           }, 50)
         })
       },
@@ -155,10 +156,8 @@
           if (res.data.code === 200) {
             const customer = res.data.message.company
             const number = res.data.message.number
-            if (number.length !== 0) {
-              number[0].number = Number(number[0].number) + 1
-              this.counter = number[0]
-            }
+            number[0].number = Number(number[0].number) + 1
+            this.counter = number[0]
             customer.forEach(ele => {
               this.customerOptions.push({value: ele.id, label: ele.name})
             })
@@ -174,7 +173,7 @@
             this.tableData = res.data.message
             const productionTime = new Date(this.deliveryTime.getTime() - 7 * 24 * 60 * 60 * 1000)
             this.tableData.forEach(ele => {
-              ele.time = dateFormat(productionTime, 'yyyy-MM-dd')
+              ele.ptime = dateFormat(productionTime, 'yyyy-MM-dd')
             })
             this.listShowFlag = true
           }
@@ -187,7 +186,6 @@
       },
       selectionChange(data) {
         this.selectData = data
-        console.log('selectData', data)
       },
       select(selection, row) {
         if (this.selectData.length === this.maxRow + 1) {
@@ -231,6 +229,20 @@
           }
         });
         return sums;
+      },
+      dataFormat() {
+        let result = []
+        this.selectData.forEach(ele => {
+          const data = {
+            prd: ele.prd, prdm: ele.name, cust: ele.cust, custm: ele.customer,
+            model: ele.model, nun: ele.nun, unit: ele.unitId, unitm: ele.unit,
+            qty: ele.qty || '', qtyR: ele.qtyR || '', ptime: new Date(ele.ptime).getTime(),
+            lot: ele.lot || '', remark: ele.remark || '', time: this.deliveryTime.getTime(),
+            no: this.counter.number, counter: this.counter.id
+          }
+          result.push(data)
+        })
+        return result
       }
     },
     components: {
@@ -250,43 +262,43 @@
         text-align: left;
       }
     }
-  }
-  .print-wrapper {
-    width: 22.3cm;
-    height: 9.4cm;
-    padding: 0.48cm 1.1cm 0.42cm 1.8cm;
-    border: 1px solid $color-deepgray;
-    margin-top: 10px;
-    box-sizing: border-box;
-    &.print-template {
-      border: none;
-    }
-    .delivery-title {
-      font-weight: bold;
-      font-size: $font-size-large;
-      margin-bottom: 5px;
-      text-align: center;
-    }
-    .delivery-message {
-      display: flex;
-      justify-content: space-between;
-      padding: 0 10px;
-      margin-bottom: 10px;
-      .delivery-number span {
-        margin-left: 10px;
-      }
-    }
-    .delivery-footer {
-      display: flex;
+    .print-wrapper {
+      width: 22.3cm;
+      height: 9.4cm;
+      padding: 0.48cm 1.1cm 0.42cm 1.8cm;
+      border: 1px solid $color-deepgray;
       margin-top: 10px;
-      margin-bottom: 20px;
-      justify-content: space-between;
-      padding: 0 10px;
-      .provider-company {
-        margin-right: 100px;
+      box-sizing: border-box;
+      &.print-template {
+        border: none;
       }
-      .receive-time span {
-        margin: 0 20px;
+      .delivery-title {
+        font-weight: bold;
+        font-size: $font-size-large;
+        margin-bottom: 5px;
+        text-align: center;
+      }
+      .delivery-message {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 10px;
+        margin-bottom: 10px;
+        .delivery-number span {
+          margin-left: 10px;
+        }
+      }
+      .delivery-footer {
+        display: flex;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        justify-content: space-between;
+        padding: 0 10px;
+        .provider-company {
+          margin-right: 100px;
+        }
+        .receive-time span {
+          margin: 0 20px;
+        }
       }
     }
   }

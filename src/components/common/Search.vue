@@ -109,6 +109,7 @@
 
   .search-container {
     display: flex;
+    justify-content: space-between;
     margin-bottom: 10px;
     .search-condition {
       .search-input {
@@ -116,8 +117,8 @@
       }
     }
     .search-btn {
-      position: absolute;
-      right: 10px;
+      // position: absolute;
+      // right: 10px;
     }
   }
 </style>

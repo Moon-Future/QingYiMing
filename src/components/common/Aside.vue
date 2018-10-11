@@ -63,17 +63,17 @@
             subs: [
               {
                 icon: 'icon-tree',
-                index: '/product',
+                index: '/baseinfo/product',
                 title: '产品',
               },
               {
                 icon: 'icon-gongsi',
-                index: '/company',
+                index: '/baseinfo/company',
                 title: '公司'
               },
               {
                 icon: 'icon-measurementunit',
-                index: '/unit',
+                index: '/baseinfo/unit',
                 title: '单位'
               }
             ]

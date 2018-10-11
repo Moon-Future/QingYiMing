@@ -21,6 +21,7 @@ const apiUrl = {
   updSupply: 'api/supply/updSupply',
 
   saveDelivery: 'api/delivery/saveDelivery',
+  getDeliveryHistory: 'api/delivery/getDeliveryHistory',
 
   register: 'api/user/register',
   login: 'api/user/login',

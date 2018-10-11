@@ -1,4 +1,5 @@
 export function dateFormat(date, format) {
+  date = typeof date === 'number' ? new Date(date) : date
   let o = {
     'M+': date.getMonth() + 1,
     'd+': date.getDate(),

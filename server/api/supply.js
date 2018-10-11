@@ -9,7 +9,7 @@ router.post('/insertSupply', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const currentTime = new Date().getTime()
-      const supply = await query(`SELECT * FROM supply WHERE customer = ${item.customer} AND product = ${item.product}`)
+      const supply = await query(`SELECT * FROM supply WHERE customer = ${item.customer} AND product = ${item.product} AND off != 1`)
       if (supply.length !== 0) {
         result.push(item.nun)
         continue
@@ -43,7 +43,7 @@ router.post('/getSupply', async (ctx) => {
       const customerId = data.customerId
       supplyList = await query(
         `
-        SELECT s.id, s.nun, c.name as customer, p.name as name, p.model, u.name as unit 
+        SELECT s.id, s.nun, c.name as customer, c.id as cust, p.name as name, p.model, p.id as prd, u.name as unit, u.id as unitId
         FROM supply s, company c, product p, unit u 
         WHERE s.customer = ${customerId} AND s.customer = c.id AND s.product = p.id AND p.unitId = u.id
         AND s.off != 1
@@ -73,8 +73,8 @@ router.post('/deleteSupply', async (ctx) => {
 router.post('/updSupply', async (ctx) => {
   try {
     const data = ctx.request.body.data
-    const check = await query(`SELECT * FROM supply WHERE customer = ${data.customer} AND product = ${data.product}`)
-    if (check.length !== 0) {
+    const check = await query(`SELECT * FROM supply WHERE customer = ${data.customer} AND product = ${data.product} AND off != 1`)
+    if (check.length !== 0 && check[0].id != data.id) {
       ctx.body = {code: 500, message: '已存在相同数据'}
       return
     }
