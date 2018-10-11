@@ -7,6 +7,7 @@
       @goBack="getSupply"
       @goAdd="getOptions"
       @delete="deleteRow"
+      @update="updateRow"
       >
     </base-table>
   </div>
@@ -27,7 +28,7 @@
         tableOptions: {
           fieldAdd: [
             { prop: 'customer', label: '客户', required: true, options: [], select: true },
-            { prop: 'product', label: '产品', required: true, options: [], select: true },
+            { prop: 'product', label: '产品', required: true, options: [], select: true, key: 'model' },
             { prop: 'nun', label: '编码', input: true }
           ],
           fieldSift: [
@@ -41,13 +42,15 @@
           dataSift: [],
           addTemplate: { customer: '', product: '', nun: '' },
           addApi: apiUrl.insertSupply,
-          deleteApi: apiUrl.deleteSupply
+          deleteApi: apiUrl.deleteSupply,
+          updApi: apiUrl.updSupply
         },
         loading: false
       }
     },
     created() {
       this.getSupply()
+      this.getOptions()
     },
     methods: {
       getSupply() {
@@ -81,6 +84,9 @@
       },
       deleteRow(row) {
         this.tableOptions.dataSift.splice(row, 1)
+      },
+      updateRow({data, row}) {
+        this.tableOptions.dataSift.splice(row, 1, data)
       }
     },
     components: {

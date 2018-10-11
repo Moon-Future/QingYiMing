@@ -7,6 +7,8 @@
       :userInfo="userInfo"
       @goBack="getProduct"
       @goAdd="goAdd"
+      @delete="deleteRow"
+      @update="updateRow"
       >
     </base-table>
   </div>
@@ -40,13 +42,15 @@
           dataSift: [],
           addTemplate: { name: '木托盘', model: '', unit: '' },
           addApi: apiUrl.insertProduct,
-          deleteApi: apiUrl.deleteProduct
+          deleteApi: apiUrl.deleteProduct,
+          updApi: apiUrl.updProduct
         },
         loading: false
       }
     },
     created() {
       this.getProduct()
+      this.goAdd()
     },
     methods: {
       getProduct() {
@@ -59,6 +63,12 @@
         }).catch(err => {
           this.loading = false
         })
+      },
+      deleteRow(row) {
+        this.tableOptions.dataSift.splice(row, 1)
+      },
+      updateRow({data, row}) {
+        this.tableOptions.dataSift.splice(row, 1, data)
       },
       goAdd() {
         this.$http.post(apiUrl.getUnit).then(res => {

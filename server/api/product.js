@@ -29,7 +29,7 @@ router.post('/insertProduct', async (ctx) => {
 router.post('/getProduct', async (ctx) => {
   try {
     const data = ctx.request.body.data
-    const product = await query(`SELECT p.name, p.model, u.name as unit FROM product p, unit u WHERE p.unitId = u.id`)
+    const product = await query(`SELECT p.id, p.name, p.model, u.name as unit FROM product p, unit u WHERE p.unitId = u.id AND p.off != 1`)
     ctx.body = {code: 200, message: product}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -43,8 +43,24 @@ router.post('/deleteProduct', async (ctx) => {
     data.forEach(ele => {
       ids.push(ele.id)
     })
-    await query(`DELETE FROM product WHERE id IN ( ${ids.join()} )`)
+    await query(`UPDATE product SET off = 1, updateTime = ${new Date().getTime()} WHERE id IN ( ${ids.join()} )`)
     ctx.body = {code: 200, message: '删除成功'}
+  } catch(err) {
+    ctx.body = {code: 500, message: err}
+  }
+})
+
+router.post('/updProduct', async (ctx) => {
+  try {
+    const data = ctx.request.body.data
+    const check = await query(`SELECT * FROM product WHERE model = '${data.model}'`)
+    if (check.length !== 0) {
+      ctx.body = {code: 500, message: `型号 ${data.model} 已存在`}
+      return
+    }
+    const upd = await query(`UPDATE product SET name = '${data.name}', model = '${data.model}', unitId = ${data.unit}, updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
+    const result = await query(`SELECT p.id, p.name, p.model, u.name as unit FROM product p, unit u WHERE p.unitId = u.id AND p.off != 1 AND p.id = ${data.id}`)
+    ctx.body = {code: 200, message: '更新成功', result: result}
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }

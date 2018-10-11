@@ -6,6 +6,7 @@
       :userInfo="userInfo"
       @goBack="getUnit"
       @delete="deleteRow"
+      @update="updateRow"
       >
     </base-table>
   </div>
@@ -32,7 +33,8 @@
           dataSift: [],
           addTemplate: { name: '', sign: '' },
           addApi: apiUrl.insertUnit,
-          deleteApi: apiUrl.deleteUnit
+          deleteApi: apiUrl.deleteUnit,
+          updApi: apiUrl.updUnit
         },
         loading: false
       }
@@ -54,7 +56,10 @@
       },
       deleteRow(row) {
         this.tableOptions.dataSift.splice(row, 1)
-      }
+      },
+      updateRow({data, row}) {
+        this.tableOptions.dataSift.splice(row, 1, data)
+      },
     },
     components: {
       BaseTable

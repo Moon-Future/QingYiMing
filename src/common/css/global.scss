@@ -1,10 +1,10 @@
 #printPanel {
   display: flex;
   justify-content: center;
-  align-items: center;
   height: 100%;
   .print-wrapper {
     border: none;
+    margin: 0;
   }
 }
 .field-required::after {
