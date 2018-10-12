@@ -4,9 +4,11 @@
       :loading="loading"
       :tableOptions="tableOptions"
       :userInfo="userInfo"
+      :total="total"
       @goBack="getUnit"
       @delete="deleteRow"
       @update="updateRow"
+      @currentChange="currentChange"
       >
     </base-table>
   </div>
@@ -36,19 +38,23 @@
           deleteApi: apiUrl.deleteUnit,
           updApi: apiUrl.updUnit
         },
-        loading: false
+        loading: false,
+        total: 0
       }
     },
     created() {
       this.getUnit()
     },
     methods: {
-      getUnit() {
+      getUnit(pageNo = 1) {
         this.loading = true
-        this.$http.post(apiUrl.getUnit).then(res => {
+        this.$http.post(apiUrl.getUnit, {
+          data: {pageNo}
+        }).then(res => {
           this.loading = false
           if (res.data.code === 200) {
             this.tableOptions.dataSift = res.data.message
+            this.total = res.data.count
           }
         }).catch(err => {
           this.loading = false
@@ -60,6 +66,9 @@
       updateRow({data, row}) {
         this.tableOptions.dataSift.splice(row, 1, data)
       },
+      currentChange(pageNo) {
+        this.getUnit(pageNo)
+      }
     },
     components: {
       BaseTable

@@ -5,10 +5,12 @@
       :loading="loading"
       :tableOptions="tableOptions"
       :userInfo="userInfo"
+      :total="total"
       @goBack="getProduct"
       @goAdd="goAdd"
       @delete="deleteRow"
       @update="updateRow"
+      @currentChange="currentChange"
       >
     </base-table>
   </div>
@@ -45,7 +47,8 @@
           deleteApi: apiUrl.deleteProduct,
           updApi: apiUrl.updProduct
         },
-        loading: false
+        loading: false,
+        total: 0
       }
     },
     created() {
@@ -53,12 +56,15 @@
       this.goAdd()
     },
     methods: {
-      getProduct() {
+      getProduct(pageNo = 1) {
         this.loading = true
-        this.$http.post(apiUrl.getProduct).then(res => {
+        this.$http.post(apiUrl.getProduct, {
+          data: {pageNo}
+        }).then(res => {
           this.loading = false
           if (res.data.code === 200) {
             this.tableOptions.dataSift = res.data.message
+            this.total = res.data.count
           }
         }).catch(err => {
           this.loading = false
@@ -76,6 +82,9 @@
             this.tableOptions.fieldAdd[2].options = res.data.message
           }
         })
+      },
+      currentChange(pageNo) {
+        this.getProduct(pageNo)
       }
     },
     components: {

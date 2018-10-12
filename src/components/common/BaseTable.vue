@@ -6,7 +6,7 @@
       <!-- <el-button type="danger" size="mini" @click="submitDelete(false)">删除</el-button> -->
     </div>
     <div class="table-sift" ref="tableSift" v-show="!this.addFlag">
-      <el-table v-loading="loading" fit border size="mini" :data="this.tableOptions.dataSift" :max-height="height">
+      <el-table v-loading="loading" :highlight-current-row="true" border size="mini" :data="this.tableOptions.dataSift">
         <el-table-column
           type="selection"
           width="55">
@@ -20,6 +20,15 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="page-wrapper">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :disabled="loading"
+          :total="total"
+          @current-change="currentChange">
+        </el-pagination>
+      </div>
     </div>
     <div class="table-add" v-show="this.addFlag">
       <el-table border size="mini" :data="dataAdd" :max-height="`${height - 50}`" cell-class-name="no-padding">
@@ -94,6 +103,10 @@
       userInfo: {
         type: Object,
         default: null
+      },
+      total: {
+        type: Number,
+        default: 0
       }
     },
     data() {
@@ -270,6 +283,9 @@
           }
         }
         return true
+      },
+      currentChange(pageNo) {
+        this.$emit('currentChange', pageNo)
       }
     },
     components: {
@@ -299,6 +315,11 @@
         right: 0;
         margin: 10px;
       }
+    }
+    .page-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
     }
   }
 </style>

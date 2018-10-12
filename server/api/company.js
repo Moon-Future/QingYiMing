@@ -29,6 +29,8 @@ router.post('/insertCompany', async (ctx) => {
 router.post('/getCompany', async (ctx) => {
   try {
     const data = ctx.request.body.data
+    const pageNo = data && data.pageNo || 1
+    const pageSize = data && data.pageSize || 10
     let company
     let number
     if (data && data.type === 0) {
@@ -40,8 +42,9 @@ router.post('/getCompany', async (ctx) => {
       }
       ctx.body = {code: 200, message: {company, number}}
     } else {
-      company = await query(`SELECT * FROM company WHERE off != 1`)
-      ctx.body = {code: 200, message: company}
+      const count = await query(`SELECT COUNT(*) as count FROM company`)
+      company = await query(`SELECT * FROM company WHERE off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+      ctx.body = {code: 200, message: company, count: count[0].count}
     }
   } catch(err) {
     ctx.body = {code: 500, message: err}

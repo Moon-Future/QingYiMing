@@ -31,7 +31,7 @@ router.post('/saveDelivery', async (ctx) => {
       ${str}
       `
     )
-    await query(`INSERT INTO deliveryGrp (delivery, createTime) VALUES ('${id}', ${currentTime})`)
+    await query(`INSERT INTO deliverygrp (delivery, createTime) VALUES ('${id}', ${currentTime})`)
     ctx.body = {code: 200, message: '已保存到历史'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -41,7 +41,10 @@ router.post('/saveDelivery', async (ctx) => {
 router.post('/getDeliveryHistory', async (ctx) => {
   try {
     const data = ctx.request.body.data
-    const ids = await query(`SELECT * FROM deliveryGrp`)
+    const pageNo = data && data.pageNo || 1
+    const pageSize = data && data.pageSize || 2
+    const count = await query(`SELECT COUNT(*) as count FROM deliverygrp`)
+    const ids = await query(`SELECT * FROM deliverygrp ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
     let result = []
     for (let i = 0, len = ids.length; i < len; i++) {
       let list = await query(`SELECT * FROM delivery WHERE id = '${ids[i].delivery}'`)
@@ -49,7 +52,7 @@ router.post('/getDeliveryHistory', async (ctx) => {
         result.push(list)
       }
     }
-    ctx.body = {code: 200, message: result}
+    ctx.body = {code: 200, message: result, count: count[0].count}
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }

@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="background">
-      <img src="https://api.dujin.org/bing/1366.php" alt="">
+      <img src="https://source.unsplash.com/random/1080x720" alt="">
     </div>
     <div class="login-wrapper">
       <h1>情义明</h1>

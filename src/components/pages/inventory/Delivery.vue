@@ -12,7 +12,7 @@
           @hide="hideList"
           placement="right"
           trigger="click">
-          <el-table ref="listTable" border size="mini" max-height="300" :data="tableData" @selection-change="selectionChange" @select="select" @select-all="selectAll">
+          <el-table v-loading="loading" ref="listTable" border size="mini" max-height="300" :data="tableData" @selection-change="selectionChange" @select="select" @select-all="selectAll">
             <el-table-column type="selection" width="35"></el-table-column>
             <el-table-column v-for="(item, i) in selectField" :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
           </el-table>
@@ -97,7 +97,8 @@
         printFlag: false,
         listShowFlag: false,
         maxRow: 8,
-        counter: {number: 1}
+        counter: {number: 1},
+        loading: false
       }
     },
     computed: {
@@ -166,16 +167,18 @@
       },
       changeCustomer({customerId, customer}) {
         this.receiveCompany = customer
+        this.loading = true
+        this.listShowFlag = true
         this.$http.post(apiUrl.getSupply, {
           data: {customerId}
         }).then(res => {
+          this.loading = false
           if (res.data.code === 200) {
             this.tableData = res.data.message
             const productionTime = new Date(this.deliveryTime.getTime() - 7 * 24 * 60 * 60 * 1000)
             this.tableData.forEach(ele => {
               ele.ptime = dateFormat(productionTime, 'yyyy-MM-dd')
             })
-            this.listShowFlag = true
           }
         }).catch(err => {
 
@@ -262,43 +265,43 @@
         text-align: left;
       }
     }
-    .print-wrapper {
-      width: 22.3cm;
-      height: 9.4cm;
-      padding: 0.48cm 1.1cm 0.42cm 1.8cm;
-      border: 1px solid $color-deepgray;
+  }
+  .print-wrapper {
+    width: 22.3cm;
+    height: 9.4cm;
+    padding: 0.48cm 1.1cm 0.42cm 1.8cm;
+    border: 1px solid $color-deepgray;
+    margin-top: 10px;
+    box-sizing: border-box;
+    &.print-template {
+      border: none;
+    }
+    .delivery-title {
+      font-weight: bold;
+      font-size: $font-size-large;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    .delivery-message {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 10px;
+      margin-bottom: 10px;
+      .delivery-number span {
+        margin-left: 10px;
+      }
+    }
+    .delivery-footer {
+      display: flex;
       margin-top: 10px;
-      box-sizing: border-box;
-      &.print-template {
-        border: none;
+      margin-bottom: 20px;
+      justify-content: space-between;
+      padding: 0 10px;
+      .provider-company {
+        margin-right: 100px;
       }
-      .delivery-title {
-        font-weight: bold;
-        font-size: $font-size-large;
-        margin-bottom: 5px;
-        text-align: center;
-      }
-      .delivery-message {
-        display: flex;
-        justify-content: space-between;
-        padding: 0 10px;
-        margin-bottom: 10px;
-        .delivery-number span {
-          margin-left: 10px;
-        }
-      }
-      .delivery-footer {
-        display: flex;
-        margin-top: 10px;
-        margin-bottom: 20px;
-        justify-content: space-between;
-        padding: 0 10px;
-        .provider-company {
-          margin-right: 100px;
-        }
-        .receive-time span {
-          margin: 0 20px;
-        }
+      .receive-time span {
+        margin: 0 20px;
       }
     }
   }

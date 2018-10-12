@@ -1,18 +1,30 @@
 <template>
-  <div class="history-container">
+  <div class="history-container" v-loading="loading">
     <search :showElements="showElements"></search>
+    <div class="page-wrapper">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :disabled="loading"
+        :page-size="5"
+        :total="total"
+        :current-page="currentPage"
+        @current-change="currentChange">
+      </el-pagination>
+    </div>
     <div class="delivery-wrapper" v-for="(data, i) in deliveryHistory" :key="i">
       <div class="operate">
         <el-button size="mini" type="primary" >重新打印</el-button>
         <el-button size="mini" type="danger" >修改</el-button>
       </div>
       <div class="print-wrapper print-wrapper-border">
+        <div class="print-time">{{ data[0].createTime | timeFilter }}</div>
         <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
         <div class="delivery-message">
           <div class="receive-company">收货单位: {{ data[0].custm }}</div>
           <div class="delivery-number">
             <span>送货日期: {{ new Date(data[0].time).getFullYear() }} 年 {{ new Date(data[0].time).getMonth() + 1 }} 月 {{ new Date(data[0].time).getDate() }} 日</span>
-            <span>NO: {{ data[0].no | noFilter() }}</span>
+            <span>NO: {{ data[0].no | noFilter }}</span>
           </div>
         </div>
         <div class="delivery-table">
@@ -29,6 +41,17 @@
           <div class="provider-company">供货单位（盖章）</div>
         </div>
       </div>
+    </div>
+    <div class="page-wrapper">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :disabled="loading"
+        :page-size="5"
+        :total="total"
+        :current-page="currentPage"
+        @current-change="currentChange">
+      </el-pagination>
     </div>
   </div>
 </template>
@@ -56,16 +79,24 @@
           {prop: 'lot', label: '生产批次', input: true, width: '60'},
           {prop: 'remark', label: '备注', input: true, width: '50'}
         ],
+        loading: false,
+        total: 0,
+        currentPage: 1
       }
     },
     created() {
       this.getDeliveryHistory()
     },
     methods: {
-      getDeliveryHistory() {
-        this.$http.post(apiUrl.getDeliveryHistory).then(res => {
+      getDeliveryHistory(pageNo = 1) {
+        this.loading = true
+        this.$http.post(apiUrl.getDeliveryHistory, {
+          data: {pageNo}
+        }).then(res => {
           if (res.data.code === 200) {
+            this.loading = false
             this.deliveryHistory = res.data.message
+            this.total = res.data.count
             for (let i = 0, len = this.deliveryHistory.length; i < len; i++) {
               let list = this.deliveryHistory[i]
               for (let j = 0; j < list.length; j++) {
@@ -74,11 +105,16 @@
               }
             }
           } else {
+            this.loading = false
             this.$message.error(res.data.message)
           }
         }).catch(err => {
+          this.loading = false
           this.$message.error('服务器君傲娇啦😭')
         })
+      },
+      currentChange(pageNo) {
+        this.currentPage = pageNo
       },
       getSummaries(param) {
         const { columns, data } = param;
@@ -111,6 +147,22 @@
     filters: {
       noFilter(no) {
         return no < 10 ? `0${no}` : no
+      },
+      timeFilter(time) {
+        const currentTime = new Date().getTime()
+        const diffTime = currentTime - time
+        const oneMin = 60000, oneHour = 3600000, oneDay = 86400000
+        let result
+        if (diffTime < oneMin) {
+          result = '刚刚'
+        } else if (diffTime > oneMin && diffTime < oneHour) {
+          result = Math.floor(diffTime / oneMin) + ' 分钟前'
+        } else if (diffTime > oneHour && diffTime < oneDay) {
+          result = '今天 ' + dateFormat(time, 'hh:mm')
+        } else {
+          result = dateFormat(time, 'yyyy-MM-dd hh:mm')
+        }
+        return result
       }
     },
     components: {
@@ -130,13 +182,19 @@
         display: flex;
       }
     }
+    .page-wrapper {
+      display: flex;
+      justify-content: flex-end;
+    }
     .print-wrapper {
+      position: relative;
       width: 22.3cm;
       height: 9.4cm;
       padding: 0.48cm 1.1cm 0.42cm 1.8cm;
       border: 1px solid $color-deepgray;
       margin-top: 10px;
       box-sizing: border-box;
+      overflow: hidden;
       &.print-template {
         border: none;
       }
@@ -167,6 +225,23 @@
         .receive-time span {
           margin: 0 20px;
         }
+      }
+      .print-time {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-Index: 2;
+        padding: 0 2em;
+        font-size: 13px;
+        line-height: 32px;
+        background: orange;
+        -webkit-transform-origin: right bottom;
+        -moz-transform-origin: right bottom;
+        transform-origin: right bottom;
+        -webkit-transform: translate(-29.29%,-100%) rotate(-45deg);
+        -moz-transform: translate(-29.29%,-100%) rotate(-45deg);
+        transform: translate(-29.29%,-100%) rotate(-45deg);
+        text-indent: 0;
       }
     }
   }

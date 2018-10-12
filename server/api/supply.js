@@ -29,16 +29,21 @@ router.post('/insertSupply', async (ctx) => {
 router.post('/getSupply', async (ctx) => {
   try {
     const data = ctx.request.body.data
+    const pageNo = data && data.pageNo || 1
+    const pageSize = data && data.pageSize || 10
     let supplyList
-    if (!data) {
+    let count
+    if (data && data.pageNo) {
+      count = await query(`SELECT COUNT(*) as count FROM supply`)
       supplyList = await query(
         `
         SELECT s.id, s.nun, c.name as customer, p.name as product, p.model, u.name as unit 
         FROM supply s, company c, product p, unit u 
         WHERE s.customer = c.id AND s.product = p.id AND p.unitId = u.id
-        AND s.off != 1
+        AND s.off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}
         `
       )
+      ctx.body = {code: 200, message: supplyList, count: count[0].count}
     } else {
       const customerId = data.customerId
       supplyList = await query(
@@ -49,8 +54,8 @@ router.post('/getSupply', async (ctx) => {
         AND s.off != 1
         `
       )
+      ctx.body = {code: 200, message: supplyList}
     }
-    ctx.body = {code: 200, message: supplyList}
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }

@@ -28,8 +28,12 @@ router.post('/insertUnit', async (ctx) => {
 
 router.post('/getUnit', async (ctx) => {
   try {
-    const unitList = await query(`SELECT * FROM unit WHERE off != 1`)
-    ctx.body = {code: 200, message: unitList}
+    const data = ctx.request.body.data
+    const pageNo = data && data.pageNo || 1
+    const pageSize = data && data.pageSize || 10
+    const count = await query(`SELECT COUNT(*) as count FROM unit`)
+    const unitList = await query(`SELECT * FROM unit WHERE off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    ctx.body = {code: 200, message: unitList, count: count[0].count}
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }

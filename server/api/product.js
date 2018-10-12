@@ -29,8 +29,11 @@ router.post('/insertProduct', async (ctx) => {
 router.post('/getProduct', async (ctx) => {
   try {
     const data = ctx.request.body.data
-    const product = await query(`SELECT p.id, p.name, p.model, u.name as unit FROM product p, unit u WHERE p.unitId = u.id AND p.off != 1`)
-    ctx.body = {code: 200, message: product}
+    const pageNo = data && data.pageNo || 1
+    const pageSize = data && data.pageSize || 10
+    const count = await query(`SELECT COUNT(*) as count FROM product`)
+    const result = await query(`SELECT p.id, p.name, p.model, u.name as unit FROM product p, unit u WHERE p.unitId = u.id AND p.off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    ctx.body = {code: 200, message: result, count: count[0].count}
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }
