@@ -22,6 +22,7 @@ const apiUrl = {
 
   saveDelivery: 'api/delivery/saveDelivery',
   getDeliveryHistory: 'api/delivery/getDeliveryHistory',
+  deleteDelivery: 'api/delivery/deleteDelivery',
 
   register: 'api/user/register',
   login: 'api/user/login',

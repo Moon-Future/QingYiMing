@@ -4,6 +4,10 @@ const query = require('../database/init')
 
 router.post('/insertSupply', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     let result = []
     for (let i = 0 , len = data.length; i < len; i++) {
@@ -28,13 +32,17 @@ router.post('/insertSupply', async (ctx) => {
 
 router.post('/getSupply', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
     let supplyList
     let count
     if (data && data.pageNo) {
-      count = await query(`SELECT COUNT(*) as count FROM supply`)
+      count = await query(`SELECT COUNT(*) as count FROM supply WHERE off != 1`)
       supplyList = await query(
         `
         SELECT s.id, s.nun, c.name as customer, p.name as product, p.model, u.name as unit 
@@ -63,6 +71,10 @@ router.post('/getSupply', async (ctx) => {
 
 router.post('/deleteSupply', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     let ids = []
     data.forEach(ele => {
@@ -77,6 +89,10 @@ router.post('/deleteSupply', async (ctx) => {
 
 router.post('/updSupply', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     const check = await query(`SELECT * FROM supply WHERE customer = ${data.customer} AND product = ${data.product} AND off != 1`)
     if (check.length !== 0 && check[0].id != data.id) {
@@ -100,6 +116,10 @@ router.post('/updSupply', async (ctx) => {
 
 router.post('/getOptions', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const customer = await query(`SELECT * FROM company WHERE type = 0 AND off != 1`)
     const product = await query(`SELECT * FROM product WHERE off != 1`)
     let result = {customer, product}

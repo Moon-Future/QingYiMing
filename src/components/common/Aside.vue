@@ -128,12 +128,12 @@
         items0: [
           {
             icon: 'icon-shenqingfahuo',
-            index: 'inventory/delivery',
+            index: '/inventory/delivery',
             title: '打印送货单'
           },
           {
             icon: 'icon-history',
-            index: 'inventory/history',
+            index: '/inventory/history',
             title: '历史送货单'
           }
         ]

@@ -5,6 +5,10 @@ const query = require('../database/init')
 
 router.post('/saveDelivery', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     const counter = data.counter
     const delivery = data.deliveryData
@@ -40,19 +44,48 @@ router.post('/saveDelivery', async (ctx) => {
 
 router.post('/getDeliveryHistory', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
-    const pageSize = data && data.pageSize || 2
+    const pageSize = data && data.pageSize || 5
     const count = await query(`SELECT COUNT(*) as count FROM deliverygrp`)
     const ids = await query(`SELECT * FROM deliverygrp ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
     let result = []
     for (let i = 0, len = ids.length; i < len; i++) {
       let list = await query(`SELECT * FROM delivery WHERE id = '${ids[i].delivery}'`)
       if (list.length !== 0) {
+        list.forEach(ele => {
+          ele.grp = ids[i].id
+        })
         result.push(list)
       }
     }
     ctx.body = {code: 200, message: result, count: count[0].count}
+  } catch(err) {
+    ctx.body = {code: 500, message: err}
+  }
+})
+
+router.post('/deleteDelivery', async (ctx) => {
+  try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
+    const data = ctx.request.body.data
+    const grp = data.grp
+    const ids = data.ids
+    let str = ''
+    ids.forEach(id => {
+      str += `'${id}',`
+    })
+    str = str.slice(0, str.length - 1)
+    await query(`UPDATE deliverygrp SET off = 1 WHERE id = ${grp}`)
+    await query(`UPDATE delivery SET off = 1 WHERE id IN (${str})`)
+    ctx.body = {code: 200, message: '删除成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }

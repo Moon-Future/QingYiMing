@@ -4,6 +4,10 @@ const query = require('../database/init')
 
 router.post('/insertUnit', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     let result = []
     for (let i = 0 , len = data.length; i < len; i++) {
@@ -28,10 +32,14 @@ router.post('/insertUnit', async (ctx) => {
 
 router.post('/getUnit', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
-    const count = await query(`SELECT COUNT(*) as count FROM unit`)
+    const count = await query(`SELECT COUNT(*) as count FROM unit WHERE off != 1`)
     const unitList = await query(`SELECT * FROM unit WHERE off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
     ctx.body = {code: 200, message: unitList, count: count[0].count}
   } catch(err) {
@@ -41,6 +49,10 @@ router.post('/getUnit', async (ctx) => {
 
 router.post('/deleteUnit', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     let ids = []
     data.forEach(ele => {
@@ -55,6 +67,10 @@ router.post('/deleteUnit', async (ctx) => {
 
 router.post('/updUnit', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     const check = await query(`SELECT * FROM unit WHERE name = '${data.name}' AND off != 1`)
     if (check.length !== 0 && check[0].id != data.id) {

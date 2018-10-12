@@ -4,6 +4,10 @@ const query = require('../database/init')
 
 router.post('/insertCompany', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     let result = []
     for (let i = 0 , len = data.length; i < len; i++) {
@@ -28,6 +32,10 @@ router.post('/insertCompany', async (ctx) => {
 
 router.post('/getCompany', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
@@ -42,7 +50,7 @@ router.post('/getCompany', async (ctx) => {
       }
       ctx.body = {code: 200, message: {company, number}}
     } else {
-      const count = await query(`SELECT COUNT(*) as count FROM company`)
+      const count = await query(`SELECT COUNT(*) as count FROM company WHERE off != 1`)
       company = await query(`SELECT * FROM company WHERE off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
       ctx.body = {code: 200, message: company, count: count[0].count}
     }
@@ -53,6 +61,10 @@ router.post('/getCompany', async (ctx) => {
 
 router.post('/deleteCompany', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     let ids = []
     data.forEach(ele => {
@@ -67,6 +79,10 @@ router.post('/deleteCompany', async (ctx) => {
 
 router.post('/updCompany', async (ctx) => {
   try {
+    if (!ctx.session) {
+      ctx.body = {code: 500, message: '没有权限'}
+      return
+    }
     const data = ctx.request.body.data
     const check = await query(`SELECT * FROM company WHERE name = '${data.name}' AND off != 1`)
     if (check.length !== 0 && check[0].id != data.id) {
