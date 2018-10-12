@@ -51,8 +51,8 @@ router.post('/getDeliveryHistory', async (ctx) => {
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 5
-    const count = await query(`SELECT COUNT(*) as count FROM deliverygrp`)
-    const ids = await query(`SELECT * FROM deliverygrp ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    const count = await query(`SELECT COUNT(*) as count FROM deliverygrp WHERE off != 1`)
+    const ids = await query(`SELECT * FROM deliverygrp WHERE off != 1 ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
     let result = []
     for (let i = 0, len = ids.length; i < len; i++) {
       let list = await query(`SELECT * FROM delivery WHERE id = '${ids[i].delivery}'`)

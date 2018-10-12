@@ -31,7 +31,7 @@
       </div>
     </div>
     <div class="table-add" v-show="this.addFlag">
-      <el-table border size="mini" :data="dataAdd" :max-height="`${height - 50}`" cell-class-name="no-padding">
+      <el-table border size="mini" :data="dataAdd" :max-height="`${height - 50}`">
         <el-table-column
           type="selection"
           width="35">

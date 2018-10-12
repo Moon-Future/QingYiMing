@@ -64,7 +64,6 @@
 <script>
   import IconFont from 'components/common/Iconfont'
   import Search from 'components/common/Search'
-  import DeliveryTable from 'components/common/DeliveryTable'
   import apiUrl from '@/serviceAPI.config.js'
   import { dateFormat } from 'common/js/tool'
   export default {
@@ -252,8 +251,7 @@
     },
     components: {
       IconFont,
-      Search,
-      DeliveryTable
+      Search
     }
   }
 </script>

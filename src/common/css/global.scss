@@ -1,12 +1,3 @@
-#printPanel {
-  display: flex;
-  justify-content: center;
-  height: 100%;
-  .print-wrapper {
-    border: none;
-    margin: 0;
-  }
-}
 .field-required::after {
   content: ' *';
   color: red;
@@ -15,13 +6,22 @@
   background-color: #c0c0c0;
   cursor: wait;
 }
+
+#printPanel {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  font-family: SimHei;
+  .print-wrapper {
+    border: none;
+    margin: 0;
+  }
+}
 .print-wrapper {
-  table {
-    td, th {
-      padding: initial !important;
-      input {
-        height: 16px !important;
-      }
+  table th, table td {
+    padding: initial !important;
+    input {
+      height: 16px !important;
     }
     .cell {
       padding: initial !important;
@@ -44,32 +44,13 @@
     }
   }
 }
-
 .el-table th, .el-table td {
   text-align: center !important;
   padding: 2px 0 !important;
-  &.no-padding {
-    .cell {
-      .el-select {
-        width: 100% !important;
-      }
-    }
-  }
-  &.print-table {
-    padding: initial !important;
-    .cell {
-      padding: initial !important;
-      input {
-        border: none;
-        text-align: center;
-      }
-    }
-  }
-  &.border-table {
-    border-right: 1px solid #000 !important;
-    border-top: 1px solid #000 !important;
-    &:first-child {
-      border-left: 1px solid #000 !important;
+  .cell {
+    color: #000;
+    .el-select {
+      width: 100% !important;
     }
   }
   input {

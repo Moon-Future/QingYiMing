@@ -49,7 +49,7 @@
         background
         layout="prev, pager, next"
         :disabled="loading"
-        :page-size="5"
+        :page-size="pageSize"
         :total="total"
         :current-page="currentPage"
         @current-change="currentChange">
@@ -84,6 +84,7 @@
         loading: false,
         total: 0,
         currentPage: 1,
+        pageSize: 5,
         printFlag: false
       }
     },
@@ -145,14 +146,19 @@
           let grp, ids = []
           this.deliveryHistory[index].forEach(ele => {
             grp = ele.grp
-            ids.push(ele.id + '')
+            ids.push(ele.id)
           })
           this.$http.post(apiUrl.deleteDelivery, {
             data: {grp, ids}
           }).then(res => {
             if (res.data.code === 200) {
               this.$message.success(res.data.message)
-              this.deleteDelivery.splice(index, 1)
+              this.deliveryHistory.splice(index, 1)
+              if (this.deliveryHistory.length === 0 && Math.ceil(this.total / this.pageSize) === this.currentPage) {
+                this.currentChange(this.currentPage - 1)
+              } else {
+                this.currentChange(this.currentPage)
+              }
             }
           }).catch(err => {
             this.$message.error('服务器君傲娇啦😭')
