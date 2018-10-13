@@ -160,12 +160,12 @@
               this.$http.post(apiUrl.saveDelivery, {
                 data: {counter: this.counter, deliveryData: this.dataFormat(this.selectData)}
               }).then(res => {
-
+                this.counter.number += 1
+                this.$refs.listTable.clearSelection()
               }).catch(err => {
 
               })
             }).catch(() => {
-          
             })
           }, 50)
         })
