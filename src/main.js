@@ -22,6 +22,8 @@ import { Pagination,
   Popover,
   Breadcrumb,
   BreadcrumbItem,
+  Form,
+  FormItem,
   Tabs,
   Icon,
   Loading,
@@ -47,6 +49,8 @@ Vue.use(TimePicker);
 Vue.use(Popover);
 Vue.use(Breadcrumb);
 Vue.use(BreadcrumbItem);
+Vue.use(Form);
+Vue.use(FormItem);
 Vue.use(Tabs);
 Vue.use(Icon);
 

@@ -278,7 +278,7 @@
     }
     .delivery-title {
       font-weight: bold;
-      font-size: $font-size-large;
+      font-size: $font-size-large-xx;
       margin-bottom: 5px;
       text-align: center;
     }
