@@ -16,10 +16,19 @@
   .print-wrapper {
     border: none;
     margin: 0;
+    table {
+      th, td {
+        border: 1px solid #000;
+        padding: 3px;
+        text-align: center;
+        white-space: nowrap;
+        font-size: 14px;
+      }
+    }
   }
 }
 .print-wrapper {
-  table th, table td {
+  .el-table th, .el-table td {
     padding: initial !important;
     input {
       height: 16px !important;
@@ -29,7 +38,7 @@
     }
   }
   &.print-wrapper-border {
-    table {
+    .el-table {
       td, th {
         border-right: 1px solid #000 !important;
         border-top: 1px solid #000 !important;
@@ -39,9 +48,9 @@
           border-left: 1px solid #000 !important;
         }
       }
-      &.el-table__footer {
-        border-bottom: 2px solid #000 !important;
-      }
+    }
+    .el-table__footer {
+      border-bottom: 2px solid #000 !important;
     }
   }
 }

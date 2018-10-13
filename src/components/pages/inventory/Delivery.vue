@@ -42,12 +42,23 @@
               </template>
             </el-table>
           </div>
-          <div class="delivery-table" v-show="printFlag">
-            <el-table size="mini" show-summary :summary-method="getSummaries" :data="selectData">
-              <template v-for="(item, i) in field">
-                <el-table-column :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
+          <div class="delivery-table" v-if="printFlag">
+            <!-- <el-table size="mini" show-summary :summary-method="getSummaries" :data="selectData">
+              <template v-for="(item, i) in fieldPrint">
+                <el-table-column :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''" :min-width="item.minWidth ? item.minWidth : ''"></el-table-column>
               </template>
-            </el-table>
+            </el-table> -->
+            <table style="width: 740px">
+              <tr>
+                <th v-for="(item, i) in field" :key="i">{{ item.label }}</th>
+              </tr>
+              <tr v-for="(data, i) in selectData" :key="i">
+                <td v-for="(item, j) in field" :key="j">{{ data[item.prop] }}</td>
+              </tr>
+              <tr>
+                <td v-for="(data, i) in summaryData" :key="i">{{ data }}</td>
+              </tr>
+            </table>
           </div>
           <div class="delivery-footer">
             <div class="delivery-company">送货人: 情义明</div>
@@ -85,7 +96,7 @@
           {prop: 'name', label: '产品名称', width: '70'},
           {prop: 'model', label: '规格型号'},
           {prop: 'unit', label: '单位', width: '40'},
-          {prop: 'qty', label: '数量', width: '50', input: true, noPadding: true},
+          {prop: 'qty', label: '数量', width: '50', input: true},
           {prop: 'qtyR', label: '实收数量', width: '70', input: true},
           {prop: 'ptime', label: '生产日期', width: '80'},
           {prop: 'lot', label: '生产批次', input: true, width: '60'},
@@ -106,6 +117,15 @@
       },
       no() {
         return this.counter.number < 10 ? `0${this.counter.number}` : this.counter.number
+      },
+      summaryData() {
+        let sums = ''
+        this.selectData.forEach(ele => {
+          if (ele.qtyR !== '' && !isNaN(ele.qtyR)) {
+            sums = Number(sums) + Number(ele.qtyR)
+          }
+        })
+        return ['', '', '', '', '合计', sums, '', '', '']
       }
     },
     created() {

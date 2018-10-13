@@ -28,12 +28,25 @@
               <span>NO: {{ data[0].no | noFilter }}</span>
             </div>
           </div>
-          <div class="delivery-table">
+          <div class="delivery-table" v-show="!printFlag">
             <el-table size="mini" show-summary :summary-method="getSummaries" :data="data">
               <template v-for="(item, i) in field">
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
               </template>
             </el-table>
+          </div>
+          <div class="delivery-table" v-show="printFlag">
+            <table style="width: 740px">
+              <tr>
+                <th v-for="(item, i) in field" :key="i">{{ item.label }}</th>
+              </tr>
+              <tr v-for="(trData, i) in data" :key="i">
+                <td v-for="(item, j) in field" :key="j">{{ trData[item.prop] }}</td>
+              </tr>
+              <tr>
+                <td v-for="(item, i) in field" :key="i">{{ data | summaryFilter(item) }}</td>
+              </tr>
+            </table>
           </div>
           <div class="delivery-footer">
             <div class="delivery-company">送货人: 情义明</div>
@@ -214,6 +227,21 @@
           result = dateFormat(time, 'yyyy-MM-dd hh:mm')
         }
         return result
+      },
+      summaryFilter(data, field) {
+        let sums = ''
+        data.forEach(ele => {
+          if (ele.qtyR !== '' && !isNaN(ele.qtyR)) {
+            sums = Number(sums) + Number(ele.qtyR)
+          }
+        })
+        if (field.prop === 'qty') {
+          return '合计'
+        } else if (field.prop === 'qtyR') {
+          return sums
+        } else {
+          return ''
+        }
       }
     },
     components: {
