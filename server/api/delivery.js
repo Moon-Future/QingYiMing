@@ -24,9 +24,9 @@ router.post('/saveDelivery', async (ctx) => {
     });
     str = str.slice(0, str.length - 1)
     if (counter.id) {
-      await query(`UPDATE counter SET number = ${counter.number} WHERE id = ${counter.id}`)
+      await query(`UPDATE counter SET number = ${counter.number}, time = $!{currentTime} WHERE id = ${counter.id}`)
     } else {
-      await query(`INSERT INTO counter (number, type) VALUES (${counter.number}, 'delivery')`)
+      await query(`INSERT INTO counter (number, type, time) VALUES (${counter.number}, 'delivery', $!{currentTime})`)
     }
     await query(
       `
@@ -78,6 +78,8 @@ router.post('/deleteDelivery', async (ctx) => {
     const data = ctx.request.body.data
     const grp = data.grp
     const ids = data.ids
+    const counter = data.counter
+    const no = data.no - 1
     let str = ''
     ids.forEach(id => {
       str += `'${id}',`
@@ -85,6 +87,7 @@ router.post('/deleteDelivery', async (ctx) => {
     str = str.slice(0, str.length - 1)
     await query(`UPDATE deliverygrp SET off = 1 WHERE id = ${grp}`)
     await query(`UPDATE delivery SET off = 1 WHERE id IN (${str})`)
+    await query(`UPDATE counter SET number = ${no}, time = ${new Date().getTime()} WHERE id = ${counter}`)
     ctx.body = {code: 200, message: '删除成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}

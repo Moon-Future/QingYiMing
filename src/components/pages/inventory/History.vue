@@ -13,7 +13,7 @@
       </el-pagination>
     </div>
     <div class="delivery-wrapper" v-for="(data, i) in deliveryHistory" :key="i">
-      <div class="operate">
+      <div class="operate" v-if="currentPage === 1 && i === 0">
         <el-button size="mini" type="primary" @click="print(i)">重新打印</el-button>
         <el-button size="mini" type="danger" @click="deleteOne(i)">删除</el-button>
       </div>
@@ -156,13 +156,15 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          let grp, ids = []
+          let grp, counter, no, ids = []
           this.deliveryHistory[index].forEach(ele => {
             grp = ele.grp
+            counter = ele.counter
+            no = ele.no
             ids.push(ele.id)
           })
           this.$http.post(apiUrl.deleteDelivery, {
-            data: {grp, ids}
+            data: {grp, ids, counter, no}
           }).then(res => {
             if (res.data.code === 200) {
               this.$message.success(res.data.message)
