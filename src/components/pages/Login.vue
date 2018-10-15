@@ -6,21 +6,24 @@
     <div class="login-wrapper">
       <h1>情义明</h1>
       <div class="form-wrapper">
-        <el-form :rules="rules" :model="form">
+        <el-form ref="loginForm" :rules="rules" :model="form">
           <el-form-item prop="account">
-            <el-input class="form-input" clearable maxlength="20" placeholder="用户" v-model="form.account">
+            <el-input class="form-input" clearable maxlength="20" placeholder="用户" v-model="form.account" @blur="blurAccount">
               <template slot="prepend">
                 <icon-font icon="icon-yonghu"></icon-font>
               </template>
             </el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input class="form-input" type="password" maxlength="20" clearable placeholder="密码" v-model="form.password">
+            <el-input class="form-input" type="password" maxlength="20" clearable placeholder="密码" v-model="form.password" @keyup.enter.native="login">
               <template slot="prepend">
                 <icon-font icon="icon-mima"></icon-font>
               </template>
             </el-input>
           </el-form-item>
+          <div class="remember-wrapper" v-show="!registerFlag">
+            <el-checkbox v-model="remember">记住账号和密码</el-checkbox>            
+          </div>
           <div v-show="registerFlag">
             <el-form-item prop="password">
               <el-input class="form-input" type="password" maxlength="20" clearable placeholder="确认密码" v-model="form.rePassword">
@@ -73,6 +76,7 @@
 <script>
   import IconFont from 'components/common/Iconfont'
   import apiUrl from '@/serviceAPI.config.js'
+  import { getCookie, setCookie, delCookie } from 'common/js/tool'
   const crypto = require('crypto')
   export default {
     data() {
@@ -100,7 +104,21 @@
         },
         registerFlag: false,
         subWait: false,
-        checked: false
+        checked: false,
+        remember: false,
+        cookiePassword: '88888888',
+        password: '',
+        cookieInfo: {}
+      }
+    },
+    created() {
+      const account = getCookie('account')
+      const password = getCookie('password')
+      if (account && password) {
+        this.remember = true
+        this.form.account = account
+        this.form.password = this.cookiePassword
+        this.cookieInfo = {account, password}
       }
     },
     methods: {
@@ -154,14 +172,20 @@
           return
         }
         this.subWait = true
+        if (this.form.account !== this.cookieInfo.account || this.form.password != this.cookiePassword) {
+          this.password = crypto.createHash('sha1').update(this.form.password.trim()).digest('hex')
+        } else {
+          this.password = this.cookieInfo.password.trim()
+        }
         this.$http.post(apiUrl.login, {
           data: {
             account: this.form.account,
-            password: crypto.createHash('sha1').update(this.form.password.trim()).digest('hex')
+            password: this.password
           }
         }).then(res => {
           this.subWait = false
           if (res.data.code === 200) {
+            this.setCookie()
             this.$message.success(res.data.message)
             this.$router.push({path: '/'})
           } else {
@@ -180,10 +204,26 @@
         this.clear()
       },
       clear() {
+        this.$refs.loginForm.resetFields()
         this.form.account = ''
         this.form.password = ''
-        this.form.rePassword = ''
-        this.form.name = ''
+        this.remember = false
+      },
+      blurAccount() {
+        if (this.cookieInfo.account !== this.form.account) {
+          this.remember = false
+        } else {
+          this.remember = true
+        }
+      },
+      setCookie() {
+        if (this.cookieInfo.account === this.form.account && !this.remember) {
+          delCookie('account')
+          delCookie('password')
+        } else if (this.cookieInfo.account !== this.form.account && this.remember) {
+          setCookie('account', this.form.account, 7)
+          setCookie('password', crypto.createHash('sha1').update(this.form.password.trim()).digest('hex'), 7)
+        }
       }
     },
     components: {
@@ -226,6 +266,9 @@
           display: flex;
           flex-flow: column;
           padding: 10px 0;
+        }
+        .remember-wrapper {
+          text-align: left;
         }
       }
     }

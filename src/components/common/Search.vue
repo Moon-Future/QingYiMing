@@ -6,7 +6,6 @@
         @change="changeCustomer"
         :filterable="showElements && showElements.customer && (showElements.customer.filterable || showElements.customer['allow-create'])"
         :allow-create="showElements && showElements.customer && showElements.customer['allow-create']"
-        clearable
         :placeholder="showElements && showElements.customer && showElements.customer.placeholder" 
         v-if="showElements && showElements.customer">
         <el-option

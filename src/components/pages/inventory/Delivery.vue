@@ -24,10 +24,10 @@
         <div class="print-wrapper" :class="hasSelected ? 'print-wrapper-border' : ''">
           <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
           <div class="delivery-message">
-            <div class="receive-company">收货单位: {{ receiveCompany }}</div>
+            <div class="receive-company">收货单位：{{ receiveCompany }}</div>
             <div class="delivery-number">
-              <span>送货日期: {{ deliveryTime.getFullYear() }} 年 {{ deliveryTime.getMonth() + 1 }} 月 {{ deliveryTime.getDate() }} 日</span>
-              <span>NO: {{ no }}</span>
+              <span>送货日期：{{ deliveryTime.getFullYear() }} 年 {{ deliveryTime.getMonth() + 1 }} 月 {{ deliveryTime.getDate() }} 日</span>
+              <span>NO:{{ no }}</span>
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
@@ -176,10 +176,7 @@
         }).then(res => {
           this.customerOptions = []
           if (res.data.code === 200) {
-            const customer = res.data.message.company
-            const number = res.data.message.number
-            number[0].number = Number(number[0].number) + 1
-            this.counter = number[0]
+            const customer = res.data.message
             customer.forEach(ele => {
               this.customerOptions.push({value: ele.id, label: ele.name})
             })
@@ -195,8 +192,11 @@
         }).then(res => {
           this.loading = false
           if (res.data.code === 200) {
-            this.tableData = res.data.message
+            this.tableData = res.data.message.supplyList
+            const number = res.data.message.number
             const productionTime = new Date(this.deliveryTime.getTime() - 7 * 24 * 60 * 60 * 1000)
+            number[0].number = Number(number[0].number) + 1
+            this.counter = number[0]
             this.tableData.forEach(ele => {
               ele.ptime = dateFormat(productionTime, 'yyyy-MM-dd')
             })
@@ -306,7 +306,8 @@
       display: flex;
       justify-content: space-between;
       padding: 0 10px;
-      margin-bottom: 10px;
+      margin-top: 10px;
+      margin-bottom: 5px;
       .delivery-number span {
         margin-left: 10px;
       }

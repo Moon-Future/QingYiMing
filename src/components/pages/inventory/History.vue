@@ -22,10 +22,10 @@
           <div class="print-time" v-show="!printFlag">{{ data[0].createTime | timeFilter }}</div>
           <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
           <div class="delivery-message">
-            <div class="receive-company">收货单位: {{ data[0].custm }}</div>
+            <div class="receive-company">收货单位：{{ data[0].custm }}</div>
             <div class="delivery-number">
-              <span>送货日期: {{ new Date(data[0].time).getFullYear() }} 年 {{ new Date(data[0].time).getMonth() + 1 }} 月 {{ new Date(data[0].time).getDate() }} 日</span>
-              <span>NO: {{ data[0].no | noFilter }}</span>
+              <span>送货日期：{{ new Date(data[0].time).getFullYear() }} 年 {{ new Date(data[0].time).getMonth() + 1 }} 月 {{ new Date(data[0].time).getDate() }} 日</span>
+              <span>NO:{{ data[0].no | noFilter }}</span>
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
@@ -292,7 +292,8 @@
       display: flex;
       justify-content: space-between;
       padding: 0 10px;
-      margin-bottom: 10px;
+      margin-top: 10px;
+      margin-bottom: 5px;
       .delivery-number span {
         margin-left: 10px;
       }

@@ -41,21 +41,9 @@ router.post('/getCompany', async (ctx) => {
     const pageSize = data && data.pageSize || 10
     const currentTime = new Date()
     let company
-    let number
     if (data && data.type === 0) {
       company = await query(`SELECT * FROM company WHERE type = 0 AND off != 1`)
-      number = await query(`SELECT * FROM counter WHERE type = 'delivery'`)
-      if (number.length === 0) {
-        await query(`INSERT INTO counter (number, type, time) VALUES (0, 'delivery', ${new Date().getTime()})`)
-        number = await query(`SELECT * FROM counter WHERE type = 'delivery'`)
-      } else {
-        // 下个月重置为0
-        const time = new Date(number[0].time)
-        if (currentTime.getFullYear() + '_' + (currentTime.getMonth() + 1) !== time.getFullYear() + '_' + (time.getMonth() + 1)) {
-          number[0].number = 0
-        }
-      }
-      ctx.body = {code: 200, message: {company, number}}
+      ctx.body = {code: 200, message: company}
     } else {
       const count = await query(`SELECT COUNT(*) as count FROM company WHERE off != 1`)
       company = await query(`SELECT * FROM company WHERE off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
