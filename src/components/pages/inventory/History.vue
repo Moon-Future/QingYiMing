@@ -13,7 +13,7 @@
       </el-pagination>
     </div>
     <div class="delivery-wrapper" v-for="(data, i) in deliveryHistory" :key="i">
-      <div class="operate" v-if="currentPage === 1 && i === 0">
+      <div class="operate" v-if="cust[data[0].cust] === data[0].id">
         <el-button size="mini" type="primary" @click="print(i)">重新打印</el-button>
         <el-button size="mini" type="danger" @click="deleteOne(i)">删除</el-button>
       </div>
@@ -80,7 +80,10 @@
       return {
         showElements: {
           time: true,
-          searchBtn: true
+          searchBtn: true,
+          customer: {
+            placeholder: '请选择客户'
+          }
         },
         deliveryHistory: [],
         field: [
@@ -98,7 +101,8 @@
         total: 0,
         currentPage: 1,
         pageSize: 5,
-        printFlag: false
+        printFlag: false,
+        cust: {}
       }
     },
     created() {
@@ -114,6 +118,7 @@
             this.loading = false
             this.deliveryHistory = res.data.message
             this.total = res.data.count
+            this.cust = res.data.cust
             for (let i = 0, len = this.deliveryHistory.length; i < len; i++) {
               let list = this.deliveryHistory[i]
               for (let j = 0; j < list.length; j++) {
@@ -156,17 +161,19 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          let grp, counter, no, ids = []
+          let grp, counter, no, cust, ids = []
           this.deliveryHistory[index].forEach(ele => {
             grp = ele.grp
             counter = ele.counter
             no = ele.no
+            cust = ele.cust
             ids.push(ele.id)
           })
           this.$http.post(apiUrl.deleteDelivery, {
-            data: {grp, ids, counter, no}
+            data: {grp, ids, counter, no, cust}
           }).then(res => {
             if (res.data.code === 200) {
+              this.cust[cust] = res.data.cust
               this.$message.success(res.data.message)
               this.deliveryHistory.splice(index, 1)
               if (this.deliveryHistory.length === 0 && Math.ceil(this.total / this.pageSize) === this.currentPage) {
