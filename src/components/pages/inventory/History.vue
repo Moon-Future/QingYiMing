@@ -1,6 +1,10 @@
 <template>
   <div class="history-container" v-loading="loading">
-    <search :showElements="showElements"></search>
+    <search 
+      :showElements="showElements" 
+      :customerOptions="customerOptions"
+      @changeCustomer="changeCustomer">
+    </search>
     <div class="page-wrapper">
       <el-pagination
         background
@@ -82,9 +86,12 @@
           time: true,
           searchBtn: true,
           customer: {
-            placeholder: '请选择客户'
+            placeholder: '请选择客户',
+            clearable: true
           }
         },
+        customerOptions: [],
+        customer: '-1',
         deliveryHistory: [],
         field: [
           {prop: 'nun', label: '物料编码', 'width': '80'},
@@ -107,12 +114,13 @@
     },
     created() {
       this.getDeliveryHistory()
+      this.getCompany()
     },
     methods: {
       getDeliveryHistory(pageNo = 1) {
         this.loading = true
         this.$http.post(apiUrl.getDeliveryHistory, {
-          data: {pageNo}
+          data: {pageNo, customer: this.customer}
         }).then(res => {
           if (res.data.code === 200) {
             this.loading = false
@@ -134,6 +142,23 @@
           this.loading = false
           this.$message.error('服务器君傲娇啦😭')
         })
+      },
+      getCompany() {
+        this.$http.post(apiUrl.getCompany, {
+          data: {type: 0}
+        }).then(res => {
+          this.customerOptions = []
+          if (res.data.code === 200) {
+            const customer = res.data.message
+            customer.forEach(ele => {
+              this.customerOptions.push({value: ele.id, label: ele.name})
+            })
+          }
+        })
+      },
+      changeCustomer({customerId, customer}) {
+        this.customer = customerId == '' ? '-1' : customerId
+        this.currentChange(1)
       },
       currentChange(pageNo) {
         this.currentPage = pageNo

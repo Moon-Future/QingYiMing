@@ -12,6 +12,7 @@ router.post('/saveDelivery', async (ctx) => {
     const data = ctx.request.body.data
     const counter = data.counter
     const delivery = data.deliveryData
+    const cust = delivery[0].cust
     const id = uuidv1()
     const currentTime = new Date().getTime()
     let str = ''
@@ -35,7 +36,7 @@ router.post('/saveDelivery', async (ctx) => {
       ${str}
       `
     )
-    await query(`INSERT INTO deliverygrp (delivery, createTime) VALUES ('${id}', ${currentTime})`)
+    await query(`INSERT INTO deliverygrp (cust, delivery, createTime) VALUES (${cust}, '${id}', ${currentTime})`)
     ctx.body = {code: 200, message: '已保存到历史'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -51,9 +52,15 @@ router.post('/getDeliveryHistory', async (ctx) => {
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 5
-    const count = await query(`SELECT COUNT(*) as count FROM deliverygrp WHERE off != 1`)
-    const ids = await query(`SELECT * FROM deliverygrp WHERE off != 1 ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
-    let result = [], cust = {}
+    const customer = data && data.customer
+    let result = [], cust = {}, ids, count
+    if (customer == '-1') {
+      count = await query(`SELECT COUNT(*) as count FROM deliverygrp WHERE off != 1`)
+      ids = await query(`SELECT * FROM deliverygrp WHERE off != 1 ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    } else {
+      count = await query(`SELECT COUNT(*) as count FROM deliverygrp WHERE off != 1 AND cust = ${customer}`)
+      ids = await query(`SELECT * FROM deliverygrp WHERE off != 1 AND cust = ${customer} ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    }
     for (let i = 0, len = ids.length; i < len; i++) {
       let list = await query(`SELECT * FROM delivery WHERE id = '${ids[i].delivery}'`)
       if (list.length !== 0) {
