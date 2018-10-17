@@ -31,7 +31,7 @@
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
-            <el-table :border="!hasSelected" size="mini" show-summary :summary-method="getSummaries" :data="selectData">
+            <el-table :border="!hasSelected" size="mini" :show-summary="sumFlag" :summary-method="getSummaries" :data="selectData">
               <template v-for="(item, i) in field">
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="item.input" :width="item.width ? item.width : ''">
                   <template slot-scope="scope">
@@ -55,7 +55,7 @@
               <tr v-for="(data, i) in selectData" :key="i">
                 <td v-for="(item, j) in field" :key="j">{{ data[item.prop] }}</td>
               </tr>
-              <tr>
+              <tr v-if="sumFlag">
                 <td v-for="(data, i) in summaryData" :key="i">{{ data }}</td>
               </tr>
             </table>
@@ -77,6 +77,7 @@
   import Search from 'components/common/Search'
   import apiUrl from '@/serviceAPI.config.js'
   import { dateFormat } from 'common/js/tool'
+  import template from 'common/js/template'
   export default {
     data() {
       return {
@@ -86,22 +87,10 @@
         customerOptions: [],
         tableData: [],
         selectData: [],
-        selectField: [
-          {prop: 'name', label: '产品名称'},
-          {prop: 'model', label: '规格型号', width: '250'},
-          {prop: 'nun', label: '物料编码'}
-        ],
-        field: [
-          {prop: 'nun', label: '物料编码', 'width': '80'},
-          {prop: 'name', label: '产品名称', width: '70'},
-          {prop: 'model', label: '规格型号'},
-          {prop: 'unit', label: '单位', width: '40'},
-          {prop: 'qty', label: '数量', width: '50', input: true},
-          {prop: 'qtyR', label: '实收数量', width: '70', input: true},
-          {prop: 'ptime', label: '生产日期', width: '80'},
-          {prop: 'lot', label: '生产批次', input: true, width: '60'},
-          {prop: 'remark', label: '备注', input: true, width: '50'}
-        ],
+        selectField: [],
+        field: [],
+        sumFlag: false,
+        sumIndex: 0,
         deliveryTime: new Date(),
         receiveCompany: '',
         printFlag: false,
@@ -120,12 +109,23 @@
       },
       summaryData() {
         let sums = ''
+        let prop = this.field[this.sumIndex].prop
+        let result = []
         this.selectData.forEach(ele => {
-          if (ele.qtyR !== '' && !isNaN(ele.qtyR)) {
-            sums = Number(sums) + Number(ele.qtyR)
+          if (ele[prop] !== '' && !isNaN(ele[prop])) {
+            sums = Number(sums) + Number(ele[prop])
           }
         })
-        return ['', '', '', '', '合计', sums, '', '', '']
+        for (let i = 0, len = this.field.length; i < len; i++) {
+          if (i === this.sumIndex) {
+            result.push(sums)
+          } else if (i === this.sumIndex - 1) {
+            result.push('合计')
+          } else {
+            result.push('')
+          }
+        }
+        return result
       }
     },
     created() {
@@ -184,6 +184,10 @@
         })
       },
       changeCustomer({customerId, customer}) {
+        this.selectField = template['3'].selectField
+        this.field = template['3'].field
+        this.sumIndex = template['3'].sumIndex
+        this.sumFlag = template['3'].sumFlag
         this.receiveCompany = customer
         this.loading = true
         this.listShowFlag = true
@@ -231,11 +235,11 @@
         const { columns, data } = param;
         const sums = [];
         columns.forEach((column, index) => {
-          if (index === 4) {
+          if (index === this.sumIndex - 1) {
             sums[index] = '合计';
             return;
           }
-          if (index === 5) {
+          if (index === this.sumIndex) {
             const values = data.map(item => Number(item[column.property]));
             if (!values.every(value => isNaN(value))) {
               sums[index] = values.reduce((prev, curr) => {
@@ -262,7 +266,7 @@
             model: ele.model, nun: ele.nun, unit: ele.unitId, unitm: ele.unit,
             qty: ele.qty || '', qtyR: ele.qtyR || '', ptime: new Date(ele.ptime).getTime(),
             lot: ele.lot || '', remark: ele.remark || '', time: this.deliveryTime.getTime(),
-            no: this.counter.number, counter: this.counter.id
+            no: this.counter.number, counter: this.counter.id, order: ele.order
           }
           result.push(data)
         })
