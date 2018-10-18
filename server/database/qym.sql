@@ -11,7 +11,7 @@
  Target Server Version : 50721
  File Encoding         : 65001
 
- Date: 16/10/2018 21:36:16
+ Date: 18/10/2018 12:12:25
 */
 
 SET NAMES utf8mb4;
@@ -26,6 +26,7 @@ CREATE TABLE `company`  (
   `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `alias` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `type` int(11) NOT NULL DEFAULT 0,
+  `template` int(11) DEFAULT NULL,
   `createTime` bigint(20) NOT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
   `off` int(11) NOT NULL DEFAULT 0,
@@ -51,6 +52,7 @@ CREATE TABLE `counter`  (
 DROP TABLE IF EXISTS `delivery`;
 CREATE TABLE `delivery`  (
   `id` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `ord` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `prd` int(11) DEFAULT NULL,
   `prdm` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `cust` int(11) DEFAULT NULL,
@@ -67,6 +69,7 @@ CREATE TABLE `delivery`  (
   `time` bigint(20) DEFAULT NULL COMMENT '发货时间',
   `no` int(11) DEFAULT NULL COMMENT 'number',
   `counter` int(11) DEFAULT NULL COMMENT 'number ID',
+  `template` int(11) NOT NULL DEFAULT 1,
   `createTime` bigint(20) DEFAULT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
   `off` int(11) NOT NULL DEFAULT 0
@@ -84,7 +87,7 @@ CREATE TABLE `deliverygrp`  (
   `updateTime` bigint(20) DEFAULT NULL,
   `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for product

@@ -18,7 +18,7 @@ router.post('/insertCompany', async (ctx) => {
         result.push(item.name)
         continue
       }
-      await query(`INSERT INTO company (name, alias, createTime) VALUES ('${item.name}', '${item.alias}', ${currentTime})`)
+      await query(`INSERT INTO company (name, alias, createTime, template) VALUES ('${item.name}', '${item.alias}', ${currentTime}, ${item.template})`)
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -84,7 +84,7 @@ router.post('/updCompany', async (ctx) => {
       ctx.body = {code: 500, message: `公司 ${data.name} 已存在`}
       return
     }
-    const upd = await query(`UPDATE company SET name = '${data.name}', alias = '${data.alias}', updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
+    const upd = await query(`UPDATE company SET name = '${data.name}', alias = '${data.alias}', updateTime = ${new Date().getTime()}, template = ${data.template} WHERE id = ${data.id}`)
     const result = await query(`SELECT * FROM company WHERE off != 1 AND id = ${data.id}`)
     ctx.body = {code: 200, message: '更新成功', result: result}
   } catch(err) {

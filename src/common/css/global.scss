@@ -52,6 +52,11 @@
       border-bottom: 2px solid #000 !important;
     }
   }
+  &.has-sum-table {
+    .el-table tr:last-child td {
+      border-bottom: 2px solid #000 !important;
+    }
+  }
 }
 .el-table th, .el-table td {
   text-align: center !important;

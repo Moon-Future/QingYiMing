@@ -19,8 +19,8 @@ router.post('/saveDelivery', async (ctx) => {
     delivery.forEach(ele => {
       let list = []
       ele.createTime = currentTime
-      list.push(`'${id}'`, ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
-        `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.createTime)
+      list.push(`'${id}'`, `'${ele.ord}'`, ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
+        `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime)
       str += `( ${list.join()} ),`
     });
     str = str.slice(0, str.length - 1)
@@ -31,7 +31,7 @@ router.post('/saveDelivery', async (ctx) => {
     }
     await query(
       `
-      INSERT INTO delivery (id, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, createTime)
+      INSERT INTO delivery (id, ord, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime)
       VALUES
       ${str}
       `

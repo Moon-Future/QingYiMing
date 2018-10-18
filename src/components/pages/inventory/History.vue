@@ -17,12 +17,13 @@
       </el-pagination>
     </div>
     <div class="delivery-wrapper" v-for="(data, i) in deliveryHistory" :key="i">
-      <div class="operate" v-if="cust[data[0].cust] === data[0].id">
+      <div class="operate">
         <el-button size="mini" type="primary" @click="print(i)">重新打印</el-button>
-        <el-button size="mini" type="danger" @click="deleteOne(i)">删除</el-button>
+        <el-button size="mini" type="danger" v-if="cust[data[0].cust] === data[0].id" @click="deleteOne(i)">删除</el-button>
       </div>
       <div ref="printWrapper">
-        <div class="print-wrapper print-wrapper-border" :class="!printFlag ? 'time-mark' : ''">
+        <div class="print-wrapper print-wrapper-border"
+          :class="{'time-mark': !printFlag, 'has-sum-table': !templateDelivery[data[0].template].sumFlag}">
           <div class="print-time" v-show="!printFlag">{{ data[0].createTime | timeFilter }}</div>
           <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
           <div class="delivery-message">
@@ -33,8 +34,8 @@
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
-            <el-table size="mini" show-summary :summary-method="getSummaries" :data="data">
-              <template v-for="(item, i) in field">
+            <el-table size="mini" :show-summary="templateDelivery[data[0].template].sumFlag" :summary-method="getSummaries" :data="data">
+              <template v-for="(item, i) in templateDelivery[data[0].template].history">
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
               </template>
             </el-table>
@@ -42,13 +43,13 @@
           <div class="delivery-table" v-show="printFlag">
             <table style="width: 740px">
               <tr>
-                <th v-for="(item, i) in field" :key="i">{{ item.label }}</th>
+                <th v-for="(item, i) in templateDelivery[data[0].template].history" :key="i">{{ item.label }}</th>
               </tr>
               <tr v-for="(trData, i) in data" :key="i">
-                <td v-for="(item, j) in field" :key="j">{{ trData[item.prop] }}</td>
+                <td v-for="(item, j) in templateDelivery[data[0].template].history" :key="j">{{ trData[item.prop] }}</td>
               </tr>
-              <tr>
-                <td v-for="(item, i) in field" :key="i">{{ data | summaryFilter(item) }}</td>
+              <tr v-if="templateDelivery[data[0].template].sumFlag">
+                <td v-for="(item, i) in templateDelivery[data[0].template].history" :key="i">{{ data | summaryFilter(item, i) }}</td>
               </tr>
             </table>
           </div>
@@ -79,6 +80,7 @@
   import Search from 'components/common/Search'
   import { dateFormat } from 'common/js/tool'
   import apiUrl from '@/serviceAPI.config.js'
+  import { templateDelivery } from 'common/js/template'
   export default {
     data() {
       return {
@@ -93,17 +95,7 @@
         customerOptions: [],
         customer: '-1',
         deliveryHistory: [],
-        field: [
-          {prop: 'nun', label: '物料编码', 'width': '80'},
-          {prop: 'name', label: '产品名称', width: '70'},
-          {prop: 'model', label: '规格型号'},
-          {prop: 'unit', label: '单位', width: '40'},
-          {prop: 'qty', label: '数量', width: '50', input: true, noPadding: true},
-          {prop: 'qtyR', label: '实收数量', width: '70', input: true},
-          {prop: 'ptime', label: '生产日期', width: '80'},
-          {prop: 'lot', label: '生产批次', input: true, width: '60'},
-          {prop: 'remark', label: '备注', input: true, width: '50'}
-        ],
+        templateDelivery: templateDelivery,
         loading: false,
         total: 0,
         currentPage: 1,
@@ -130,8 +122,13 @@
             for (let i = 0, len = this.deliveryHistory.length; i < len; i++) {
               let list = this.deliveryHistory[i]
               for (let j = 0; j < list.length; j++) {
-                list[j].ptime = dateFormat(list[j].ptime, 'yyyy-MM-dd')
-                list[j].time = dateFormat(list[j].time, 'yyyy-MM-dd')
+                if (list[j].ptime) {
+                  list[j].ptime = dateFormat(list[j].ptime, 'yyyy-MM-dd')
+                }
+                if (list[j].time) {
+                  list[j].time = dateFormat(list[j].time, 'yyyy-MM-dd')
+                }
+                list[j].name = list[j].prdm
               }
             }
           } else {
@@ -216,13 +213,14 @@
       },
       getSummaries(param) {
         const { columns, data } = param;
+        const sumIndex = templateDelivery[data[0].template].sumIndex
         const sums = [];
         columns.forEach((column, index) => {
-          if (index === 4) {
+          if (index === sumIndex - 1) {
             sums[index] = '合计';
             return;
           }
-          if (index === 5) {
+          if (index === sumIndex) {
             const values = data.map(item => Number(item[column.property]));
             if (!values.every(value => isNaN(value))) {
               sums[index] = values.reduce((prev, curr) => {
@@ -262,17 +260,20 @@
         }
         return result
       },
-      summaryFilter(data, field) {
+      summaryFilter(data, field, index) {
         let sums = ''
+        let sumIndex = templateDelivery[data[0].template].sumIndex
+        let prop = templateDelivery[data[0].template].history[sumIndex].prop
         data.forEach(ele => {
-          if (ele.qtyR !== '' && !isNaN(ele.qtyR)) {
-            sums = Number(sums) + Number(ele.qtyR)
+          if (ele[prop] !== '' && !isNaN(ele[prop])) {
+            sums = Number(sums) + Number(ele[prop])
           }
         })
-        if (field.prop === 'qty') {
-          return '合计'
-        } else if (field.prop === 'qtyR') {
+
+        if (index === sumIndex) {
           return sums
+        } else if (index === sumIndex - 1) {
+          return '合计'
         } else {
           return ''
         }

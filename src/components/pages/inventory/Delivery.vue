@@ -21,7 +21,8 @@
         <el-button slot="reference" @click="print">打印 <icon-font icon="icon-dayinji"></icon-font></el-button>
       </div>
       <div ref="printWrapper">
-        <div class="print-wrapper" :class="hasSelected ? 'print-wrapper-border' : ''">
+        <div class="print-wrapper"
+          :class="{'print-wrapper-border': hasSelected, 'has-sum-table': !sumFlag}">
           <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
           <div class="delivery-message">
             <div class="receive-company">收货单位：{{ receiveCompany }}</div>
@@ -31,7 +32,7 @@
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
-            <el-table :border="!hasSelected" size="mini" :show-summary="sumFlag" :summary-method="getSummaries" :data="selectData">
+            <el-table :border="!hasSelected" size="mini" :show-summary="sumFlag" :summary-method="getSummaries" :data="selectData" :key="receiveCompany">
               <template v-for="(item, i) in field">
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="item.input" :width="item.width ? item.width : ''">
                   <template slot-scope="scope">
@@ -77,7 +78,7 @@
   import Search from 'components/common/Search'
   import apiUrl from '@/serviceAPI.config.js'
   import { dateFormat } from 'common/js/tool'
-  import template from 'common/js/template'
+  import { templateDelivery } from 'common/js/template'
   export default {
     data() {
       return {
@@ -85,6 +86,8 @@
           customer: {placeholder: '请选择出货单位'},
         },
         customerOptions: [],
+        customerMap: {},
+        template: 1,
         tableData: [],
         selectData: [],
         selectField: [],
@@ -179,18 +182,22 @@
             const customer = res.data.message
             customer.forEach(ele => {
               this.customerOptions.push({value: ele.id, label: ele.name})
+              this.customerMap[ele.id] = {name: ele.name, template: ele.template}
             })
           }
         })
       },
       changeCustomer({customerId, customer}) {
-        this.selectField = template['3'].selectField
-        this.field = template['3'].field
-        this.sumIndex = template['3'].sumIndex
-        this.sumFlag = template['3'].sumFlag
+        const template = this.customerMap[customerId].template
+        this.template = template
+        this.selectField = templateDelivery[template].selectField
+        this.field = templateDelivery[template].field
+        this.sumIndex = templateDelivery[template].sumIndex
+        this.sumFlag = templateDelivery[template].sumFlag
         this.receiveCompany = customer
         this.loading = true
         this.listShowFlag = true
+        this.selectData = []
         this.$http.post(apiUrl.getSupply, {
           data: {customerId}
         }).then(res => {
@@ -229,7 +236,6 @@
             selection.splice(i, 1)
           }
         }
-
       },
       getSummaries(param) {
         const { columns, data } = param;
@@ -266,7 +272,7 @@
             model: ele.model, nun: ele.nun, unit: ele.unitId, unitm: ele.unit,
             qty: ele.qty || '', qtyR: ele.qtyR || '', ptime: new Date(ele.ptime).getTime(),
             lot: ele.lot || '', remark: ele.remark || '', time: this.deliveryTime.getTime(),
-            no: this.counter.number, counter: this.counter.id, order: ele.order
+            no: this.counter.number, counter: this.counter.id, ord: ele.ord || '', template: this.template
           }
           result.push(data)
         })

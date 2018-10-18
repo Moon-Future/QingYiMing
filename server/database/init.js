@@ -19,6 +19,5 @@ const query = (sql, values) => {
     })
   })
 }
-console.log('已连接数据库')
 
 module.exports = query
