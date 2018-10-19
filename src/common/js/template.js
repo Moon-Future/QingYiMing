@@ -28,7 +28,7 @@ const templateDelivery = {
       {prop: 'remark', label: '备注', input: true, width: '50'}
     ],
     sumFlag: true,
-    sumIndex: 5
+    sumIndex: 4
   },
   2: {
     selectField: [
