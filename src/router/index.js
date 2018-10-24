@@ -6,8 +6,10 @@ import Product from '@/components/pages/Product'
 import Unit from '@/components/pages//Unit'
 import Company from '@/components/pages/Company'
 import Supply from '@/components/pages/Supply'
-import Delivery from '@/components/pages/inventory/Delivery'
-import DeliveryHistory from '@/components/pages/inventory/History'
+import Delivery from '@/components/pages/Delivery'
+import DeliveryHistory from '@/components/pages/DeliveryHistory'
+import Order from '@/components/pages/Order'
+import OrderHistory from '@/components/pages/OrderHistory'
 
 Vue.use(Router)
 
@@ -41,6 +43,16 @@ export default new Router({
           path: '/supply',
           name: 'Supply',
           component: Supply
+        },
+        {
+          path: '/order/latest',
+          name: 'order',
+          component: Order
+        },
+        {
+          path: '/order/history',
+          name: 'OrderHistory',
+          component: OrderHistory
         },
         {
           path: '/inventory/delivery',

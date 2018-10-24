@@ -97,12 +97,12 @@
             subs: [
               {
                 icon: 'icon-order',
-                index: '/order',
+                index: '/order/latest',
                 title: '最新订单'
               },
               {
                 icon: 'icon-order-history',
-                index: '/orderHistory',
+                index: '/order/history',
                 title: '历史订单'
               }
             ]
