@@ -42,40 +42,52 @@ router.post('/getSupply', async (ctx) => {
     let supplyList
     let count
     let number
-    if (data && data.pageNo) {
-      count = await query(`SELECT COUNT(*) as count FROM supply WHERE off != 1`)
+    if (data) {
+      if (data.pageNo) {
+        count = await query(`SELECT COUNT(*) as count FROM supply WHERE off != 1`)
+        supplyList = await query(
+          `
+          SELECT s.id, s.nun, c.name as customer, p.name as product, p.model, u.name as unit 
+          FROM supply s, company c, product p, unit u 
+          WHERE s.customer = c.id AND s.product = p.id AND p.unitId = u.id
+          AND s.off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}
+          `
+        )
+        ctx.body = {code: 200, message: supplyList, count: count[0].count}
+      } else if (data.customerId) {
+        const customerId = data.customerId
+        supplyList = await query(
+          `
+          SELECT s.id, s.nun, c.name as customer, c.id as cust, p.name as name, p.model, p.id as prd, u.name as unit, u.id as unitId
+          FROM supply s, company c, product p, unit u 
+          WHERE s.customer = ${customerId} AND s.customer = c.id AND s.product = p.id AND p.unitId = u.id
+          AND s.off != 1
+          `
+        )
+        number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND customer = ${customerId}`)
+        if (number.length === 0) {
+          await query(`INSERT INTO counter (number, customer, type, time) VALUES (0, ${customerId}, 'delivery', ${new Date().getTime()})`)
+          number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND customer = ${customerId}`)
+        } else {
+          // 下个月重置为0
+          const time = new Date(number[0].time)
+          const currentTime = new Date()
+          if (currentTime.getFullYear() + '_' + (currentTime.getMonth() + 1) !== time.getFullYear() + '_' + (time.getMonth() + 1)) {
+            number[0].number = 0
+          }
+        }
+        ctx.body = {code: 200, message: {supplyList, number}}
+      }
+    } else {
       supplyList = await query(
         `
-        SELECT s.id, s.nun, c.name as customer, p.name as product, p.model, u.name as unit 
+        SELECT s.id, s.nun, c.name as customer, c.id as cust, p.name as product, p.id as prd, p.model, u.name as unit 
         FROM supply s, company c, product p, unit u 
         WHERE s.customer = c.id AND s.product = p.id AND p.unitId = u.id
-        AND s.off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}
-        `
-      )
-      ctx.body = {code: 200, message: supplyList, count: count[0].count}
-    } else {
-      const customerId = data.customerId
-      supplyList = await query(
-        `
-        SELECT s.id, s.nun, c.name as customer, c.id as cust, p.name as name, p.model, p.id as prd, u.name as unit, u.id as unitId
-        FROM supply s, company c, product p, unit u 
-        WHERE s.customer = ${customerId} AND s.customer = c.id AND s.product = p.id AND p.unitId = u.id
         AND s.off != 1
         `
       )
-      number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND customer = ${customerId}`)
-      if (number.length === 0) {
-        await query(`INSERT INTO counter (number, customer, type, time) VALUES (0, ${customerId}, 'delivery', ${new Date().getTime()})`)
-        number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND customer = ${customerId}`)
-      } else {
-        // 下个月重置为0
-        const time = new Date(number[0].time)
-        const currentTime = new Date()
-        if (currentTime.getFullYear() + '_' + (currentTime.getMonth() + 1) !== time.getFullYear() + '_' + (time.getMonth() + 1)) {
-          number[0].number = 0
-        }
-      }
-      ctx.body = {code: 200, message: {supplyList, number}}
+      ctx.body = {code: 200, message: supplyList}
     }
   } catch(err) {
     ctx.body = {code: 500, message: err}
