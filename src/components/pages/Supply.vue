@@ -1,5 +1,5 @@
 <template>
-  <div class="unit-container">
+  <div class="supply-container">
     <base-table
       :loading="loading"
       :tableOptions="tableOptions"
