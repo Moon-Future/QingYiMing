@@ -10,7 +10,7 @@
           <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select">
             <template slot-scope="scope">
               <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder"></el-input>
-              <el-select size="mini" v-if="item.select" v-model="scope.row[item.prop]" :filterable="item['allow-create'] || item.filterable" :allow-create="item['allow-create']" clearable :placeholder="item.placeholder">
+              <el-select size="mini" v-if="item.select" v-model="scope.row[item.prop]" :filterable="item['allow-create'] || item.filterable" :allow-create="item['allow-create']" :placeholder="item.placeholder" @change="selectChange(scope.row[item.prop], item.prop, scope.row)">
                 <el-option
                   v-for="option in item.options" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
@@ -20,6 +20,16 @@
           <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="!item.input && !item.select">
           </el-table-column>
         </template>
+        <el-table-column width="50">
+          <template slot-scope="scope">
+            <el-button class="x"><i class="el-icon-circle-plus"></i></el-button>
+          </template>
+        </el-table-column>
+        <el-table-column v-if="userInfo && userInfo.root === 1" width="100" label="操作">
+          <template slot-scope="scope">
+            <el-button size="mini" type="danger" @click="submitDelete(true, scope.row, scope.$index)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
       <el-button class="btn-add" type="primary" size="medium" @click="addRow">新增</el-button>
       <el-button class="btn-submit" type="success" size="medium" v-show="!subWait" @click="submitAdd">提交</el-button>
@@ -71,8 +81,8 @@
           this.loading = false
           if (res.data.code === 200) {
             const message = res.data.message
-            const customerOptions = [], customerMap = {}
-            const productOptions = [], productMap = {}
+            const customerOptions = []
+            const productOptions = []
             message.forEach(ele => {
               if (!this.customerProduct[ele.cust]) {
                 this.customerProduct[ele.cust] = []
@@ -95,6 +105,12 @@
       },
       currentChange(pageNo) {
         this.getOptions(pageNo)
+      },
+      selectChange(cust, prop, row) {
+        if (prop === 'customer') {
+          row.product = ''
+          this.fieldAdd[2].options = this.customerProduct[cust]
+        }
       }
     },
     components: {
