@@ -5,22 +5,22 @@
       <el-button type="primary" size="mini" v-show="this.addFlag" @click="goBack">返回</el-button>
     </div>
     <div class="table-add" v-show="this.addFlag">
-      <table>
+      <table class="proto-table">
         <tr>
-          <th>订单编号</th>
-          <th>客户</th>
-          <th>产品</th>
-          <th>数量</th>
+          <th class="field-required">订单编号</th>
+          <th class="field-required">客户</th>
+          <th class="field-required">产品</th>
+          <th class="field-required">数量</th>
           <th width=50></th>
           <th width=100></th>
         </tr>
         <template v-for="(data, i) in dataAdd" >
-          <tr :key="i">
+          <tr>
             <td :rowspan="data.message.length + 1">
-              <el-input size="mini" v-model="data.ord"></el-input>
+              <el-input size="mini" v-model="data.ord" placeholder="请输入订单编号"></el-input>
             </td>
             <td :rowspan="data.message.length + 1">
-              <el-select size="mini" v-model="data.customer" @change="changeCustomer">
+              <el-select size="mini" v-model="data.customer" @change="changeCustomer(data.customer, data)">
                 <el-option
                   v-for="option in customerOptions" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
@@ -29,36 +29,36 @@
             <td>
               <el-select size="mini" v-model="data.message[0].product">
                 <el-option
-                  v-for="option in productOptions" :label="option.name" :value="option.id" :key="option.id">
+                  v-for="option in data.productOptions" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
               </el-select>
             </td> 
             <td>
-              <el-input size="mini" v-model="data.message[0].qty"></el-input>
+              <el-input type="number" size="mini" v-model="data.message[0].qty" placeholder="请输入订单数量"></el-input>
             </td> 
-            <td><icon-font icon="icon-minus" @click.native="delPrdRow"></icon-font></td>
+            <td></td>
             <td :rowspan="data.message.length + 1">
-              <el-button size="mini" type="danger">删除</el-button>
+              <el-button size="mini" type="danger" @click="deleteRow(i)">删除</el-button>
             </td>
           </tr>
           <template>
-            <tr v-for="index in data.message.length - 1" :key="`${index}_j`">
+            <tr v-for="index in data.message.length - 1">
               <td>
                 <el-select size="mini" v-model="data.message[index].product">
                   <el-option
-                    v-for="option in productOptions" :label="option.name" :value="option.id" :key="option.id">
+                    v-for="option in data.productOptions" :label="option.name" :value="option.id" :key="option.id">
                   </el-option>
                 </el-select>
               </td> 
               <td>
-                <el-input size="mini" v-model="data.message[index].qty"></el-input>
+                <el-input type="number" size="mini" v-model="data.message[index].qty" placeholder="请输入订单数量"></el-input>
               </td>
-              <td><icon-font icon="icon-minus" @click.native="delPrdRow"></icon-font></td>
+              <td><icon-font icon="icon-minus" @click.native="delPrdRow(data, index)"></icon-font></td>
             </tr>
           </template>
-          <tr :key="`${i}_i`">
+          <tr>
             <td colspan="2">
-              <el-button class="btn-add" type="info" size="mini" @click="addRow">新增</el-button>
+              <el-button class="btn-add" type="info" size="mini" @click="addPrdRow(data.message)">新增</el-button>
             </td>
           </tr>
         </template>
@@ -72,9 +72,7 @@
 
 <script>
   import IconFont from 'components/common/Iconfont'
-  import BaseTable from 'components/common/BaseTable'
   import apiUrl from '@/serviceAPI.config.js'
-  import { templateOptions, templateMap } from 'common/js/template'
   export default {
     props: {
       userInfo: {
@@ -89,19 +87,11 @@
           { prop: 'customer', label: '客户'},
           { prop: 'templatem', label: '货运单模板'}
         ],
-        fieldAdd: [
-          { prop: 'ord', label: '订单编号', required: true, input: true, placeholder: '输入订单编号' },
-          { prop: 'customer', label: '客户', required: true, select: true, options: [] },
-          { prop: 'product', label: '产品', required: true, select: true, options: [] },
-          { prop: 'qty', label: '数量', required: true, input: true }
-        ],
         dataAdd: [
-          {ord: '', customer: '', message: [{product: '', qty: ''}, {product: '', qty: ''}]},
-          {ord: '', customer: '', message: [{product: '', qty: ''}]}
+          {ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: []}
         ],
         customerProduct: {},
         customerOptions: [],
-        productOptions: [],
         addFlag: true,
         loading: false,
         subWait: false,
@@ -118,7 +108,6 @@
           this.loading = false
           if (res.data.code === 200) {
             const message = res.data.message
-            const productOptions = []
             message.forEach(ele => {
               if (!this.customerProduct[ele.cust]) {
                 this.customerProduct[ele.cust] = []
@@ -137,14 +126,49 @@
       goBack() {
 
       },
-      addRow() {
-
-      },
       submitAdd() {
+        if (this.subWait) {
+          return
+        }
+        let ordMap = {}
+        for (let i = 0, len = this.dataAdd.length; i < len; i++) {
+          let data = this.dataAdd[i]
+          let message = data.message
+          if (ordMap[data.ord]) {
+            this.$message.error('存在相同订单编号')
+            return
+          }
+          ordMap[data.ord] = true
+          if (data.ord === '' || data.customer === '') {
+            this.$message.error('* 为必填字段')
+            return
+          }
+          for (let j = 0; j < message.length; j++) {
+            let product = message[j].product
+            let qty = message[j].qty
+            if (product === '' || qty === '') {
+              this.$message.error('* 为必填字段')
+              return
+            }
+          }
+        }
+        this.$http.post(apiUrl.insertOrder, {
+          data: this.dataAdd
+        }).then(res => {
+          if (res.data.code === 200) {
 
+          } else {
+            this.$message.success(res.data.message)
+          }
+        }).catch(err => {
+          throw new Error(err)
+        })
       },
-      deleteRow(row) {
-        this.tableOptions.dataSift.splice(row, 1)
+      addRow() {
+        this.dataAdd.push({ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: []})
+      },
+      deleteRow(index) {
+        this.dataAdd.splice(index, 1)
       },
       updateRow({data, row}) {
         data.templatem = templateMap[data.template]
@@ -153,16 +177,21 @@
       currentChange(pageNo) {
         this.getOptions(pageNo)
       },
-      changeCustomer(cust) {
-        this.productOptions = this.customerProduct[cust]
+      changeCustomer(cust, row) {
+        row.productOptions = this.customerProduct[cust]
+        row.message.forEach(ele => {
+          ele.product = ''
+        })
       },
       addPrdRow(row) {
-        row.message.push({produc: '', qty: ''})
+        row.push({product: '', qty: ''})
+      },
+      delPrdRow(row, index) {
+        row.splice(index, 1)
       }
     },
     components: {
-      IconFont,
-      BaseTable
+      IconFont
     }
   }
 </script>
@@ -187,9 +216,9 @@
       width: 100%;
     }
     .btn-submit {
-      position: absolute;
-      right: 0;
-      margin: 10px;
+      margin: 10px 0;
+      display: flex;
+      margin-left: auto;
     }
   }
   .page-wrapper {
