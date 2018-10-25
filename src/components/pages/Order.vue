@@ -5,32 +5,42 @@
       <el-button type="primary" size="mini" v-show="this.addFlag" @click="goBack">返回</el-button>
     </div>
     <div class="table-add" v-show="this.addFlag">
-      <el-table border size="mini" :data="dataAdd" :max-height="`${height - 50}`">
-        <template v-for="(item, i) in fieldAdd">
-          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select">
-            <template slot-scope="scope">
-              <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder"></el-input>
-              <el-select size="mini" v-if="item.select" v-model="scope.row[item.prop]" :filterable="item['allow-create'] || item.filterable" :allow-create="item['allow-create']" :placeholder="item.placeholder" @change="selectChange(scope.row[item.prop], item.prop, scope.row)">
-                <el-option
-                  v-for="option in item.options" :label="option.name" :value="option.id" :key="option.id">
-                </el-option>
-              </el-select>
-            </template>
-          </el-table-column>
-          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="!item.input && !item.select">
-          </el-table-column>
+      <table>
+        <tr>
+          <th>订单编号</th>
+          <th>客户</th>
+          <th>产品</th>
+          <th>数量</th>
+          <th></th>
+          <th></th>
+        </tr>
+        <template v-for="(data, i) in dataAdd">
+          <tr>
+            <td :rowspan="data.message.length">{{ data.ord }}</td>
+            <td :rowspan="data.message.length">{{ data.customer }}</td>
+            <td>{{ data.message[0].product }}</td> 
+            <td>{{ data.message[0].qty }}</td>
+            <td>删除</td>
+            <td :rowspan="data.message.length">删除</td>
+          </tr>
+          <template>
+            <tr v-for="index in data.message.length - 1">
+              <td>{{ data.message[index].product }}</td> 
+              <td>{{ data.message[index].qty }}</td>
+              <td>删除</td>
+            </tr>
+          </template>
         </template>
-        <el-table-column width="50">
-          <template slot-scope="scope">
-            <el-button class="x"><i class="el-icon-circle-plus"></i></el-button>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="userInfo && userInfo.root === 1" width="100" label="操作">
-          <template slot-scope="scope">
-            <el-button size="mini" type="danger" @click="submitDelete(true, scope.row, scope.$index)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+       <!--  <tr v-for="(data, i) in dataAdd" :key="i">
+          <td :rowspan="data.message.length">{{ data.ord }}</td>
+          <td :rowspan="data.message.length">{{ data.customer }}</td>
+          <td>{{ data.message[0].product }}</td>
+          <td>{{ data.message[0].qty }}</td>
+          <td>
+            <el-button size="mini" type="danger">删除</el-button>
+          </td>
+        </tr> -->
+      </table>
       <el-button class="btn-add" type="primary" size="medium" @click="addRow">新增</el-button>
       <el-button class="btn-submit" type="success" size="medium" v-show="!subWait" @click="submitAdd">提交</el-button>
       <el-button class="btn-submit" type="info" size="medium" v-show="subWait" :loading="true">提交中</el-button>
@@ -39,6 +49,7 @@
 </template>
 
 <script>
+  import IconFont from 'components/common/Iconfont'
   import BaseTable from 'components/common/BaseTable'
   import apiUrl from '@/serviceAPI.config.js'
   import { templateOptions, templateMap } from 'common/js/template'
@@ -63,11 +74,15 @@
           { prop: 'qty', label: '数量', required: true, input: true }
         ],
         dataAdd: [
-          {ord: '', customer: '', product: '', qty: ''}
+          {ord: '1', customer: '2', message: [{product: '5', qty: '6'}, {product: '15', qty: '16'}]},
+          {ord: 'w1', customer: 'w2', message: [{product: 'w5', qty: 'w6'}]}
         ],
         customerProduct: {},
+        customerOptions: [],
+        productOptions: [],
         addFlag: true,
         loading: false,
+        subWait: false,
         total: 0
       }
     },
@@ -81,20 +96,30 @@
           this.loading = false
           if (res.data.code === 200) {
             const message = res.data.message
-            const customerOptions = []
             const productOptions = []
             message.forEach(ele => {
               if (!this.customerProduct[ele.cust]) {
                 this.customerProduct[ele.cust] = []
-                customerOptions.push({id: ele.cust, name: ele.customer})
+                this.customerOptions.push({id: ele.cust, name: ele.customer})
               }
               this.customerProduct[ele.cust].push({id: ele.prd, name: ele.model})
             });
-            this.fieldAdd[1].options = customerOptions
           }
         }).catch(err => {
           this.loading = false
         })
+      },
+      goAdd() {
+
+      },
+      goBack() {
+
+      },
+      addRow() {
+
+      },
+      submitAdd() {
+
       },
       deleteRow(row) {
         this.tableOptions.dataSift.splice(row, 1)
@@ -106,20 +131,23 @@
       currentChange(pageNo) {
         this.getOptions(pageNo)
       },
-      selectChange(cust, prop, row) {
-        if (prop === 'customer') {
-          row.product = ''
-          this.fieldAdd[2].options = this.customerProduct[cust]
-        }
+      changeCustomer(cust) {
+        this.productOptions = this.customerProduct[cust]
+      },
+      addPrdRow(row) {
+        row.message.push({produc: '', qty: ''})
       }
     },
     components: {
+      IconFont,
       BaseTable
     }
   }
 </script>
 
 <style lang="scss" scoped>
+  @import 'common/css/variable.scss';
+
   .btn-operate {
     text-align: left;
     margin-bottom: 10px;
@@ -128,6 +156,11 @@
     }
   }
   .table-add {
+    .prd-message {
+      margin: 3px 0;
+      border-bottom: 1px solid;
+      padding-bottom: 3px;
+    }
     .btn-add {
       width: 100%;
     }

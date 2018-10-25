@@ -45,6 +45,12 @@
  table {
   border-collapse: collapse;
   border-spacing: 0;
+  width: 100%;
+  th, td {
+    border: 1px solid #ebeef5;
+    line-height: 32px;
+    vertical-align: middle;
+  }
  }
  
  /* custom */
@@ -71,5 +77,6 @@
   vertical-align: -0.15em;
   fill: currentColor;
   overflow: hidden;
+  cursor: pointer;
 }
  
