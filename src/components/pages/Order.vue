@@ -11,35 +11,57 @@
           <th>客户</th>
           <th>产品</th>
           <th>数量</th>
-          <th></th>
-          <th></th>
+          <th width=50></th>
+          <th width=100></th>
         </tr>
-        <template v-for="(data, i) in dataAdd">
-          <tr>
-            <td :rowspan="data.message.length">{{ data.ord }}</td>
-            <td :rowspan="data.message.length">{{ data.customer }}</td>
-            <td>{{ data.message[0].product }}</td> 
-            <td>{{ data.message[0].qty }}</td>
-            <td>删除</td>
-            <td :rowspan="data.message.length">删除</td>
+        <template v-for="(data, i) in dataAdd" >
+          <tr :key="i">
+            <td :rowspan="data.message.length + 1">
+              <el-input size="mini" v-model="data.ord"></el-input>
+            </td>
+            <td :rowspan="data.message.length + 1">
+              <el-select size="mini" v-model="data.customer" @change="changeCustomer">
+                <el-option
+                  v-for="option in customerOptions" :label="option.name" :value="option.id" :key="option.id">
+                </el-option>
+              </el-select>
+            </td>
+            <td>
+              <el-select size="mini" v-model="data.message[0].product">
+                <el-option
+                  v-for="option in productOptions" :label="option.name" :value="option.id" :key="option.id">
+                </el-option>
+              </el-select>
+            </td> 
+            <td>
+              <el-input size="mini" v-model="data.message[0].qty"></el-input>
+            </td> 
+            <td><icon-font icon="icon-minus" @click.native="delPrdRow"></icon-font></td>
+            <td :rowspan="data.message.length + 1">
+              <el-button size="mini" type="danger">删除</el-button>
+            </td>
           </tr>
           <template>
-            <tr v-for="index in data.message.length - 1">
-              <td>{{ data.message[index].product }}</td> 
-              <td>{{ data.message[index].qty }}</td>
-              <td>删除</td>
+            <tr v-for="index in data.message.length - 1" :key="`${index}_j`">
+              <td>
+                <el-select size="mini" v-model="data.message[index].product">
+                  <el-option
+                    v-for="option in productOptions" :label="option.name" :value="option.id" :key="option.id">
+                  </el-option>
+                </el-select>
+              </td> 
+              <td>
+                <el-input size="mini" v-model="data.message[index].qty"></el-input>
+              </td>
+              <td><icon-font icon="icon-minus" @click.native="delPrdRow"></icon-font></td>
             </tr>
           </template>
+          <tr :key="`${i}_i`">
+            <td colspan="2">
+              <el-button class="btn-add" type="info" size="mini" @click="addRow">新增</el-button>
+            </td>
+          </tr>
         </template>
-       <!--  <tr v-for="(data, i) in dataAdd" :key="i">
-          <td :rowspan="data.message.length">{{ data.ord }}</td>
-          <td :rowspan="data.message.length">{{ data.customer }}</td>
-          <td>{{ data.message[0].product }}</td>
-          <td>{{ data.message[0].qty }}</td>
-          <td>
-            <el-button size="mini" type="danger">删除</el-button>
-          </td>
-        </tr> -->
       </table>
       <el-button class="btn-add" type="primary" size="medium" @click="addRow">新增</el-button>
       <el-button class="btn-submit" type="success" size="medium" v-show="!subWait" @click="submitAdd">提交</el-button>
@@ -74,8 +96,8 @@
           { prop: 'qty', label: '数量', required: true, input: true }
         ],
         dataAdd: [
-          {ord: '1', customer: '2', message: [{product: '5', qty: '6'}, {product: '15', qty: '16'}]},
-          {ord: 'w1', customer: 'w2', message: [{product: 'w5', qty: 'w6'}]}
+          {ord: '', customer: '', message: [{product: '', qty: ''}, {product: '', qty: ''}]},
+          {ord: '', customer: '', message: [{product: '', qty: ''}]}
         ],
         customerProduct: {},
         customerOptions: [],
