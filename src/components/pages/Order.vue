@@ -15,7 +15,7 @@
           <th width=100></th>
         </tr>
         <template v-for="(data, i) in dataAdd" >
-          <tr>
+          <tr :key="i">
             <td :rowspan="data.message.length + 1">
               <el-input size="mini" v-model="data.ord" placeholder="请输入订单编号"></el-input>
             </td>
@@ -42,7 +42,7 @@
             </td>
           </tr>
           <template>
-            <tr v-for="index in data.message.length - 1">
+            <tr v-for="index in data.message.length - 1" :key="`${i}_${index}`">
               <td>
                 <el-select size="mini" v-model="data.message[index].product">
                   <el-option
@@ -53,10 +53,10 @@
               <td>
                 <el-input type="number" size="mini" v-model="data.message[index].qty" placeholder="请输入订单数量"></el-input>
               </td>
-              <td><icon-font icon="icon-minus" @click.native="delPrdRow(data, index)"></icon-font></td>
+              <td><icon-font icon="icon-minus" @click.native="delPrdRow(data.message, index)"></icon-font></td>
             </tr>
           </template>
-          <tr>
+          <tr :key="`${i}_a`">
             <td colspan="2">
               <el-button class="btn-add" type="info" size="mini" @click="addPrdRow(data.message)">新增</el-button>
             </td>
@@ -92,6 +92,8 @@
         ],
         customerProduct: {},
         customerOptions: [],
+        customerMap: {},
+        productMap: {},
         addFlag: true,
         loading: false,
         subWait: false,
@@ -112,6 +114,10 @@
               if (!this.customerProduct[ele.cust]) {
                 this.customerProduct[ele.cust] = []
                 this.customerOptions.push({id: ele.cust, name: ele.customer})
+                this.customerMap[ele.cust] = ele.customer
+              }
+              if (this.productMap[ele.prd]) {
+                this.productMap[ele.prd] = {model: ele.model, name: ele.name}
               }
               this.customerProduct[ele.cust].push({id: ele.prd, name: ele.model})
             });

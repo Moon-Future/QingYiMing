@@ -9,7 +9,21 @@ router.post('/insertOrder', async (ctx) => {
       return
     }
     const data = ctx.request.body.data
-    ctx.body = {code: 200, message: data}
+    let result
+    for (let i = 0 , len = data.length; i < len; i++) {
+      const item = data[i]
+      const order = await query(`SELECT * FROM ord WHERE ord = '${item.ord}' AND off != 1`)
+      if (order.length !== 0) {
+        result.push(item.name)
+        continue
+      }
+      await query(`NSERT INTO ord () VALUES ()`)
+    }
+    if (result.length === 0) {
+      ctx.body = {code: 200, message: '新增成功'}
+    } else {
+      ctx.body = {code: 200, message: `订单编号 ${result.join(', ')} 已存在`, repeat: true}
+    }
   } catch(err) {
     ctx.body = {code: 500, message: err}
   }
