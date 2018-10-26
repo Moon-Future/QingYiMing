@@ -27,13 +27,13 @@ router.post('/insertOrder', async (ctx) => {
       item.message.forEach(ele => {
         let list = [
           `'${id}'`, `'${item.ord}'`, item.customer, `'${item.custm}'`, ele.product, `'${ele.name}'`, `'${ele.model}'`,
-          ele.qty, currentTime
+          ele.qty, currentTime, item.time
         ]
         str += `( ${list.join()} ),`
       })
       str = str.slice(0, str.length - 1)
-      await query(`INSERT INTO ord (id, ord, cust, custm, prd, prdm, model, qty, createTime) VALUES ${str}`)
-      await query(`INSERT INTO ordgrp (ord, createTime) VALUES ('${id}', ${currentTime})`)
+      await query(`INSERT INTO ord (id, ord, cust, custm, prd, prdm, model, qty, createTime, time) VALUES ${str}`)
+      await query(`INSERT INTO ordgrp (ord, cust, createTime) VALUES ('${id}', ${item.customer}, ${currentTime})`)
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -54,6 +54,25 @@ router.post('/getOrder', async (ctx) => {
       return
     }
     
+    const data = ctx.request.body.data
+    const pageNo = data && data.pageNo || 1
+    const pageSize = data && data.pageSize || 5
+    let ids, ordStr = '', orderList, count
+    count = await query(`SELECT COUNT(*) as count FROM ordgrp WHERE off != 1`)
+    ids = await query(`SELECT * FROM ordgrp WHERE off != 1 ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    ids.forEach(ele => {
+      ordStr += `'${ele.ord}',`
+    })
+    ordStr = ordStr.slice(0, ordStr.length - 1)
+    orderList = await query(
+      `
+      SELECT o.ord, o.qty, o.sentQty, o.finished, o.time, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model
+      FROM ord o, company c, product p
+      WHERE o.cust = c.id AND o.prd = p.id
+      AND o.off != 1 AND o.id IN (${ordStr})
+      `
+    )
+    ctx.body = {code: 200, message: orderList, count: count[0].count}
   } catch(err) {
     ctx.body = {code: 500, message: err}
     throw new Error(err)

@@ -5,7 +5,32 @@
       <el-button type="primary" size="mini" v-show="this.addFlag" @click="goBack">返回</el-button>
     </div>
     <div class="table-sift" v-show="!this.addFlag">
-      
+      <el-table
+        border
+        v-loading="loading"
+        :data="dataSift"
+        :row-class-name="tableRowFinished"
+        :span-method="spanMethod">
+        <template v-for="(item, i) in fieldSift">
+          <el-table-column v-if="item.prop === 'finished'" :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i">
+            <template slot-scope="scope">
+              <icon-font :icon="scope.row.finished === 1 ? 'icon-finished' : ''"></icon-font>
+            </template>
+          </el-table-column>
+          <el-table-column v-else :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i"></el-table-column>
+
+        </template>
+      </el-table>
+      <div class="page-wrapper">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :disabled="loading"
+          :total="total"
+          :page-size="5"
+          @current-change="currentChange">
+        </el-pagination>
+      </div>
     </div>
     <div class="table-add" v-show="this.addFlag">
       <table class="proto-table">
@@ -15,6 +40,7 @@
           <th class="field-required">产品</th>
           <th class="field-required">数量</th>
           <th width=50></th>
+          <th>订单时间</th>
           <th width=100></th>
         </tr>
         <template v-for="(data, i) in dataAdd" >
@@ -40,6 +66,16 @@
               <el-input type="number" size="mini" v-model="data.message[0].qty" placeholder="请输入订单数量"></el-input>
             </td> 
             <td></td>
+            <td :rowspan="data.message.length + 1">
+              <el-date-picker
+                v-model="data.time"
+                type="date"
+                placeholder="选择日期"
+                format="yyyy 年 MM 月 dd 日"
+                value-format="timestamp"
+                :clearable="false">
+              </el-date-picker>
+            </td>
             <td :rowspan="data.message.length + 1">
               <el-button size="mini" type="danger" @click="deleteRow(i)">删除</el-button>
             </td>
@@ -75,6 +111,7 @@
 
 <script>
   import IconFont from 'components/common/Iconfont'
+  import { dateFormat } from 'common/js/tool'
   import apiUrl from '@/serviceAPI.config.js'
   export default {
     props: {
@@ -87,11 +124,17 @@
       return {
         fieldSift: [
           { prop: 'ord', label: '订单编号'},
-          { prop: 'customer', label: '客户'},
-          { prop: 'templatem', label: '货运单模板'}
+          { prop: 'custm', label: '客户'},
+          { prop: 'model', label: '产品'},
+          { prop: 'qty', label: '数量', minWidth: '35'},
+          { prop: 'sentQty', label: '已送数量', minWidth: '35'},
+          { prop: 'finished', label: '完成', minWidth: '20'},
+          { prop: 'time', label: '订单日期', minWidth: '40'}
         ],
+        dataSift: [],
+        siftMap: {},
         dataAdd: [
-          {ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: []}
+          {ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: [], time: ''}
         ],
         customerProduct: {},
         customerOptions: [],
@@ -101,18 +144,37 @@
         addFlag: false,
         loading: false,
         subWait: false,
-        total: 0
+        total: 0,
+        currentTime: new Date().getTime()
       }
     },
     created() {
-
+      this.getOrder()
     },
     methods: {
-      getOrder() {
-        this.$http.post(apiUrl.getOrder).then(res => {
-
+      getOrder(pageNo = 1) {
+        this.siftMap = {}
+        this.loading = true
+        this.$http.post(apiUrl.getOrder, {
+          data: {pageNo}
+        }).then(res => {
+          this.loading = false
+          if (res.data.code === 200) {
+            this.total = res.data.count
+            this.dataSift = res.data.message
+            this.dataSift.forEach((ele, index) => {
+              ele.time = dateFormat(ele.time, 'yyyy-MM-dd')
+              if (this.siftMap[ele.ord] === undefined) {
+                this.siftMap[ele.ord] = {rowIndex: index, num: 1}
+              } else {
+                this.siftMap[ele.ord].num += 1
+              }
+            })
+          } else {
+            this.$message.error(res.data.message)
+          }
         }).catch(err => {
-          
+          this.loading = false
         })
       },
       getOptions() {
@@ -139,6 +201,8 @@
       },
       goAdd() {
         this.addFlag = true
+        this.currentTime = new Date().getTime()
+        this.dataAdd = [{ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: [], time: this.currentTime}]
         if (!this.optionFlag) {
           this.optionFlag = true
           this.getOptions()
@@ -146,7 +210,7 @@
       },
       goBack() {
         this.addFlag = false
-        this.dataAdd = [{ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: []}]
+        this.getOrder()
       },
       submitAdd() {
         if (this.subWait) {
@@ -181,16 +245,17 @@
           data: this.dataAdd
         }).then(res => {
           if (res.data.code === 200) {
-
-          } else {
+            this.goBack()
             this.$message.success(res.data.message)
+          } else {
+            this.$message.error(res.data.message)
           }
         }).catch(err => {
           throw new Error(err)
         })
       },
       addRow() {
-        this.dataAdd.push({ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: []})
+        this.dataAdd.push({ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: [], time: this.currentTime})
       },
       deleteRow(index) {
         this.dataAdd.splice(index, 1)
@@ -200,7 +265,7 @@
         this.tableOptions.dataSift.splice(row, 1, data)
       },
       currentChange(pageNo) {
-        this.getOptions(pageNo)
+        this.getOrder(pageNo)
       },
       changeCustomer(cust, row) {
         row.productOptions = this.customerProduct[cust]
@@ -213,6 +278,28 @@
       },
       delPrdRow(row, index) {
         row.splice(index, 1)
+      },
+      tableRowFinished({row, rowIndex}) {
+        if (row.finished === 1) {
+          return 'finished-row'
+        }
+      },
+      spanMethod({ row, column, rowIndex, columnIndex }) {
+        if (this.siftMap[row.ord].rowIndex === rowIndex) {
+          if ([0, 1, 6].indexOf(columnIndex) !== -1) {
+            return {
+              rowspan: this.siftMap[row.ord].num,
+              colspan: 1
+            }
+          }
+        } else {
+          if ([0, 1, 6].indexOf(columnIndex) !== -1) {
+            return {
+              rowspan: 0,
+              colspan: 0
+            }
+          }
+        }
       }
     },
     components: {

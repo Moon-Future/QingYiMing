@@ -1,3 +1,5 @@
+@import 'common/css/variable.scss';
+
 .field-required::after {
   content: ' *';
   color: red;
@@ -70,4 +72,8 @@
   input {
     padding: initial !important;
   }
+}
+
+.el-table .finished-row {
+  background: #f0f9eb;
 }
