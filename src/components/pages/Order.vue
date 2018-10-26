@@ -4,6 +4,9 @@
       <el-button v-if="userInfo && userInfo.root === 1" type="primary" size="mini" v-show="!this.addFlag" @click="goAdd">新增</el-button>
       <el-button type="primary" size="mini" v-show="this.addFlag" @click="goBack">返回</el-button>
     </div>
+    <div class="table-sift" v-show="!this.addFlag">
+      
+    </div>
     <div class="table-add" v-show="this.addFlag">
       <table class="proto-table">
         <tr>
@@ -94,16 +97,24 @@
         customerOptions: [],
         customerMap: {},
         productMap: {},
-        addFlag: true,
+        optionFlag: false,
+        addFlag: false,
         loading: false,
         subWait: false,
         total: 0
       }
     },
     created() {
-      this.getOptions()
+
     },
     methods: {
+      getOrder() {
+        this.$http.post(apiUrl.getOrder).then(res => {
+
+        }).catch(err => {
+          
+        })
+      },
       getOptions() {
         this.loading = true
         this.$http.post(apiUrl.getSupply).then(res => {
@@ -127,10 +138,15 @@
         })
       },
       goAdd() {
-
+        this.addFlag = true
+        if (!this.optionFlag) {
+          this.optionFlag = true
+          this.getOptions()
+        }
       },
       goBack() {
-
+        this.addFlag = false
+        this.dataAdd = [{ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: []}]
       },
       submitAdd() {
         if (this.subWait) {

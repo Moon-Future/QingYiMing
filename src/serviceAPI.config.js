@@ -29,7 +29,8 @@ const apiUrl = {
   logout: 'api/user/logout',
   getSession: 'api/user/getSession',
 
-  insertOrder: 'api/order/insertOrder'
+  insertOrder: 'api/order/insertOrder',
+  getOrder: 'api/order/getOrder'
 }
 
 module.exports = apiUrl
