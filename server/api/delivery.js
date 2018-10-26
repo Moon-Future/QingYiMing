@@ -2,13 +2,16 @@ const Router = require('koa-router')
 const router = new Router()
 const uuidv1 = require('uuid/v1');
 const query = require('../database/init')
+const checkRoot = require('./root')
 
 router.post('/saveDelivery', async (ctx) => {
   try {
-    if (!ctx.session) {
-      ctx.body = {code: 500, message: '没有权限'}
+    const checkResult = checkRoot(ctx)
+    if (checkResult.code === 500) {
+      ctx.body = checkResult
       return
     }
+
     const data = ctx.request.body.data
     const counter = data.counter
     const delivery = data.deliveryData
@@ -45,10 +48,12 @@ router.post('/saveDelivery', async (ctx) => {
 
 router.post('/getDeliveryHistory', async (ctx) => {
   try {
-    if (!ctx.session) {
-      ctx.body = {code: 500, message: '没有权限'}
+    const checkResult = checkRoot(ctx)
+    if (checkResult.code === 500) {
+      ctx.body = checkResult
       return
     }
+    
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 5
@@ -83,10 +88,12 @@ router.post('/getDeliveryHistory', async (ctx) => {
 
 router.post('/deleteDelivery', async (ctx) => {
   try {
-    if (!ctx.session) {
-      ctx.body = {code: 500, message: '没有权限'}
+    const checkResult = checkRoot(ctx)
+    if (checkResult.code === 500) {
+      ctx.body = checkResult
       return
     }
+    
     const data = ctx.request.body.data
     const grp = data.grp
     const ids = data.ids

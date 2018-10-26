@@ -1,13 +1,16 @@
 const Router = require('koa-router')
 const router = new Router()
 const query = require('../database/init')
+const checkRoot = require('./root')
 
 router.post('/insertProduct', async (ctx) => {
   try {
-    if (!ctx.session) {
-      ctx.body = {code: 500, message: '没有权限'}
+    const checkResult = checkRoot(ctx)
+    if (checkResult.code === 500) {
+      ctx.body = checkResult
       return
     }
+    
     const data = ctx.request.body.data
     let result = []
     for (let i = 0 , len = data.length; i < len; i++) {
@@ -32,10 +35,12 @@ router.post('/insertProduct', async (ctx) => {
 
 router.post('/getProduct', async (ctx) => {
   try {
-    if (!ctx.session) {
-      ctx.body = {code: 500, message: '没有权限'}
+    const checkResult = checkRoot(ctx)
+    if (checkResult.code === 500) {
+      ctx.body = checkResult
       return
     }
+    
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
@@ -49,10 +54,12 @@ router.post('/getProduct', async (ctx) => {
 
 router.post('/deleteProduct', async (ctx) => {
   try {
-    if (!ctx.session) {
-      ctx.body = {code: 500, message: '没有权限'}
+    const checkResult = checkRoot(ctx)
+    if (checkResult.code === 500) {
+      ctx.body = checkResult
       return
     }
+    
     const data = ctx.request.body.data
     let ids = []
     data.forEach(ele => {
@@ -67,10 +74,12 @@ router.post('/deleteProduct', async (ctx) => {
 
 router.post('/updProduct', async (ctx) => {
   try {
-    if (!ctx.session) {
-      ctx.body = {code: 500, message: '没有权限'}
+    const checkResult = checkRoot(ctx)
+    if (checkResult.code === 500) {
+      ctx.body = checkResult
       return
     }
+    
     const data = ctx.request.body.data
     const check = await query(`SELECT * FROM product WHERE model = '${data.model}' AND off != 1`)
     if (check.length !== 0 && check[0].id != data.id) {
