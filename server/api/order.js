@@ -9,15 +9,25 @@ router.post('/insertOrder', async (ctx) => {
       return
     }
     const data = ctx.request.body.data
-    let result
+    let result = []
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
-      const order = await query(`SELECT * FROM ord WHERE ord = '${item.ord}' AND off != 1`)
+      const currentTime = new Date().getTime()
+      const order = await query(`SELECT * FROM ord WHERE ord = '${item.ord}' AND createTime != ${currentTime} AND off != 1`)
+      let str = ''
       if (order.length !== 0) {
         result.push(item.name)
         continue
       }
-      await query(`NSERT INTO ord () VALUES ()`)
+      item.message.forEach(ele => {
+        let list = [
+          `'${item.ord}'`, item.customer, `'${item.custm}'`, ele.product, `'${ele.name}'`, `'${ele.model}'`,
+          ele.qty, currentTime
+        ]
+        str += `( ${list.join()} ),`
+      })
+      str = str.slice(0, str.length - 1)
+      await query(`INSERT INTO ord (ord, cust, custm, prd, prdm, model, qty, createTime) VALUES ${str}`)
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -26,6 +36,7 @@ router.post('/insertOrder', async (ctx) => {
     }
   } catch(err) {
     ctx.body = {code: 500, message: err}
+    throw new Error(err)
   }
 })
 

@@ -116,8 +116,8 @@
                 this.customerOptions.push({id: ele.cust, name: ele.customer})
                 this.customerMap[ele.cust] = ele.customer
               }
-              if (this.productMap[ele.prd]) {
-                this.productMap[ele.prd] = {model: ele.model, name: ele.name}
+              if (!this.productMap[ele.prd]) {
+                this.productMap[ele.prd] = {model: ele.model, name: ele.product}
               }
               this.customerProduct[ele.cust].push({id: ele.prd, name: ele.model})
             });
@@ -149,6 +149,7 @@
             this.$message.error('* 为必填字段')
             return
           }
+          data.custm = this.customerMap[data.customer]
           for (let j = 0; j < message.length; j++) {
             let product = message[j].product
             let qty = message[j].qty
@@ -156,6 +157,8 @@
               this.$message.error('* 为必填字段')
               return
             }
+            message[j].model = this.productMap[product].model
+            message[j].name = this.productMap[product].name
           }
         }
         this.$http.post(apiUrl.insertOrder, {
