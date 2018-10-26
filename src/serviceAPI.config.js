@@ -30,7 +30,8 @@ const apiUrl = {
   getSession: 'api/user/getSession',
 
   insertOrder: 'api/order/insertOrder',
-  getOrder: 'api/order/getOrder'
+  getOrder: 'api/order/getOrder',
+  updOrder: 'api/order/updOrder'
 }
 
 module.exports = apiUrl

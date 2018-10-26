@@ -18,8 +18,12 @@
             </template>
           </el-table-column>
           <el-table-column v-else :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i"></el-table-column>
-
         </template>
+        <el-table-column width="100" label="操作">
+          <template slot-scope="scope">
+            <el-button size="mini" @click="handleEdit(scope.$index)">编辑</el-button>
+          </template>
+        </el-table-column>
       </el-table>
       <div class="page-wrapper">
         <el-pagination
@@ -27,7 +31,8 @@
           layout="prev, pager, next"
           :disabled="loading"
           :total="total"
-          :page-size="5"
+          :page-size="pageSize"
+          :current-page="currentPage"
           @current-change="currentChange">
         </el-pagination>
       </div>
@@ -46,14 +51,15 @@
         <template v-for="(data, i) in dataAdd" >
           <tr :key="i">
             <td :rowspan="data.message.length + 1">
-              <el-input size="mini" v-model="data.ord" placeholder="请输入订单编号"></el-input>
+              <el-input size="mini" :readonly="updFlag" v-model="data.ord" placeholder="请输入订单编号"></el-input>
             </td>
             <td :rowspan="data.message.length + 1">
-              <el-select size="mini" v-model="data.customer" @change="changeCustomer(data.customer, data)">
+              <el-select size="mini" v-if="!updFlag"  v-model="data.customer" @change="changeCustomer(data.customer, data)">
                 <el-option
                   v-for="option in customerOptions" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
               </el-select>
+              <template v-else>{{ data.customer | filterCustomer(customerMap) }}</template>
             </td>
             <td>
               <el-select size="mini" v-model="data.message[0].product">
@@ -99,10 +105,11 @@
             <td colspan="2">
               <el-button class="btn-add" type="info" size="mini" @click="addPrdRow(data.message)">新增</el-button>
             </td>
+            <td></td>
           </tr>
         </template>
       </table>
-      <el-button class="btn-add" type="primary" size="medium" @click="addRow">新增</el-button>
+      <el-button class="btn-add" type="primary" size="medium" v-show="!updFlag" @click="addRow">新增</el-button>
       <el-button class="btn-submit" type="success" size="medium" v-show="!subWait" @click="submitAdd">提交</el-button>
       <el-button class="btn-submit" type="info" size="medium" v-show="subWait" :loading="true">提交中</el-button>
     </div>
@@ -111,7 +118,7 @@
 
 <script>
   import IconFont from 'components/common/Iconfont'
-  import { dateFormat } from 'common/js/tool'
+  import { dateFormat, deepClone } from 'common/js/tool'
   import apiUrl from '@/serviceAPI.config.js'
   export default {
     props: {
@@ -133,6 +140,8 @@
         ],
         dataSift: [],
         siftMap: {},
+        editMap: {},
+        dataUpd: [],
         dataAdd: [
           {ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: [], time: ''}
         ],
@@ -141,34 +150,53 @@
         customerMap: {},
         productMap: {},
         optionFlag: false,
+        updFlag: false,
         addFlag: false,
         loading: false,
         subWait: false,
         total: 0,
+        currentPage: 1,
+        pageSize: 10,
         currentTime: new Date().getTime()
       }
     },
     created() {
       this.getOrder()
+      if (!this.optionFlag) {
+        this.optionFlag = true
+        this.getOptions()
+      }
     },
     methods: {
       getOrder(pageNo = 1) {
         this.siftMap = {}
+        this.editMap = {}
         this.loading = true
+        this.updFlag = false
         this.$http.post(apiUrl.getOrder, {
-          data: {pageNo}
+          data: {pageNo, pageSize: this.pageSize}
         }).then(res => {
           this.loading = false
           if (res.data.code === 200) {
             this.total = res.data.count
             this.dataSift = res.data.message
             this.dataSift.forEach((ele, index) => {
-              ele.time = dateFormat(ele.time, 'yyyy-MM-dd')
               if (this.siftMap[ele.ord] === undefined) {
                 this.siftMap[ele.ord] = {rowIndex: index, num: 1}
+                this.editMap[index] = [{
+                  id: ele.id,
+                  uuid: ele.uuid,
+                  ord: ele.ord,
+                  customer: ele.cust,
+                  time: ele.time,
+                  message: [{product: ele.prd, qty: ele.qty, id: ele.id}],
+                  productOptions: []
+                }]
               } else {
                 this.siftMap[ele.ord].num += 1
+                this.editMap[this.siftMap[ele.ord].rowIndex][0].message.push({product: ele.prd, qty: ele.qty, id: ele.id})
               }
+              ele.time = dateFormat(ele.time, 'yyyy-MM-dd')
             })
           } else {
             this.$message.error(res.data.message)
@@ -199,18 +227,19 @@
           this.loading = false
         })
       },
-      goAdd() {
+      goAdd(data) {
         this.addFlag = true
-        this.currentTime = new Date().getTime()
-        this.dataAdd = [{ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: [], time: this.currentTime}]
-        if (!this.optionFlag) {
-          this.optionFlag = true
-          this.getOptions()
+        if (this.updFlag) {
+          data[0].productOptions = this.customerProduct[data[0].customer]
+          this.dataAdd = data
+        } else {
+          this.currentTime = new Date().getTime()
+          this.dataAdd = [{ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: [], time: this.currentTime}]
         }
       },
       goBack() {
         this.addFlag = false
-        this.getOrder()
+        this.updFlag = false
       },
       submitAdd() {
         if (this.subWait) {
@@ -241,11 +270,15 @@
             message[j].name = this.productMap[product].name
           }
         }
-        this.$http.post(apiUrl.insertOrder, {
+        console.log(this.dataAdd)
+        return
+        this.$http.post(this.updFlag ? apiUrl.updOrder : apiUrl.insertOrder, {
           data: this.dataAdd
         }).then(res => {
           if (res.data.code === 200) {
-            this.goBack()
+            this.addFlag = false
+            this.updFlag = false
+            this.currentChange(1)
             this.$message.success(res.data.message)
           } else {
             this.$message.error(res.data.message)
@@ -265,6 +298,7 @@
         this.tableOptions.dataSift.splice(row, 1, data)
       },
       currentChange(pageNo) {
+        this.currentPage = pageNo
         this.getOrder(pageNo)
       },
       changeCustomer(cust, row) {
@@ -279,27 +313,39 @@
       delPrdRow(row, index) {
         row.splice(index, 1)
       },
+      handleEdit(index) {
+        this.updFlag = true
+        this.goAdd(deepClone(this.editMap[index]))
+      },
       tableRowFinished({row, rowIndex}) {
         if (row.finished === 1) {
           return 'finished-row'
         }
       },
       spanMethod({ row, column, rowIndex, columnIndex }) {
+        if (!this.siftMap[row.ord]) {
+          return
+        }
         if (this.siftMap[row.ord].rowIndex === rowIndex) {
-          if ([0, 1, 6].indexOf(columnIndex) !== -1) {
+          if ([0, 1, 6, 7].indexOf(columnIndex) !== -1) {
             return {
               rowspan: this.siftMap[row.ord].num,
               colspan: 1
             }
           }
         } else {
-          if ([0, 1, 6].indexOf(columnIndex) !== -1) {
+          if ([0, 1, 6, 7].indexOf(columnIndex) !== -1) {
             return {
               rowspan: 0,
               colspan: 0
             }
           }
         }
+      }
+    },
+    filters: {
+      filterCustomer(cust, customerMap) {
+        return customerMap[cust]
       }
     },
     components: {

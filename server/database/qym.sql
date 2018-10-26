@@ -3,15 +3,15 @@
 
  Source Server         : localhost
  Source Server Type    : MySQL
- Source Server Version : 80011
+ Source Server Version : 50721
  Source Host           : localhost:3306
  Source Schema         : qym
 
  Target Server Type    : MySQL
- Target Server Version : 80011
+ Target Server Version : 50721
  File Encoding         : 65001
 
- Date: 25/10/2018 23:16:46
+ Date: 26/10/2018 21:46:03
 */
 
 SET NAMES utf8mb4;
@@ -21,53 +21,49 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Table structure for company
 -- ----------------------------
 DROP TABLE IF EXISTS `company`;
-CREATE TABLE `company` (
+CREATE TABLE `company`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `alias` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
-  `type` int(11) NOT NULL DEFAULT '0',
+  `type` int(11) NOT NULL DEFAULT 0,
   `template` int(11) DEFAULT NULL,
   `createTime` bigint(20) NOT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
-  `off` int(11) NOT NULL DEFAULT '0',
+  `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of company
 -- ----------------------------
-BEGIN;
 INSERT INTO `company` VALUES (1, '情义明木业有限公司', '情义明', 1, NULL, 1539106236226, NULL, 0);
 INSERT INTO `company` VALUES (6, '骆驼集团襄阳蓄电池有限公司', '骆驼', 0, 1, 1539150339197, NULL, 0);
 INSERT INTO `company` VALUES (7, '湖北回天新材料股份有限公司', '回天', 0, 3, 1539150294048, 1539835639964, 0);
-COMMIT;
 
 -- ----------------------------
 -- Table structure for counter
 -- ----------------------------
 DROP TABLE IF EXISTS `counter`;
-CREATE TABLE `counter` (
+CREATE TABLE `counter`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `number` int(11) NOT NULL DEFAULT '1',
+  `number` int(11) NOT NULL DEFAULT 1,
   `customer` int(11) NOT NULL,
   `type` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `time` bigint(20) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of counter
 -- ----------------------------
-BEGIN;
 INSERT INTO `counter` VALUES (6, 3, 6, 'delivery', 1539915080729);
 INSERT INTO `counter` VALUES (7, 3, 7, 'delivery', 1539835678076);
-COMMIT;
 
 -- ----------------------------
 -- Table structure for delivery
 -- ----------------------------
 DROP TABLE IF EXISTS `delivery`;
-CREATE TABLE `delivery` (
+CREATE TABLE `delivery`  (
   `id` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `ord` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `prd` int(11) DEFAULT NULL,
@@ -86,16 +82,15 @@ CREATE TABLE `delivery` (
   `time` bigint(20) DEFAULT NULL COMMENT '发货时间',
   `no` int(11) DEFAULT NULL COMMENT 'number',
   `counter` int(11) DEFAULT NULL COMMENT 'number ID',
-  `template` int(11) NOT NULL DEFAULT '1',
+  `template` int(11) NOT NULL DEFAULT 1,
   `createTime` bigint(20) DEFAULT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
-  `off` int(11) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+  `off` int(11) NOT NULL DEFAULT 0
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of delivery
 -- ----------------------------
-BEGIN;
 INSERT INTO `delivery` VALUES ('dfe995a0-d289-11e8-a79b-cd997e20a3eb', '', 13, '木托盘', 6, '骆驼集团襄阳蓄电池有限公司', '1#', '26060001', 11, '个', '', '13', 1539216000000, '', '', 1539835012253, 1, 6, 1, 1539835024378, NULL, 0);
 INSERT INTO `delivery` VALUES ('e5553800-d289-11e8-a79b-cd997e20a3eb', '', 16, '木托盘', 6, '骆驼集团襄阳蓄电池有限公司', '3-1#', '26060017', 11, '个', '', '', 1539216000000, '', '', 1539835012253, 2, 6, 1, 1539835033472, NULL, 0);
 INSERT INTO `delivery` VALUES ('e5553800-d289-11e8-a79b-cd997e20a3eb', '', 17, '木托盘', 6, '骆驼集团襄阳蓄电池有限公司', '3-2#', '26060018', 11, '个', '', '', 1539216000000, '', '', 1539835012253, 2, 6, 1, 1539835033472, NULL, 0);
@@ -113,60 +108,88 @@ INSERT INTO `delivery` VALUES ('658bfbc0-d28b-11e8-a79b-cd997e20a3eb', '', 49, '
 INSERT INTO `delivery` VALUES ('45375090-d344-11e8-86d7-6d225cf9a638', '', 14, '木托盘', 6, '骆驼集团襄阳蓄电池有限公司', '2#', '26060002', 11, '个', '67', '', 1539302400000, '', '', 1539915061696, 3, 6, 1, 1539915080729, NULL, 0);
 INSERT INTO `delivery` VALUES ('45375090-d344-11e8-86d7-6d225cf9a638', '', 15, '木托盘', 6, '骆驼集团襄阳蓄电池有限公司', '3#', '26060003', 11, '个', '', '', 1539302400000, '', '', 1539915061696, 3, 6, 1, 1539915080729, NULL, 0);
 INSERT INTO `delivery` VALUES ('45375090-d344-11e8-86d7-6d225cf9a638', '', 18, '木托盘', 6, '骆驼集团襄阳蓄电池有限公司', '3-3#', '26060019', 11, '个', '98', '', 1539302400000, '', '', 1539915061696, 3, 6, 1, 1539915080729, NULL, 0);
-COMMIT;
 
 -- ----------------------------
 -- Table structure for deliverygrp
 -- ----------------------------
 DROP TABLE IF EXISTS `deliverygrp`;
-CREATE TABLE `deliverygrp` (
+CREATE TABLE `deliverygrp`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cust` int(11) NOT NULL,
   `delivery` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `createTime` bigint(20) DEFAULT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
-  `off` int(11) NOT NULL DEFAULT '0',
+  `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 34 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of deliverygrp
 -- ----------------------------
-BEGIN;
 INSERT INTO `deliverygrp` VALUES (28, 6, 'dfe995a0-d289-11e8-a79b-cd997e20a3eb', 1539835024378, NULL, 0);
 INSERT INTO `deliverygrp` VALUES (29, 6, 'e5553800-d289-11e8-a79b-cd997e20a3eb', 1539835033472, NULL, 0);
 INSERT INTO `deliverygrp` VALUES (30, 7, 'b95c64c0-d28a-11e8-a79b-cd997e20a3eb', 1539835389196, NULL, 0);
 INSERT INTO `deliverygrp` VALUES (31, 7, '38bce230-d28b-11e8-a79b-cd997e20a3eb', 1539835602899, NULL, 0);
 INSERT INTO `deliverygrp` VALUES (32, 7, '658bfbc0-d28b-11e8-a79b-cd997e20a3eb', 1539835678076, NULL, 0);
 INSERT INTO `deliverygrp` VALUES (33, 6, '45375090-d344-11e8-86d7-6d225cf9a638', 1539915080729, NULL, 0);
-COMMIT;
 
 -- ----------------------------
 -- Table structure for ord
 -- ----------------------------
 DROP TABLE IF EXISTS `ord`;
-CREATE TABLE `ord` (
+CREATE TABLE `ord`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `ord` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `cust` int(11) NOT NULL,
   `custm` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `prd` int(11) NOT NULL,
   `prdm` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
-  `model` varchar(50) DEFAULT NULL,
+  `model` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `qty` int(11) NOT NULL,
-  `sentQty` int(11) NOT NULL DEFAULT '0',
-  `finished` int(11) NOT NULL DEFAULT '0',
+  `sentQty` int(11) NOT NULL DEFAULT 0,
+  `finished` int(11) NOT NULL DEFAULT 0,
+  `time` bigint(20) NOT NULL,
   `createTime` bigint(20) NOT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
-  `off` int(11) NOT NULL DEFAULT '0',
+  `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of ord
+-- ----------------------------
+INSERT INTO `ord` VALUES (3, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', '#a', 6, '骆驼集团襄阳蓄电池有限公司', 13, '木托盘', '1#', 12, 0, 0, 1540557709964, 1540557724781, NULL, 0);
+INSERT INTO `ord` VALUES (4, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', '#a', 6, '骆驼集团襄阳蓄电池有限公司', 14, '木托盘', '2#', 23, 0, 0, 1540557709964, 1540557724781, NULL, 0);
+INSERT INTO `ord` VALUES (5, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', '#a', 6, '骆驼集团襄阳蓄电池有限公司', 15, '木托盘', '3#', 56, 0, 0, 1540557709964, 1540557724781, NULL, 0);
+INSERT INTO `ord` VALUES (6, '3b0f1d60-d91f-11e8-832e-3f4db4b7b226', '#20181026', 7, '湖北回天新材料股份有限公司', 39, '木托盘', '806Z折边胶木托盘', 560, 0, 0, 1540558862853, 1540558879286, NULL, 0);
+INSERT INTO `ord` VALUES (7, '3b0f1d60-d91f-11e8-832e-3f4db4b7b226', '#20181026', 7, '湖北回天新材料股份有限公司', 43, '木托盘', '906Z单桶木托盘', 780, 0, 0, 1540558862853, 1540558879286, NULL, 0);
+
+-- ----------------------------
+-- Table structure for ordgrp
+-- ----------------------------
+DROP TABLE IF EXISTS `ordgrp`;
+CREATE TABLE `ordgrp`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ord` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `cust` int(11) NOT NULL,
+  `createTime` bigint(20) NOT NULL,
+  `updateTime` bigint(20) DEFAULT NULL,
+  `off` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of ordgrp
+-- ----------------------------
+INSERT INTO `ordgrp` VALUES (12, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', 6, 1540557724781, NULL, 0);
+INSERT INTO `ordgrp` VALUES (13, '3b0f1d60-d91f-11e8-832e-3f4db4b7b226', 7, 1540558879286, NULL, 0);
 
 -- ----------------------------
 -- Table structure for product
 -- ----------------------------
 DROP TABLE IF EXISTS `product`;
-CREATE TABLE `product` (
+CREATE TABLE `product`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `model` varchar(50) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
@@ -174,15 +197,14 @@ CREATE TABLE `product` (
   `provider` int(11) NOT NULL,
   `createTime` bigint(20) NOT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
-  `off` int(11) NOT NULL DEFAULT '0',
+  `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
-  KEY `unit` (`unitId`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+  INDEX `unit`(`unitId`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 62 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of product
 -- ----------------------------
-BEGIN;
 INSERT INTO `product` VALUES (13, '木托盘', '1#', 11, 1, 1539106370011, NULL, 0);
 INSERT INTO `product` VALUES (14, '木托盘', '2#', 11, 1, 1539106370015, NULL, 0);
 INSERT INTO `product` VALUES (15, '木托盘', '3#', 11, 1, 1539106370019, NULL, 0);
@@ -232,31 +254,29 @@ INSERT INTO `product` VALUES (58, '木托盘', '外贸免熏蒸木压板1200*115
 INSERT INTO `product` VALUES (59, '木托盘', '外贸免熏蒸木压板1140*1140', 13, 1, 1539229090198, NULL, 0);
 INSERT INTO `product` VALUES (60, '木托盘', '外贸免熏蒸木压板1100*800', 13, 1, 1539229090202, NULL, 0);
 INSERT INTO `product` VALUES (61, '木托盘', '外贸免熏蒸木压板1150*900', 13, 1, 1539229090205, NULL, 0);
-COMMIT;
 
 -- ----------------------------
 -- Table structure for supply
 -- ----------------------------
 DROP TABLE IF EXISTS `supply`;
-CREATE TABLE `supply` (
+CREATE TABLE `supply`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `customer` int(11) NOT NULL,
   `product` int(11) NOT NULL,
   `nun` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `createTime` bigint(20) NOT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
-  `off` int(11) NOT NULL DEFAULT '0',
+  `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
-  KEY `product` (`product`) USING BTREE,
-  KEY `customer` (`customer`) USING BTREE,
-  CONSTRAINT `customer` FOREIGN KEY (`customer`) REFERENCES `company` (`id`),
-  CONSTRAINT `product` FOREIGN KEY (`product`) REFERENCES `product` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+  INDEX `product`(`product`) USING BTREE,
+  INDEX `customer`(`customer`) USING BTREE,
+  CONSTRAINT `customer` FOREIGN KEY (`customer`) REFERENCES `company` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `product` FOREIGN KEY (`product`) REFERENCES `product` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 48 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of supply
 -- ----------------------------
-BEGIN;
 INSERT INTO `supply` VALUES (7, 6, 13, '26060001', 1539106635420, NULL, 0);
 INSERT INTO `supply` VALUES (8, 6, 14, '26060002', 1539106635425, NULL, 0);
 INSERT INTO `supply` VALUES (9, 6, 15, '26060003', 1539106635429, NULL, 0);
@@ -290,36 +310,33 @@ INSERT INTO `supply` VALUES (44, 7, 42, '', 1539230307173, NULL, 0);
 INSERT INTO `supply` VALUES (45, 7, 43, '', 1539230307176, NULL, 0);
 INSERT INTO `supply` VALUES (46, 7, 34, '90木托盘木托盘木托盘1000*3000', 1539418892857, 1539418921899, 1);
 INSERT INTO `supply` VALUES (47, 7, 49, '89076666', 1539418958506, NULL, 0);
-COMMIT;
 
 -- ----------------------------
 -- Table structure for unit
 -- ----------------------------
 DROP TABLE IF EXISTS `unit`;
-CREATE TABLE `unit` (
+CREATE TABLE `unit`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `sign` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `createTime` bigint(20) NOT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
-  `off` int(11) NOT NULL DEFAULT '0',
+  `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of unit
 -- ----------------------------
-BEGIN;
 INSERT INTO `unit` VALUES (11, '个', '', 1539106290655, NULL, 0);
 INSERT INTO `unit` VALUES (13, '块', '', 1539183768077, NULL, 0);
 INSERT INTO `unit` VALUES (14, '套', '', 1539227991486, NULL, 0);
-COMMIT;
 
 -- ----------------------------
 -- Table structure for user
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
-CREATE TABLE `user` (
+CREATE TABLE `user`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `account` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
@@ -327,16 +344,14 @@ CREATE TABLE `user` (
   `root` int(11) NOT NULL,
   `createTime` bigint(20) NOT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
-  `off` int(11) NOT NULL DEFAULT '0',
+  `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-BEGIN;
 INSERT INTO `user` VALUES (1, '陈亮', '236338364', 'f889134a41063043803618b18908b6bd6d57b027', 1, 1539190580107, NULL, 0);
 INSERT INTO `user` VALUES (4, 'r', '2', '77de68daecd823babbb58edb1c8e14d7106e83bb', 0, 1539330034198, NULL, 0);
-COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
