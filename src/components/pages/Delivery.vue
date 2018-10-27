@@ -12,9 +12,40 @@
           @hide="hideList"
           placement="right"
           trigger="click">
-          <el-table v-loading="loading" ref="listTable" border size="mini" max-height="300" :data="tableData" @selection-change="selectionChange" @select="select" @select-all="selectAll">
+          <el-table 
+            ref="listTable" 
+            border 
+            size="mini" 
+            max-height="300"
+            :data="tableData"
+            key="listTable1"
+            v-if="template !== 3" 
+            v-loading="loading" 
+            @selection-change="selectionChange" 
+            @select="select" 
+            @select-all="selectAll">
             <el-table-column type="selection" width="35"></el-table-column>
             <el-table-column v-for="(item, i) in selectField" :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
+          </el-table>
+          <el-table 
+            border 
+            size="mini" 
+            max-height="300" 
+            :data="tableData" 
+            key="listTable2"
+            v-if="template === 3" 
+            v-loading="loading"
+            :span-method="spanMethod"
+            :cell-style="cellStyle">
+            <template v-for="(item, i) in selectField">
+              <el-table-column v-if="!item.checkBox" :width="item.width ? item.width : ''" :prop="item.prop" :label="item.label" :key="i">
+              </el-table-column>
+              <el-table-column v-if="item.checkBox" :width="item.width ? item.width : ''" :prop="item.prop" :label="item.label" :key="i">
+                <template slot-scope="scope">
+                  <el-checkbox v-model="scope.row[item.prop]" @change="selectOrder(scope.row)"></el-checkbox>
+                </template>
+              </el-table-column>
+            </template>
           </el-table>
           <el-button type="primary" slot="reference">物料清单</el-button>
         </el-popover>
@@ -77,7 +108,7 @@
   import IconFont from 'components/common/Iconfont'
   import Search from 'components/common/Search'
   import apiUrl from '@/serviceAPI.config.js'
-  import { dateFormat } from 'common/js/tool'
+  import { dateFormat, deepClone } from 'common/js/tool'
   import { templateDelivery } from 'common/js/template'
   export default {
     data() {
@@ -87,6 +118,7 @@
         },
         customerOptions: [],
         customerMap: {},
+        orderMap: {},
         template: 1,
         tableData: [],
         selectData: [],
@@ -198,19 +230,31 @@
         this.loading = true
         this.listShowFlag = true
         this.selectData = []
-        this.$http.post(apiUrl.getSupply, {
+        this.$http.post(this.template !== 3 ? apiUrl.getSupply : apiUrl.getOrder, {
           data: {customerId}
         }).then(res => {
           this.loading = false
           if (res.data.code === 200) {
-            this.tableData = res.data.message.supplyList
+            if (this.template !== 3) {
+              this.tableData = res.data.message.supplyList
+              const productionTime = new Date(this.deliveryTime.getTime() - 7 * 24 * 60 * 60 * 1000)
+              this.tableData.forEach(ele => {
+                ele.ptime = dateFormat(productionTime, 'yyyy-MM-dd')
+              })
+            } else {
+              this.tableData = res.data.message.orderList
+              this.tableData.forEach((ele, index) => {
+                ele.restQty = Number(ele.qty) - Number(ele.sentQty)
+                if (this.orderMap[ele.ord] === undefined) {
+                  this.orderMap[ele.ord] = {rowIndex: index, num: 1}
+                } else {
+                  this.orderMap[ele.ord].num += 1
+                }
+              })
+            }
             const number = res.data.message.number
-            const productionTime = new Date(this.deliveryTime.getTime() - 7 * 24 * 60 * 60 * 1000)
             number[0].number = Number(number[0].number) + 1
             this.counter = number[0]
-            this.tableData.forEach(ele => {
-              ele.ptime = dateFormat(productionTime, 'yyyy-MM-dd')
-            })
           }
         }).catch(err => {
 
@@ -234,6 +278,21 @@
           for (let i = len - 1; i >= this.maxRow; i--) {
             this.$refs.listTable.toggleRowSelection(selection[i], false);
             selection.splice(i, 1)
+          }
+        }
+      },
+      selectOrder(row) {
+        const selectData = deepClone(row)
+        if (row.checked === true) {
+          selectData.ordQty = selectData.qty
+          selectData.qty = ''
+          this.selectData.push(selectData)
+        } else {
+          for (let i = 0, len = this.selectData.length; i < len; i++) {
+            if (this.selectData[i].id === selectData.id) {
+              this.selectData.splice(i, 1)
+              break
+            }
           }
         }
       },
@@ -263,6 +322,35 @@
           }
         });
         return sums;
+      },
+      spanMethod({ row, column, rowIndex, columnIndex }) {
+        if (!this.orderMap[row.ord]) {
+          return
+        }
+        if (this.orderMap[row.ord].rowIndex === rowIndex) {
+          if ([0].indexOf(columnIndex) !== -1) {
+            return {
+              rowspan: this.orderMap[row.ord].num,
+              colspan: 1
+            }
+          }
+        } else {
+          if ([0].indexOf(columnIndex) !== -1) {
+            return {
+              rowspan: 0,
+              colspan: 0
+            }
+          }
+        }
+      },
+      cellStyle({row, column, rowIndex, columnIndex}) {
+        if (columnIndex === 3) {
+          return 'color: blue'
+        } else if (columnIndex === 4) {
+          return 'color: #00CC33'
+        } else if (columnIndex === 5) {
+          return 'color: red'
+        }
       },
       dataFormat() {
         let result = []

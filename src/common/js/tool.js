@@ -37,7 +37,7 @@ export function delCookie(name) {
 export function deepClone(obj) {
   let objClone = Array.isArray(obj) ? [] : {}
   if (obj && typeof obj === "object") {
-    for (key in obj) {
+    for (let key in obj) {
       if (obj.hasOwnProperty(key)) {
         if (obj[key] && typeof obj[key] === "object") {
           objClone[key] = deepClone(obj[key]);

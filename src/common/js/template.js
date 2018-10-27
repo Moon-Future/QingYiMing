@@ -1,9 +1,9 @@
 const templateDelivery = {
   1: {
     selectField: [
-      {prop: 'name', label: '产品名称'},
+      {prop: 'name', label: '产品名称', width: '100'},
       {prop: 'model', label: '规格型号', width: '250'},
-      {prop: 'nun', label: '物料编码'}
+      {prop: 'nun', label: '物料编码', width: '100'}
     ],
     field: [
       {prop: 'nun', label: '物料编码', 'width': '80'},
@@ -32,9 +32,9 @@ const templateDelivery = {
   },
   2: {
     selectField: [
-      {prop: 'name', label: '产品名称'},
+      {prop: 'name', label: '产品名称', width: '100'},
       {prop: 'model', label: '规格型号', width: '250'},
-      {prop: 'nun', label: '物料编码'}
+      {prop: 'nun', label: '物料编码', width: '100'}
     ],
     field: [
       {prop: 'model', label: '产品名称'},
@@ -53,12 +53,15 @@ const templateDelivery = {
   },
   3: {
     selectField: [
-      {prop: 'name', label: '产品名称'},
-      {prop: 'model', label: '规格型号', width: '250'},
-      {prop: 'nun', label: '物料编码'}
+      {prop: 'ord', label: '订单编号', width: '150'},
+      {prop: 'checked', label: '', checkBox: true, width: '30'},
+      {prop: 'model', label: '产品型号', width: '150'},
+      {prop: 'qty', label: '数量', width: '60'},
+      {prop: 'sentQty', label: '已送数量', width: '80'},
+      {prop: 'restQty', label: '待送数量', width: '80'},
     ],
     field: [
-      {prop: 'ord', label: '订单编号', input: true},
+      {prop: 'ord', label: '订单编号'},
       {prop: 'model', label: '产品名称'},
       {prop: 'unit', label: '单位', width: '50'},
       {prop: 'qty', label: '数量', width: '50', input: true},

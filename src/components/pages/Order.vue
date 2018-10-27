@@ -270,8 +270,6 @@
             message[j].name = this.productMap[product].name
           }
         }
-        console.log(this.dataAdd)
-        return
         this.$http.post(this.updFlag ? apiUrl.updOrder : apiUrl.insertOrder, {
           data: this.dataAdd
         }).then(res => {

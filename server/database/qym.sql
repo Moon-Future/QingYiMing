@@ -11,7 +11,7 @@
  Target Server Version : 50721
  File Encoding         : 65001
 
- Date: 26/10/2018 21:46:03
+ Date: 27/10/2018 18:13:02
 */
 
 SET NAMES utf8mb4;
@@ -154,16 +154,21 @@ CREATE TABLE `ord`  (
   `updateTime` bigint(20) DEFAULT NULL,
   `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ord
 -- ----------------------------
 INSERT INTO `ord` VALUES (3, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', '#a', 6, '骆驼集团襄阳蓄电池有限公司', 13, '木托盘', '1#', 12, 0, 0, 1540557709964, 1540557724781, NULL, 0);
-INSERT INTO `ord` VALUES (4, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', '#a', 6, '骆驼集团襄阳蓄电池有限公司', 14, '木托盘', '2#', 23, 0, 0, 1540557709964, 1540557724781, NULL, 0);
-INSERT INTO `ord` VALUES (5, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', '#a', 6, '骆驼集团襄阳蓄电池有限公司', 15, '木托盘', '3#', 56, 0, 0, 1540557709964, 1540557724781, NULL, 0);
-INSERT INTO `ord` VALUES (6, '3b0f1d60-d91f-11e8-832e-3f4db4b7b226', '#20181026', 7, '湖北回天新材料股份有限公司', 39, '木托盘', '806Z折边胶木托盘', 560, 0, 0, 1540558862853, 1540558879286, NULL, 0);
+INSERT INTO `ord` VALUES (4, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', '#a', 6, '骆驼集团襄阳蓄电池有限公司', 14, '木托盘', '2#', 23, 0, 1, 1540557709964, 1540557724781, NULL, 0);
+INSERT INTO `ord` VALUES (5, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', '#a', 6, '骆驼集团襄阳蓄电池有限公司', 15, '木托盘', '3#', 56, 0, 1, 1540557709964, 1540557724781, NULL, 0);
+INSERT INTO `ord` VALUES (6, '3b0f1d60-d91f-11e8-832e-3f4db4b7b226', '#20181026', 7, '湖北回天新材料股份有限公司', 39, '木托盘', '806Z折边胶木托盘', 560, 0, 1, 1540558862853, 1540558879286, NULL, 0);
 INSERT INTO `ord` VALUES (7, '3b0f1d60-d91f-11e8-832e-3f4db4b7b226', '#20181026', 7, '湖北回天新材料股份有限公司', 43, '木托盘', '906Z单桶木托盘', 780, 0, 0, 1540558862853, 1540558879286, NULL, 0);
+INSERT INTO `ord` VALUES (8, '412c53e0-d9cc-11e8-b159-3f38f859e2c7', '#20181027', 7, '湖北回天新材料股份有限公司', 39, '木托盘', '806Z折边胶木托盘', 550, 0, 0, 1540633164160, 1540633192478, NULL, 0);
+INSERT INTO `ord` VALUES (9, '412c53e0-d9cc-11e8-b159-3f38f859e2c7', '#20181027', 7, '湖北回天新材料股份有限公司', 41, '木托盘', '906Z双桶木托盘', 650, 0, 0, 1540633164160, 1540633192478, NULL, 0);
+INSERT INTO `ord` VALUES (10, '412c53e0-d9cc-11e8-b159-3f38f859e2c7', '#20181027', 7, '湖北回天新材料股份有限公司', 43, '木托盘', '906Z单桶木托盘', 750, 0, 0, 1540633164160, 1540633192478, NULL, 0);
+INSERT INTO `ord` VALUES (11, '412c53e0-d9cc-11e8-b159-3f38f859e2c7', '#20181027', 7, '湖北回天新材料股份有限公司', 49, '木托盘', '8264水务胶专用木托盘1000*1000', 850, 0, 0, 1540633164160, 1540633192478, NULL, 0);
+INSERT INTO `ord` VALUES (12, '412c53e0-d9cc-11e8-b159-3f38f859e2c7', '#20181027', 7, '湖北回天新材料股份有限公司', 40, '木托盘', '906Z双桶木箱', 950, 0, 0, 1540633164160, 1540633192478, NULL, 0);
 
 -- ----------------------------
 -- Table structure for ordgrp
@@ -173,17 +178,19 @@ CREATE TABLE `ordgrp`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ord` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `cust` int(11) NOT NULL,
+  `finished` int(11) NOT NULL DEFAULT 0,
   `createTime` bigint(20) NOT NULL,
   `updateTime` bigint(20) DEFAULT NULL,
   `off` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ordgrp
 -- ----------------------------
-INSERT INTO `ordgrp` VALUES (12, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', 6, 1540557724781, NULL, 0);
-INSERT INTO `ordgrp` VALUES (13, '3b0f1d60-d91f-11e8-832e-3f4db4b7b226', 7, 1540558879286, NULL, 0);
+INSERT INTO `ordgrp` VALUES (12, '8aeba1d0-d91c-11e8-832e-3f4db4b7b226', 6, 0, 1540557724781, NULL, 0);
+INSERT INTO `ordgrp` VALUES (13, '3b0f1d60-d91f-11e8-832e-3f4db4b7b226', 7, 0, 1540558879286, NULL, 0);
+INSERT INTO `ordgrp` VALUES (14, '412c53e0-d9cc-11e8-b159-3f38f859e2c7', 7, 0, 1540633192478, NULL, 0);
 
 -- ----------------------------
 -- Table structure for product
