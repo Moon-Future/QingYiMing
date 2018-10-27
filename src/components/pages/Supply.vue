@@ -29,20 +29,20 @@
       return {
         tableOptions: {
           fieldAdd: [
-            { prop: 'customer', label: '客户', required: true, options: [], select: true },
-            { prop: 'product', label: '产品', required: true, options: [], select: true, key: 'model' },
+            { prop: 'cust', label: '客户', required: true, options: [], select: true, key: 'custm' },
+            { prop: 'prd', label: '产品', required: true, options: [], select: true, key: 'model' },
             { prop: 'nun', label: '编码', input: true }
           ],
           fieldSift: [
-            { prop: 'customer', label: '客户' },
-            { prop: 'product', label: '产品名称' },
+            { prop: 'custm', label: '客户' },
+            { prop: 'prdm', label: '产品名称' },
             { prop: 'model', label: '产品型号' },
             { prop: 'nun', label: '编码' },
-            { prop: 'unit', label: '单位' }
+            { prop: 'unitm', label: '单位' }
           ],
           checkRepeat: {field: ['customer', 'product'], message: '客户对应产品重复'},
           dataSift: [],
-          addTemplate: { customer: '', product: '', nun: '' },
+          addTemplate: { cust: '', prd: '', nun: '' },
           addApi: apiUrl.insertSupply,
           deleteApi: apiUrl.deleteSupply,
           updApi: apiUrl.updSupply

@@ -47,11 +47,11 @@ router.post('/getCompany', async (ctx) => {
     const currentTime = new Date()
     let company
     if (data && data.type === 0) {
-      company = await query(`SELECT * FROM company WHERE type = 0 AND off != 1`)
+      company = await query(`SELECT * FROM company WHERE type = 0 AND off != 1 ORDER BY createTime ASC`)
       ctx.body = {code: 200, message: company}
     } else {
       const count = await query(`SELECT COUNT(*) as count FROM company WHERE off != 1`)
-      company = await query(`SELECT * FROM company WHERE off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+      company = await query(`SELECT * FROM company WHERE off != 1 ORDER BY createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
       ctx.body = {code: 200, message: company, count: count[0].count}
     }
   } catch(err) {

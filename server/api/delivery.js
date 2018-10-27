@@ -30,7 +30,7 @@ router.post('/saveDelivery', async (ctx) => {
     if (counter.id) {
       await query(`UPDATE counter SET number = ${counter.number}, time = ${currentTime} WHERE id = ${counter.id}`)
     } else {
-      await query(`INSERT INTO counter (number, type, time) VALUES (${counter.number}, 'delivery', ${currentTime})`)
+      await query(`INSERT INTO counter (number, cust, type, time) VALUES (${counter.number}, ${ele.cust}, 'delivery', ${currentTime})`)
     }
     await query(
       `

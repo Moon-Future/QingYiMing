@@ -38,7 +38,12 @@
           fieldAdd: [
             { prop: 'name', label: '名称', required: true, input: true, placeholder: '输入产品名' },
             { prop: 'model', label: '型号', required: true, input: true, placeholder: '输入产品型号' },
-            { prop: 'unit', label: '单位', required: true, select: true, options: []}
+            { prop: 'unit', label: '单位', required: true, select: true, options: [], key: 'unitm'}
+          ],
+          fieldSift: [
+            { prop: 'name', label: '名称' },
+            { prop: 'model', label: '型号' },
+            { prop: 'unitm', label: '单位' }
           ],
           checkRepeat: {field: ['model'], message: '型号重复'},
           dataSift: [],

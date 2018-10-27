@@ -26,7 +26,7 @@ router.post('/insertOrder', async (ctx) => {
       }
       item.message.forEach(ele => {
         let list = [
-          `'${uuid}'`, `'${item.ord}'`, item.customer, `'${item.custm}'`, ele.product, `'${ele.name}'`, `'${ele.model}'`,
+          `'${uuid}'`, `'${item.ord}'`, item.cust, `'${item.custm}'`, ele.prd, `'${ele.prdm}'`, `'${ele.model}'`,
           ele.qty, currentTime, item.time
         ]
         str += `( ${list.join()} ),`
@@ -58,24 +58,24 @@ router.post('/getOrder', async (ctx) => {
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
     const customerId = data && data.customerId
-    let ids, ordStr = '', orderList = [], count
+    let ids, orderList = [], count
     if (customerId) {
       ids = await query(`SELECT * FROM ordgrp WHERE cust = ${customerId} AND finished != 1 AND off != 1 `)
       for (let i = 0, len = ids.length; i < len; i++) {
         let list = await query(
           `
-          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model, u.name as unit, u.id as unitId
+          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model, u.name as unitm, u.id as unit
           FROM ord o, company c, product p, unit u
-          WHERE o.cust = c.id AND o.prd = p.id AND p.unitId = u.id
+          WHERE o.cust = c.id AND o.prd = p.id AND p.unit = u.id
           AND o.off != 1 AND o.uuid = '${ids[i].ord}'
           `
         )
         orderList = orderList.concat(list)
       }
-      number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND customer = ${customerId}`)
+      number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND cust = ${customerId}`)
       if (number.length === 0) {
-        await query(`INSERT INTO counter (number, customer, type, time) VALUES (0, ${customerId}, 'delivery', ${new Date().getTime()})`)
-        number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND customer = ${customerId}`)
+        await query(`INSERT INTO counter (number, cust, type, time) VALUES (0, ${customerId}, 'delivery', ${new Date().getTime()})`)
+        number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND cust = ${customerId}`)
       } else {
         // 下个月重置为0
         const time = new Date(number[0].time)
@@ -125,12 +125,12 @@ router.post('/updOrder', async (ctx) => {
         let ele = item.message[j]
         if (ele.id === undefined) {
           let list = [
-            `'${item.uuid}'`, `'${item.ord}'`, item.customer, `'${item.custm}'`, ele.product, `'${ele.name}'`, `'${ele.model}'`,
+            `'${item.uuid}'`, `'${item.ord}'`, item.cust, `'${item.custm}'`, ele.prd, `'${ele.prdm}'`, `'${ele.model}'`,
             ele.qty, item.createTime, item.time
           ]
           strInsert += `( ${list.join()} ),`
         } else {
-          await query(`UPDATE ord SET prd = ${ele.product}, prdm = '${ele.name}', model = '${ele.model}', 
+          await query(`UPDATE ord SET prd = ${ele.prd}, prdm = '${ele.prdm}', model = '${ele.model}', 
             qty = ${ele.qty}, time = ${item.time}, updateTime = ${currentTime}, off = ${ele.off} WHERE id = ${ele.id}`)
         }
       }

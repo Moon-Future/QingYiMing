@@ -356,11 +356,12 @@
         let result = []
         this.selectData.forEach(ele => {
           const data = {
-            prd: ele.prd, prdm: ele.name, cust: ele.cust, custm: ele.customer,
-            model: ele.model, nun: ele.nun, unit: ele.unitId, unitm: ele.unit,
-            qty: ele.qty || '', qtyR: ele.qtyR || '', ptime: new Date(ele.ptime).getTime(),
+            prd: ele.prd, prdm: ele.prdm, cust: ele.cust, custm: ele.custm,
+            model: ele.model, nun: ele.nun || '', unit: ele.unit, unitm: ele.unitm,
+            qty: ele.qty || '', qtyR: ele.qtyR || '', ptime: ele.ptime && new Date(ele.ptime).getTime() || '',
             lot: ele.lot || '', remark: ele.remark || '', time: this.deliveryTime.getTime(),
-            no: this.counter.number, counter: this.counter.id, ord: ele.ord || '', template: this.template
+            no: this.counter.number, counter: this.counter.id, ord: ele.ord || '', template: this.template,
+            idOrd: ele.id || '', uuidOrd: ele.uuid || ''
           }
           result.push(data)
         })

@@ -16,12 +16,12 @@ router.post('/insertSupply', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const currentTime = new Date().getTime()
-      const supply = await query(`SELECT * FROM supply WHERE customer = ${item.customer} AND product = ${item.product} AND off != 1`)
+      const supply = await query(`SELECT * FROM supply WHERE cust = ${item.cust} AND prd = ${item.prd} AND off != 1`)
       if (supply.length !== 0) {
         result.push(item.nun)
         continue
       }
-      await query(`INSERT INTO supply (customer, product, nun, createTime) VALUES (${item.customer}, ${item.product}, '${item.nun}', ${currentTime})`)
+      await query(`INSERT INTO supply (cust, prd, nun, createTime) VALUES (${item.cust}, ${item.prd}, '${item.nun}', ${currentTime})`)
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -52,10 +52,10 @@ router.post('/getSupply', async (ctx) => {
         count = await query(`SELECT COUNT(*) as count FROM supply WHERE off != 1`)
         supplyList = await query(
           `
-          SELECT s.id, s.nun, c.name as customer, p.name as product, p.model, u.name as unit 
+          SELECT s.id, s.nun, c.name as custm, p.name as prdm, p.model, u.name as unitm 
           FROM supply s, company c, product p, unit u 
-          WHERE s.customer = c.id AND s.product = p.id AND p.unitId = u.id
-          AND s.off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}
+          WHERE s.cust = c.id AND s.prd = p.id AND p.unit = u.id
+          AND s.off != 1 ORDER BY s.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}
           `
         )
         ctx.body = {code: 200, message: supplyList, count: count[0].count}
@@ -63,16 +63,16 @@ router.post('/getSupply', async (ctx) => {
         const customerId = data.customerId
         supplyList = await query(
           `
-          SELECT s.id, s.nun, c.name as customer, c.id as cust, p.name as name, p.model, p.id as prd, u.name as unit, u.id as unitId
+          SELECT s.id, s.nun, c.name as custm, c.id as cust, p.name as prdm, p.model, p.id as prd, u.name as unitm, u.id as unit
           FROM supply s, company c, product p, unit u 
-          WHERE s.customer = ${customerId} AND s.customer = c.id AND s.product = p.id AND p.unitId = u.id
-          AND s.off != 1
+          WHERE s.cust = ${customerId} AND s.cust = c.id AND s.prd = p.id AND p.unit = u.id
+          AND s.off != 1 ORDER BY s.createTime ASC
           `
         )
-        number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND customer = ${customerId}`)
+        number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND cust = ${customerId}`)
         if (number.length === 0) {
-          await query(`INSERT INTO counter (number, customer, type, time) VALUES (0, ${customerId}, 'delivery', ${new Date().getTime()})`)
-          number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND customer = ${customerId}`)
+          await query(`INSERT INTO counter (number, cust, type, time) VALUES (0, ${customerId}, 'delivery', ${new Date().getTime()})`)
+          number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND cust = ${customerId}`)
         } else {
           // 下个月重置为0
           const time = new Date(number[0].time)
@@ -86,10 +86,10 @@ router.post('/getSupply', async (ctx) => {
     } else {
       supplyList = await query(
         `
-        SELECT s.id, s.nun, c.name as customer, c.id as cust, p.name as product, p.id as prd, p.model, u.name as unit 
+        SELECT s.id, s.nun, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model, u.name as unitm 
         FROM supply s, company c, product p, unit u 
-        WHERE s.customer = c.id AND s.product = p.id AND p.unitId = u.id
-        AND s.off != 1
+        WHERE s.cust = c.id AND s.prd = p.id AND p.unit = u.id
+        AND s.off != 1 ORDER BY s.createTime ASC
         `
       )
       ctx.body = {code: 200, message: supplyList}
@@ -128,17 +128,17 @@ router.post('/updSupply', async (ctx) => {
     }
     
     const data = ctx.request.body.data
-    const check = await query(`SELECT * FROM supply WHERE customer = ${data.customer} AND product = ${data.product} AND off != 1`)
+    const check = await query(`SELECT * FROM supply WHERE cust = ${data.cust} AND prd = ${data.prd} AND off != 1`)
     if (check.length !== 0 && check[0].id != data.id) {
       ctx.body = {code: 500, message: '已存在相同数据'}
       return
     }
-    const upd = await query(`UPDATE supply SET customer = ${data.customer}, product = ${data.product}, nun = '${data.nun}', updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
+    const upd = await query(`UPDATE supply SET cust = ${data.cust}, prd = ${data.prd}, nun = '${data.nun}', updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
     const result = await query(
         `
-        SELECT s.id, s.nun, c.name as customer, p.name as product, p.model, u.name as unit 
+        SELECT s.id, s.nun, c.name as custm, p.name as prdm, p.model, u.name as unitm
         FROM supply s, company c, product p, unit u 
-        WHERE s.customer = c.id AND s.product = p.id AND p.unitId = u.id
+        WHERE s.cust = c.id AND s.prd = p.id AND p.unit = u.id
         AND c.off != 1 AND s.id = ${data.id}
         `
       )

@@ -54,15 +54,15 @@
               <el-input size="mini" :readonly="updFlag" v-model="data.ord" placeholder="请输入订单编号"></el-input>
             </td>
             <td :rowspan="data.message.length + 1">
-              <el-select size="mini" v-if="!updFlag"  v-model="data.customer" @change="changeCustomer(data.customer, data)">
+              <el-select size="mini" v-if="!updFlag"  v-model="data.cust" @change="changeCustomer(data.cust, data)">
                 <el-option
                   v-for="option in customerOptions" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
               </el-select>
-              <template v-else>{{ data.customer | filterCustomer(customerMap) }}</template>
+              <template v-else>{{ data.cust | filterCustomer(customerMap) }}</template>
             </td>
             <td>
-              <el-select size="mini" v-model="data.message[0].product">
+              <el-select size="mini" v-model="data.message[0].prd">
                 <el-option
                   v-for="option in data.productOptions" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
@@ -89,7 +89,7 @@
           <template>
             <tr v-for="index in data.message.length - 1" :key="`${i}_${index}`">
               <td>
-                <el-select size="mini" v-model="data.message[index].product">
+                <el-select size="mini" v-model="data.message[index].prd">
                   <el-option
                     v-for="option in data.productOptions" :label="option.name" :value="option.id" :key="option.id">
                   </el-option>
@@ -143,7 +143,7 @@
         editMap: {},
         dataUpd: [],
         dataAdd: [
-          {ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: [], time: ''}
+          {ord: '', cust: '', message: [{prd: '', qty: ''}], productOptions: [], time: ''}
         ],
         customerProduct: {},
         customerOptions: [],
@@ -187,14 +187,14 @@
                   id: ele.id,
                   uuid: ele.uuid,
                   ord: ele.ord,
-                  customer: ele.cust,
+                  cust: ele.cust,
                   time: ele.time,
-                  message: [{product: ele.prd, qty: ele.qty, id: ele.id}],
+                  message: [{prd: ele.prd, qty: ele.qty, id: ele.id}],
                   productOptions: []
                 }]
               } else {
                 this.siftMap[ele.ord].num += 1
-                this.editMap[this.siftMap[ele.ord].rowIndex][0].message.push({product: ele.prd, qty: ele.qty, id: ele.id})
+                this.editMap[this.siftMap[ele.ord].rowIndex][0].message.push({prd: ele.prd, qty: ele.qty, id: ele.id})
               }
               ele.time = dateFormat(ele.time, 'yyyy-MM-dd')
             })
@@ -214,11 +214,11 @@
             message.forEach(ele => {
               if (!this.customerProduct[ele.cust]) {
                 this.customerProduct[ele.cust] = []
-                this.customerOptions.push({id: ele.cust, name: ele.customer})
-                this.customerMap[ele.cust] = ele.customer
+                this.customerOptions.push({id: ele.cust, name: ele.custm})
+                this.customerMap[ele.cust] = ele.custm
               }
               if (!this.productMap[ele.prd]) {
-                this.productMap[ele.prd] = {model: ele.model, name: ele.product}
+                this.productMap[ele.prd] = {model: ele.model, name: ele.prdm}
               }
               this.customerProduct[ele.cust].push({id: ele.prd, name: ele.model})
             });
@@ -230,11 +230,11 @@
       goAdd(data) {
         this.addFlag = true
         if (this.updFlag) {
-          data[0].productOptions = this.customerProduct[data[0].customer]
+          data[0].productOptions = this.customerProduct[data[0].cust]
           this.dataAdd = data
         } else {
           this.currentTime = new Date().getTime()
-          this.dataAdd = [{ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: [], time: this.currentTime}]
+          this.dataAdd = [{ord: '', cust: '', message: [{prd: '', qty: ''}], productOptions: [], time: this.currentTime}]
         }
       },
       goBack() {
@@ -254,20 +254,20 @@
             return
           }
           ordMap[data.ord] = true
-          if (data.ord === '' || data.customer === '') {
+          if (data.ord === '' || data.cust === '') {
             this.$message.error('* 为必填字段')
             return
           }
-          data.custm = this.customerMap[data.customer]
+          data.custm = this.customerMap[data.cust]
           for (let j = 0; j < message.length; j++) {
-            let product = message[j].product
+            let prd = message[j].prd
             let qty = message[j].qty
-            if (product === '' || qty === '') {
+            if (prd === '' || qty === '') {
               this.$message.error('* 为必填字段')
               return
             }
-            message[j].model = this.productMap[product].model
-            message[j].name = this.productMap[product].name
+            message[j].model = this.productMap[prd].model
+            message[j].prdm = this.productMap[prd].name
           }
         }
         this.$http.post(this.updFlag ? apiUrl.updOrder : apiUrl.insertOrder, {
@@ -286,7 +286,7 @@
         })
       },
       addRow() {
-        this.dataAdd.push({ord: '', customer: '', message: [{product: '', qty: ''}], productOptions: [], time: this.currentTime})
+        this.dataAdd.push({ord: '', cust: '', message: [{prd: '', qty: ''}], productOptions: [], time: this.currentTime})
       },
       deleteRow(index) {
         this.dataAdd.splice(index, 1)
@@ -306,7 +306,7 @@
         })
       },
       addPrdRow(row) {
-        row.push({product: '', qty: ''})
+        row.push({prd: '', qty: ''})
       },
       delPrdRow(row, index) {
         row.splice(index, 1)

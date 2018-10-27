@@ -21,7 +21,7 @@ router.post('/insertProduct', async (ctx) => {
         result.push(item.model)
         continue
       }
-      await query(`INSERT INTO product (name, model, unitId, provider, createTime) VALUES ('${item.name}', '${item.model}', ${item.unit}, ${1}, ${currentTime})`)
+      await query(`INSERT INTO product (name, model, unit, provider, createTime) VALUES ('${item.name}', '${item.model}', ${item.unit}, ${1}, ${currentTime})`)
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -45,7 +45,7 @@ router.post('/getProduct', async (ctx) => {
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
     const count = await query(`SELECT COUNT(*) as count FROM product WHERE off != 1`)
-    const result = await query(`SELECT p.id, p.name, p.model, u.name as unit FROM product p, unit u WHERE p.unitId = u.id AND p.off != 1 LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    const result = await query(`SELECT p.id, p.name, p.model, u.name as unitm FROM product p, unit u WHERE p.unit = u.id AND p.off != 1 ORDER BY p.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
     ctx.body = {code: 200, message: result, count: count[0].count}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -86,8 +86,8 @@ router.post('/updProduct', async (ctx) => {
       ctx.body = {code: 500, message: `型号 ${data.model} 已存在`}
       return
     }
-    const upd = await query(`UPDATE product SET name = '${data.name}', model = '${data.model}', unitId = ${data.unit}, updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
-    const result = await query(`SELECT p.id, p.name, p.model, u.name as unit FROM product p, unit u WHERE p.unitId = u.id AND p.off != 1 AND p.id = ${data.id}`)
+    const upd = await query(`UPDATE product SET name = '${data.name}', model = '${data.model}', unit = ${data.unit}, updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
+    const result = await query(`SELECT p.id, p.name, p.model, u.name as unitm FROM product p, unit u WHERE p.unit = u.id AND p.off != 1 AND p.id = ${data.id}`)
     ctx.body = {code: 200, message: '更新成功', result: result}
   } catch(err) {
     ctx.body = {code: 500, message: err}
