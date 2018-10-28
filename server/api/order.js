@@ -19,12 +19,13 @@ router.post('/insertOrder', async (ctx) => {
       const uuid = uuidv1()
       const currentTime = new Date().getTime()
       const order = await query(`SELECT * FROM ord WHERE ord = '${item.ord}' AND createTime != ${currentTime} AND off != 1`)
-      let str = ''
+      let str = '', qtyAll = 0
       if (order.length !== 0) {
         result.push(item.name)
         continue
       }
       item.message.forEach(ele => {
+        qtyAll += Number(ele.qty)
         let list = [
           `'${uuid}'`, `'${item.ord}'`, item.cust, `'${item.custm}'`, ele.prd, `'${ele.prdm}'`, `'${ele.model}'`,
           ele.qty, currentTime, item.time
@@ -33,7 +34,7 @@ router.post('/insertOrder', async (ctx) => {
       })
       str = str.slice(0, str.length - 1)
       await query(`INSERT INTO ord (uuid, ord, cust, custm, prd, prdm, model, qty, createTime, time) VALUES ${str}`)
-      await query(`INSERT INTO ordgrp (ord, cust, createTime) VALUES ('${uuid}', ${item.customer}, ${currentTime})`)
+      await query(`INSERT INTO ordgrp (ord, cust, qtyAll, createTime) VALUES ('${uuid}', ${item.cust}, ${qtyAll}, ${currentTime})`)
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -120,9 +121,10 @@ router.post('/updOrder', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const currentTime = new Date().getTime()
-      let strInsert = '', strUpd = ''
+      let strInsert = '', qtyAll = 0
       for (let j = 0; j < item.message.length; j++) {
         let ele = item.message[j]
+        qtyAll += Number(ele.qty)
         if (ele.id === undefined) {
           let list = [
             `'${item.uuid}'`, `'${item.ord}'`, item.cust, `'${item.custm}'`, ele.prd, `'${ele.prdm}'`, `'${ele.model}'`,
@@ -134,8 +136,9 @@ router.post('/updOrder', async (ctx) => {
             qty = ${ele.qty}, time = ${item.time}, updateTime = ${currentTime}, off = ${ele.off} WHERE id = ${ele.id}`)
         }
       }
-      str = str.slice(0, str.length - 1)
-      await query(`INSERT INTO ord (uuid, ord, cust, custm, prd, prdm, model, qty, createTime, time) VALUES ${str}`)
+      strInsert = strInsert.slice(0, strInsert.length - 1)
+      await query(`INSERT INTO ord (uuid, ord, cust, custm, prd, prdm, model, qty, createTime, time) VALUES ${strInsert}`)
+      await query(`UPDATE ordgrp SET qtyAll = ${qtyAll}, updateTime = ${currentTime} WHERE ord = ${item.uuid}`)
     }
     ctx.body = {code: 200, message: '更新成功'}
   } catch(err) {
