@@ -242,6 +242,7 @@
                 ele.ptime = dateFormat(productionTime, 'yyyy-MM-dd')
               })
             } else {
+              this.orderMap = {}
               this.tableData = res.data.message.orderList
               this.tableData.forEach((ele, index) => {
                 ele.restQty = Number(ele.qty) - Number(ele.sentQty)
