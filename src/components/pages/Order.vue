@@ -10,7 +10,8 @@
         v-loading="loading"
         :data="dataSift"
         :row-class-name="tableRowFinished"
-        :span-method="spanMethod">
+        :span-method="spanMethod"
+        :cell-style="cellStyle">
         <template v-for="(item, i) in fieldSift">
           <el-table-column v-if="item.prop === 'finished'" :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i">
             <template slot-scope="scope">
@@ -135,6 +136,7 @@
           { prop: 'model', label: '产品'},
           { prop: 'qty', label: '数量', minWidth: '35'},
           { prop: 'sentQty', label: '已送数量', minWidth: '35'},
+          { prop: 'restQty', label: '待送数量', minWidth: '35'},
           { prop: 'finished', label: '完成', minWidth: '20'},
           { prop: 'time', label: '订单日期', minWidth: '40'}
         ],
@@ -181,6 +183,7 @@
             this.total = res.data.count
             this.dataSift = res.data.message
             this.dataSift.forEach((ele, index) => {
+              ele.restQty = Number(ele.qty) - Number(ele.sentQty)
               if (this.siftMap[ele.ord] === undefined) {
                 this.siftMap[ele.ord] = {rowIndex: index, num: 1}
                 this.editMap[index] = [{
@@ -316,30 +319,39 @@
         this.goAdd(deepClone(this.editMap[index]))
       },
       tableRowFinished({row, rowIndex}) {
-        if (row.finished === 1) {
-          return 'finished-row'
-        }
+        // if (row.finished === 1) {
+        //   return 'finished-row'
+        // }
       },
       spanMethod({ row, column, rowIndex, columnIndex }) {
         if (!this.siftMap[row.ord]) {
           return
         }
         if (this.siftMap[row.ord].rowIndex === rowIndex) {
-          if ([0, 1, 6, 7].indexOf(columnIndex) !== -1) {
+          if ([0, 1, 7, 8].indexOf(columnIndex) !== -1) {
             return {
               rowspan: this.siftMap[row.ord].num,
               colspan: 1
             }
           }
         } else {
-          if ([0, 1, 6, 7].indexOf(columnIndex) !== -1) {
+          if ([0, 1, 7, 8].indexOf(columnIndex) !== -1) {
             return {
               rowspan: 0,
               colspan: 0
             }
           }
         }
-      }
+      },
+      cellStyle({row, column, rowIndex, columnIndex}) {
+        if (columnIndex === 3) {
+          return 'color: blue'
+        } else if (columnIndex === 4) {
+          return 'color: #00CC33'
+        } else if (columnIndex === 5) {
+          return 'color: red'
+        }
+      },
     },
     filters: {
       filterCustomer(cust, customerMap) {
