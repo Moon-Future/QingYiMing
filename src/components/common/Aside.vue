@@ -33,6 +33,9 @@
         </template>
       </template>
     </el-menu>
+    <div class="rights">
+      <p>Copyright © 2018 - {{ new Date().getFullYear() }} Qing Yi Ming wood industry Co., Ltd.</p>
+    </div>
   </div>
 </template>
 
@@ -181,6 +184,13 @@
     .aside-menu {
       height: 100%;
       border: none;
+    }
+    .rights {
+      font-size: 12px;
+      color: $color-white;
+      margin: 10px;
+      text-align: center;
+      line-height: 22px;
     }
   }
 </style>
