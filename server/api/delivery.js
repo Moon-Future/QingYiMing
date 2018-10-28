@@ -19,6 +19,10 @@ router.post('/saveDelivery', async (ctx) => {
     const id = uuidv1()
     const currentTime = new Date().getTime()
     let str = ''
+
+    ctx.body = {code: 200, message: data}
+    return
+
     delivery.forEach(ele => {
       let list = []
       ele.createTime = currentTime

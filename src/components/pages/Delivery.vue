@@ -362,7 +362,7 @@
             qty: ele.qty || '', qtyR: ele.qtyR || '', ptime: ele.ptime && new Date(ele.ptime).getTime() || '',
             lot: ele.lot || '', remark: ele.remark || '', time: this.deliveryTime.getTime(),
             no: this.counter.number, counter: this.counter.id, ord: ele.ord || '', template: this.template,
-            idOrd: ele.id || '', uuidOrd: ele.uuid || ''
+            ordId: ele.id || '', ordUuid: ele.uuid || '', ordTemplate: this.template === 3 ? true : false
           }
           result.push(data)
         })
