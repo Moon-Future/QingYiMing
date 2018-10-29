@@ -71,6 +71,10 @@ router.post('/getOrder', async (ctx) => {
           AND o.off != 1 AND o.uuid = '${ids[i].ord}'
           `
         )
+        list.forEach(ele => {
+          ele.qtyAll = ids[i].qtyAll
+          ele.sentAll = ids[i].sentAll
+        })
         orderList = orderList.concat(list)
       }
       number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND cust = ${customerId}`)
