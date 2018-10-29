@@ -16,37 +16,61 @@ router.post('/saveDelivery', async (ctx) => {
     const counter = data.counter
     const delivery = data.deliveryData
     const cust = delivery[0].cust
+    const template = delivery[0].template
     const id = uuidv1()
     const currentTime = new Date().getTime()
     let str = ''
 
-    ctx.body = {code: 200, message: data}
-    return
+    // delivery.forEach(ele => {
+    //   let list = []
+    //   ele.createTime = currentTime
+    //   list.push(`'${id}'`, `'${ele.ord}'`, ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
+    //     `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime)
+    //   str += `( ${list.join()} ),`
+    // });
+    // str = str.slice(0, str.length - 1)
+    // if (counter.id) {
+    //   await query(`UPDATE counter SET number = ${counter.number}, time = ${currentTime} WHERE id = ${counter.id}`)
+    // } else {
+    //   await query(`INSERT INTO counter (number, cust, type, time) VALUES (${counter.number}, ${ele.cust}, 'delivery', ${currentTime})`)
+    // }
+    // await query(
+    //   `
+    //   INSERT INTO delivery (id, ord, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime)
+    //   VALUES
+    //   ${str}
+    //   `
+    // )
+    // await query(`INSERT INTO deliverygrp (cust, delivery, createTime) VALUES (${cust}, '${id}', ${currentTime})`)
 
-    delivery.forEach(ele => {
-      let list = []
-      ele.createTime = currentTime
-      list.push(`'${id}'`, `'${ele.ord}'`, ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
-        `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime)
-      str += `( ${list.join()} ),`
-    });
-    str = str.slice(0, str.length - 1)
-    if (counter.id) {
-      await query(`UPDATE counter SET number = ${counter.number}, time = ${currentTime} WHERE id = ${counter.id}`)
-    } else {
-      await query(`INSERT INTO counter (number, cust, type, time) VALUES (${counter.number}, ${ele.cust}, 'delivery', ${currentTime})`)
+    // 订单已送数量更新
+    if (template === 3) {
+      let sentQtyMap = {}
+      for (let i = 0, len = delivery.length; i < len; i++) {
+        let ele = delivery[i]
+        let sentQty = Number(ele.sentQty) + Number(ele.qty)
+        let ordFinished = sentQty >= ele.ordQty ? 1 : 0
+        if (sentQtyMap[ele.ordUuid]) {
+          sentQtyMap[ele.ordUuid] += Number(ele.qty)
+        } else {
+          sentQtyMap[ele.ordUuid] = Number(ele.qty)
+        }
+        await query(`UPDATE ord SET sentQty = ${sentQty}, finished = ${ordFinished} WHERE id = ${ele.ordId}`)
+      }
+      for (let i = 0, len = delivery.length; i < len; i++) {
+        let ele = delivery[i]
+        let ordUuid = ele.ordUuid
+        let qtyAll = ele.qtyAll
+        let sentAll = Number(ele.sentAll) + Number(sentQtyMap[ele.ordUuid])
+        let finished = sentAll >= ele.qtyAll ? 1 : 0
+        await query(`UPDATE ordgrp SET sentAll = ${sentAll}, finished = ${finished} WHERE ord = '${ele.ordUuid}'`)
+      }
     }
-    await query(
-      `
-      INSERT INTO delivery (id, ord, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime)
-      VALUES
-      ${str}
-      `
-    )
-    await query(`INSERT INTO deliverygrp (cust, delivery, createTime) VALUES (${cust}, '${id}', ${currentTime})`)
+
     ctx.body = {code: 200, message: '已保存到历史'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
+    throw new Error(err)
   }
 })
 
