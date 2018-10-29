@@ -179,9 +179,6 @@
           this.$message.error('请先选择数据')
           return
         }
-        console.log(this.tableData)
-        console.log(this.selectData)
-        return
         this.printFlag = true
         this.$nextTick(() => {
           setTimeout(() => {
@@ -206,7 +203,11 @@
                 data: {counter: this.counter, deliveryData: this.dataFormat(this.selectData)}
               }).then(res => {
                 this.counter.number += 1
-                this.$refs.listTable.clearSelection()
+                if (this.template === 3) {
+                  this.selectData = []
+                } else {
+                  this.$refs.listTable.clearSelection()
+                }
                 if (this.selectCustomerMap && this.template === 3) {
                   this.selectCustomerMap.flag = true
                 }

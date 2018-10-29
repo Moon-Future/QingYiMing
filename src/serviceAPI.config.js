@@ -31,6 +31,7 @@ const apiUrl = {
 
   insertOrder: 'api/order/insertOrder',
   getOrder: 'api/order/getOrder',
+  getOrderHistory: 'api/order/getOrderHistory',
   updOrder: 'api/order/updOrder'
 }
 

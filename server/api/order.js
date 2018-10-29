@@ -91,8 +91,8 @@ router.post('/getOrder', async (ctx) => {
       }
       ctx.body = {code: 200, message: {orderList, number}}
     } else {
-      count = await query(`SELECT COUNT(*) as count FROM ordgrp WHERE off != 1`)
-      ids = await query(`SELECT * FROM ordgrp WHERE off != 1 ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+      count = await query(`SELECT COUNT(*) as count FROM ordgrp WHERE finished != 1 AND off != 1`)
+      ids = await query(`SELECT * FROM ordgrp WHERE finished != 1 AND off != 1 ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
       for (let i = 0, len = ids.length; i < len; i++) {
         let list = await query(
           `
@@ -106,6 +106,39 @@ router.post('/getOrder', async (ctx) => {
       }
       ctx.body = {code: 200, message: orderList, count: count[0].count}
     }
+  } catch(err) {
+    ctx.body = {code: 500, message: err}
+    throw new Error(err)
+  }
+})
+
+router.post('/getOrderHistory', async (ctx) => {
+  try {
+    const checkResult = checkRoot(ctx)
+    if (checkResult.code === 500) {
+      ctx.body = checkResult
+      return
+    }
+    
+    const data = ctx.request.body.data
+    const pageNo = data && data.pageNo || 1
+    const pageSize = data && data.pageSize || 10
+    const count = await query(`SELECT COUNT(*) as count FROM ordgrp WHERE finished = 1 AND off != 1`)
+    const ids = await query(`SELECT * FROM ordgrp WHERE finished = 1 AND off != 1 ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    let orderList = []
+    for (let i = 0, len = ids.length; i < len; i++) {
+      let list = await query(
+        `
+        SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model
+        FROM ord o, company c, product p
+        WHERE o.cust = c.id AND o.prd = p.id
+        AND o.off != 1 AND o.uuid = '${ids[i].ord}'
+        `
+      )
+      orderList = orderList.concat(list)
+    }
+
+    ctx.body = {code: 200, message: orderList, count: count[0].count}
   } catch(err) {
     ctx.body = {code: 500, message: err}
     throw new Error(err)

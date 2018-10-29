@@ -1,73 +1,40 @@
 <template>
-  <div class="order-container">
-    <div class="btn-operate">
-      <el-button v-if="userInfo && userInfo.root === 1" type="primary" size="mini" v-show="!this.addFlag" @click="goAdd">新增</el-button>
-      <el-button type="primary" size="mini" v-show="this.addFlag" @click="goBack">返回</el-button>
-    </div>
-    <div class="table-add" v-show="this.addFlag">
-      <el-table border size="mini" :data="dataAdd">
-        <el-table-column label="订单编号" prop="ord">
-          <template slot-scope="scope">
-            <el-input size="mini" v-model="scope.row.ord"></el-input>
-          </template>
-        </el-table-column>
-        <el-table-column label="客户" prop="customer">
-          <template slot-scope="scope">
-            <el-select size="mini" v-model="scope.row.customer" @change="changeCustomer">
-              <el-option
-                v-for="option in customerOptions" :label="option.name" :value="option.id" :key="option.id">
-              </el-option>
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="产品" prop="message">
-          <template slot-scope="scope">
-            <div v-for="(msg, i) in scope.row.message" class="prd-message">
-              <el-select size="mini" v-model="msg.product">
-                <el-option
-                  v-for="option in productOptions" :label="option.name" :value="option.id" :key="option.id">
-                </el-option>
-              </el-select>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="数量" prop="qty">
-          <template slot-scope="scope">
-            <div v-for="(msg, i) in scope.row.message" class="prd-message">
-              <el-input size="mini" v-model="msg.qty"></el-input>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column width="50">
-          <template slot-scope="scope">
-            <div v-for="(msg, i) in scope.row.message" class="prd-message">
-              <icon-font icon="icon-minus" @click.native="delPrdRow"></icon-font>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column width="50">
-          <template slot-scope="scope">
-            <icon-font icon="icon-plus" @click.native="addPrdRow(scope.row)"></icon-font>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="userInfo && userInfo.root === 1" width="100" label="操作">
-          <template slot-scope="scope">
-            <el-button size="mini" type="danger" @click="submitDelete(true, scope.row, scope.$index)">删除</el-button>
-          </template>
-        </el-table-column>
+  <div class="orderhistory-container">
+    <div class="table-sift" >
+      <el-table
+        border
+        v-loading="loading"
+        :data="dataSift"
+        :span-method="spanMethod"
+        :cell-style="cellStyle">
+        <template v-for="(item, i) in fieldSift">
+          <el-table-column v-if="item.prop === 'finished'" :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i">
+            <template slot-scope="scope">
+              <icon-font :icon="scope.row.finished === 1 ? 'icon-finished' : ''"></icon-font>
+            </template>
+          </el-table-column>
+          <el-table-column v-else :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i"></el-table-column>
+        </template>
       </el-table>
-      <el-button class="btn-add" type="primary" size="medium" @click="addRow">新增</el-button>
-      <el-button class="btn-submit" type="success" size="medium" v-show="!subWait" @click="submitAdd">提交</el-button>
-      <el-button class="btn-submit" type="info" size="medium" v-show="subWait" :loading="true">提交中</el-button>
+      <div class="page-wrapper">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :disabled="loading"
+          :total="total"
+          :page-size="pageSize"
+          :current-page="currentPage"
+          @current-change="currentChange">
+        </el-pagination>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
   import IconFont from 'components/common/Iconfont'
-  import BaseTable from 'components/common/BaseTable'
+  import { dateFormat, deepClone } from 'common/js/tool'
   import apiUrl from '@/serviceAPI.config.js'
-  import { templateOptions, templateMap } from 'common/js/template'
   export default {
     props: {
       userInfo: {
@@ -79,82 +46,97 @@
       return {
         fieldSift: [
           { prop: 'ord', label: '订单编号'},
-          { prop: 'customer', label: '客户'},
-          { prop: 'templatem', label: '货运单模板'}
+          { prop: 'custm', label: '客户'},
+          { prop: 'model', label: '产品'},
+          { prop: 'qty', label: '数量', minWidth: '35'},
+          { prop: 'sentQty', label: '已送数量', minWidth: '40'},
+          { prop: 'restQty', label: '待送数量', minWidth: '40'},
+          { prop: 'finished', label: '完成', minWidth: '25'},
+          { prop: 'time', label: '订单日期', minWidth: '45'}
         ],
-        fieldAdd: [
-          { prop: 'ord', label: '订单编号', required: true, input: true, placeholder: '输入订单编号' },
-          { prop: 'customer', label: '客户', required: true, select: true, options: [] },
-          { prop: 'product', label: '产品', required: true, select: true, options: [] },
-          { prop: 'qty', label: '数量', required: true, input: true }
-        ],
-        dataAdd: [
-          {ord: '', customer: '', message: [{product: '', qty: ''}]}
-        ],
-        customerProduct: {},
-        customerOptions: [],
-        productOptions: [],
-        addFlag: true,
+        dataSift: [],
         loading: false,
-        subWait: false,
-        total: 0
+        total: 0,
+        currentPage: 1,
+        pageSize: 10
       }
     },
     created() {
-      this.getOptions()
+      this.siftMap = {}
+      this.getOrderHistory()
     },
     methods: {
-      getOptions() {
-        this.loading = true
-        this.$http.post(apiUrl.getSupply).then(res => {
+      getOrderHistory(pageNo = 1) {
+        this.$http.post(apiUrl.getOrderHistory, {
+          data: {pageNo, pageSize: this.pageSize}
+        }).then(res => {
           this.loading = false
           if (res.data.code === 200) {
-            const message = res.data.message
-            const productOptions = []
-            message.forEach(ele => {
-              if (!this.customerProduct[ele.cust]) {
-                this.customerProduct[ele.cust] = []
-                this.customerOptions.push({id: ele.cust, name: ele.customer})
+            this.total = res.data.count
+            this.dataSift = res.data.message
+            this.dataSift.forEach((ele, index) => {
+              ele.restQty = Number(ele.qty) - Number(ele.sentQty)
+              if (this.siftMap[ele.ord] === undefined) {
+                this.siftMap[ele.ord] = {rowIndex: index, num: 1}
+              } else {
+                this.siftMap[ele.ord].num += 1
               }
-              this.customerProduct[ele.cust].push({id: ele.prd, name: ele.model})
-            });
+              ele.time = dateFormat(ele.time, 'yyyy-MM-dd')
+            })
+          } else {
+            this.$message.error(res.data.message)
           }
         }).catch(err => {
           this.loading = false
         })
       },
-      goAdd() {
-
-      },
-      goBack() {
-
-      },
-      addRow() {
-
-      },
-      submitAdd() {
-
-      },
-      deleteRow(row) {
-        this.tableOptions.dataSift.splice(row, 1)
-      },
-      updateRow({data, row}) {
-        data.templatem = templateMap[data.template]
-        this.tableOptions.dataSift.splice(row, 1, data)
-      },
       currentChange(pageNo) {
-        this.getOptions(pageNo)
+        this.currentPage = pageNo
+        this.getOrder(pageNo)
       },
-      changeCustomer(cust) {
-        this.productOptions = this.customerProduct[cust]
+      changeCustomer(cust, row) {
+        row.productOptions = this.customerProduct[cust]
+        row.message.forEach(ele => {
+          ele.product = ''
+        })
       },
-      addPrdRow(row) {
-        row.message.push({produc: '', qty: ''})
+      spanMethod({ row, column, rowIndex, columnIndex }) {
+        if (!this.siftMap[row.ord]) {
+          return
+        }
+        if (this.siftMap[row.ord].rowIndex === rowIndex) {
+          if ([0, 1, 7, 8].indexOf(columnIndex) !== -1) {
+            return {
+              rowspan: this.siftMap[row.ord].num,
+              colspan: 1
+            }
+          }
+        } else {
+          if ([0, 1, 7, 8].indexOf(columnIndex) !== -1) {
+            return {
+              rowspan: 0,
+              colspan: 0
+            }
+          }
+        }
+      },
+      cellStyle({row, column, rowIndex, columnIndex}) {
+        if (columnIndex === 3) {
+          return 'color: blue'
+        } else if (columnIndex === 4) {
+          return 'color: #00CC33'
+        } else if (columnIndex === 5) {
+          return 'color: red'
+        }
+      },
+    },
+    filters: {
+      filterCustomer(cust, customerMap) {
+        return customerMap[cust]
       }
     },
     components: {
-      IconFont,
-      BaseTable
+      IconFont
     }
   }
 </script>
@@ -162,28 +144,6 @@
 <style lang="scss" scoped>
   @import 'common/css/variable.scss';
 
-  .btn-operate {
-    text-align: left;
-    margin-bottom: 10px;
-    button {
-      margin: 0;
-    }
-  }
-  .table-add {
-    .prd-message {
-      margin: 3px 0;
-      border-bottom: 1px solid;
-      padding-bottom: 3px;
-    }
-    .btn-add {
-      width: 100%;
-    }
-    .btn-submit {
-      position: absolute;
-      right: 0;
-      margin: 10px;
-    }
-  }
   .page-wrapper {
     display: flex;
     justify-content: flex-end;

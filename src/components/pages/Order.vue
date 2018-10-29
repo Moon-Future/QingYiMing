@@ -135,10 +135,10 @@
           { prop: 'custm', label: '客户'},
           { prop: 'model', label: '产品'},
           { prop: 'qty', label: '数量', minWidth: '35'},
-          { prop: 'sentQty', label: '已送数量', minWidth: '35'},
-          { prop: 'restQty', label: '待送数量', minWidth: '35'},
-          { prop: 'finished', label: '完成', minWidth: '20'},
-          { prop: 'time', label: '订单日期', minWidth: '40'}
+          { prop: 'sentQty', label: '已送数量', minWidth: '40'},
+          { prop: 'restQty', label: '待送数量', minWidth: '40'},
+          { prop: 'finished', label: '完成', minWidth: '25'},
+          { prop: 'time', label: '订单日期', minWidth: '45'}
         ],
         dataSift: [],
         siftMap: {},
