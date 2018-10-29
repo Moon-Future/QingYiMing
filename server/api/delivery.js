@@ -21,27 +21,27 @@ router.post('/saveDelivery', async (ctx) => {
     const currentTime = new Date().getTime()
     let str = ''
 
-    // delivery.forEach(ele => {
-    //   let list = []
-    //   ele.createTime = currentTime
-    //   list.push(`'${id}'`, `'${ele.ord}'`, ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
-    //     `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime)
-    //   str += `( ${list.join()} ),`
-    // });
-    // str = str.slice(0, str.length - 1)
-    // if (counter.id) {
-    //   await query(`UPDATE counter SET number = ${counter.number}, time = ${currentTime} WHERE id = ${counter.id}`)
-    // } else {
-    //   await query(`INSERT INTO counter (number, cust, type, time) VALUES (${counter.number}, ${ele.cust}, 'delivery', ${currentTime})`)
-    // }
-    // await query(
-    //   `
-    //   INSERT INTO delivery (id, ord, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime)
-    //   VALUES
-    //   ${str}
-    //   `
-    // )
-    // await query(`INSERT INTO deliverygrp (cust, delivery, createTime) VALUES (${cust}, '${id}', ${currentTime})`)
+    delivery.forEach(ele => {
+      let list = []
+      ele.createTime = currentTime
+      list.push(`'${id}'`, `'${ele.ord}'`, ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
+        `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime)
+      str += `( ${list.join()} ),`
+    });
+    str = str.slice(0, str.length - 1)
+    if (counter.id) {
+      await query(`UPDATE counter SET number = ${counter.number}, time = ${currentTime} WHERE id = ${counter.id}`)
+    } else {
+      await query(`INSERT INTO counter (number, cust, type, time) VALUES (${counter.number}, ${ele.cust}, 'delivery', ${currentTime})`)
+    }
+    await query(
+      `
+      INSERT INTO delivery (id, ord, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime)
+      VALUES
+      ${str}
+      `
+    )
+    await query(`INSERT INTO deliverygrp (cust, delivery, createTime) VALUES (${cust}, '${id}', ${currentTime})`)
 
     // 订单已送数量更新
     if (template === 3) {

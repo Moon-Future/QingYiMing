@@ -47,7 +47,7 @@
               </el-table-column>
             </template>
           </el-table>
-          <el-button type="primary" slot="reference">物料清单</el-button>
+          <el-button type="primary" slot="reference" @click="showList">物料清单</el-button>
         </el-popover>
         <el-button slot="reference" @click="print">打印 <icon-font icon="icon-dayinji"></icon-font></el-button>
       </div>
@@ -67,9 +67,14 @@
               <template v-for="(item, i) in field">
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="item.input" :width="item.width ? item.width : ''">
                   <template slot-scope="scope">
-                    <el-tooltip content="Bottom center" placement="bottom" effect="light">
-                      <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder"></el-input>
-                    </el-tooltip>
+                    <template v-if="item.tooltip">
+                      <el-tooltip :content="`不得大于${scope.row.restQty}`" placement="right" effect="dark">
+                        <el-input size="mini" :type="item.type" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder" @blur="ordQtyBlur(scope.row)"></el-input>
+                      </el-tooltip>
+                    </template>
+                    <template v-else>
+                      <el-input size="mini" :type="item.type" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder"></el-input>
+                    </template>
                   </template>
                 </el-table-column>
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="!item.input" :width="item.width ? item.width : ''"></el-table-column>
@@ -174,6 +179,9 @@
           this.$message.error('请先选择数据')
           return
         }
+        console.log(this.tableData)
+        console.log(this.selectData)
+        return
         this.printFlag = true
         this.$nextTick(() => {
           setTimeout(() => {
@@ -199,6 +207,9 @@
               }).then(res => {
                 this.counter.number += 1
                 this.$refs.listTable.clearSelection()
+                if (this.selectCustomerMap && this.template === 3) {
+                  this.selectCustomerMap.flag = true
+                }
               }).catch(err => {
 
               })
@@ -222,6 +233,7 @@
         })
       },
       changeCustomer({customerId, customer}) {
+        this.selectCustomerMap = {customerId, customer}
         const template = this.customerMap[customerId].template
         this.template = template
         this.selectField = templateDelivery[template].selectField
@@ -266,6 +278,12 @@
       hideList() {
         this.listShowFlag = false
       },
+      showList() {
+        if (this.selectCustomerMap && this.selectCustomerMap.flag) {
+          this.selectCustomerMap.flag = false
+          this.changeCustomer(this.selectCustomerMap)
+        }
+      },
       selectionChange(data) {
         this.selectData = data
       },
@@ -297,6 +315,12 @@
               break
             }
           }
+        }
+      },
+      ordQtyBlur(row) {
+        if (!/^[0-9]*$/.test(row.qty) || Number(row.qty) > Number(row.restQty)) {
+          this.$message.error(`输入有误，只能为数字且不得大于${row.restQty}`)
+          row.qty = ''
         }
       },
       getSummaries(param) {
@@ -362,7 +386,7 @@
             prd: ele.prd, prdm: ele.prdm, cust: ele.cust, custm: ele.custm,
             model: ele.model, nun: ele.nun || '', unit: ele.unit, unitm: ele.unitm,
             qty: ele.qty || 0, qtyR: ele.qtyR || 0, sentQty: ele.sentQty || 0, ordQty: ele.ordQty || 0,
-            ptime: ele.ptime && new Date(ele.ptime).getTime() || '',
+            ptime: ele.ptime && new Date(ele.ptime).getTime() || 0,
             lot: ele.lot || '', remark: ele.remark || '', time: this.deliveryTime.getTime(),
             no: this.counter.number, counter: this.counter.id, ord: ele.ord || '', template: this.template,
             ordId: ele.id || '', ordUuid: ele.uuid || '', ordTemplate: this.template === 3 ? true : false,

@@ -10,8 +10,8 @@ const templateDelivery = {
       {prop: 'prdm', label: '产品名称', width: '70'},
       {prop: 'model', label: '规格型号'},
       {prop: 'unitm', label: '单位', width: '50'},
-      {prop: 'qty', label: '数量', width: '50', input: true},
-      {prop: 'qtyR', label: '实收数量', width: '70', input: true},
+      {prop: 'qty', label: '数量', width: '50', input: true, type: 'number'},
+      {prop: 'qtyR', label: '实收数量', width: '70', input: true, type: 'number'},
       {prop: 'ptime', label: '生产日期', width: '80'},
       {prop: 'lot', label: '生产批次', input: true, width: '60'},
       {prop: 'remark', label: '备注', input: true, width: '50'}
@@ -39,7 +39,7 @@ const templateDelivery = {
     field: [
       {prop: 'model', label: '产品名称'},
       {prop: 'unitm', label: '单位', width: '50'},
-      {prop: 'qty', label: '数量', width: '50', input: true},
+      {prop: 'qty', label: '数量', width: '50', input: true, type: 'number'},
       {prop: 'remark', label: '备注', input: true}
     ],
     history: [
@@ -64,7 +64,7 @@ const templateDelivery = {
       {prop: 'ord', label: '订单编号'},
       {prop: 'model', label: '产品名称'},
       {prop: 'unitm', label: '单位', width: '50'},
-      {prop: 'qty', label: '数量', width: '50', input: true},
+      {prop: 'qty', label: '数量', width: '50', input: true, tooltip: true, type: 'number'},
       {prop: 'remark', label: '备注', input: true}
     ],
     history: [
