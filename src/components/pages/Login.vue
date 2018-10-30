@@ -40,9 +40,9 @@
               </el-input>
             </el-form-item>
             <el-form-item prop="root">
-              <el-input class="form-input" maxlength="20" clearable placeholder="可以为空" v-model="form.root">
+              <el-input class="form-input" maxlength="20" clearable placeholder="注册码" v-model="form.root">
                 <template slot="prepend">
-                  管理员验证码
+                  注册码
                 </template>
               </el-input>
             </el-form-item>
@@ -100,6 +100,9 @@
           ],
           name: [
             {required: true, message: '请输入昵称', trigger: 'blur'}
+          ],
+          root: [
+            {required: true, message: '请输入注册码', trigger: 'blur'}
           ]
         },
         registerFlag: false,
@@ -131,7 +134,7 @@
         if (this.subWait) {
           return
         }
-        if (this.form.account === '' || this.form.password === '' || this.form.rePassword === '' || this.form.name === '') {
+        if (this.form.account === '' || this.form.password === '' || this.form.rePassword === '' || this.form.name === '' || this.form.root === '') {
           this.$message.error('请补充完整数据')
           return
         }
