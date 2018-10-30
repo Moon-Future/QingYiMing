@@ -47,7 +47,7 @@
               </el-table-column>
             </template>
           </el-table>
-          <el-button type="primary" slot="reference" @click="showList">物料清单</el-button>
+          <el-button type="primary" slot="reference">物料清单</el-button>
         </el-popover>
         <el-button slot="reference" @click="print">打印 <icon-font icon="icon-dayinji"></icon-font></el-button>
       </div>
@@ -205,11 +205,11 @@
                 this.counter.number += 1
                 if (this.template === 3) {
                   this.selectData = []
+                  this.tableData = []
+                  this.changeCustomer(this.selectCustomerMap)
+                  this.listShowFlag = false
                 } else {
                   this.$refs.listTable.clearSelection()
-                }
-                if (this.selectCustomerMap && this.template === 3) {
-                  this.selectCustomerMap.flag = true
                 }
               }).catch(err => {
 
@@ -278,12 +278,6 @@
       },
       hideList() {
         this.listShowFlag = false
-      },
-      showList() {
-        if (this.selectCustomerMap && this.selectCustomerMap.flag) {
-          this.selectCustomerMap.flag = false
-          this.changeCustomer(this.selectCustomerMap)
-        }
       },
       selectionChange(data) {
         this.selectData = data
