@@ -183,16 +183,17 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          let grp, counter, no, cust, ids = []
+          let grp, counter, no, cust, template, ids = []
           this.deliveryHistory[index].forEach(ele => {
             grp = ele.grp
             counter = ele.counter
             no = ele.no
             cust = ele.cust
+            template = ele.template
             ids.push(ele.id)
           })
           this.$http.post(apiUrl.deleteDelivery, {
-            data: {grp, ids, counter, no, cust}
+            data: {grp, ids, counter, no, cust, template, deliveryData: this.deliveryHistory[index]}
           }).then(res => {
             if (res.data.code === 200) {
               this.cust[cust] = res.data.cust

@@ -20,11 +20,24 @@ router.post('/saveDelivery', async (ctx) => {
     const id = uuidv1()
     const currentTime = new Date().getTime()
     let str = ''
+    let sentQtyMap = {}, sentAll = 0
+    delivery.forEach(ele => {
+      if (sentQtyMap[ele.ordUuid]) {
+        sentQtyMap[ele.ordUuid] += Number(ele.qty)
+      } else {
+        sentQtyMap[ele.ordUuid] = Number(ele.qty)
+      }
+    })
+    delivery.forEach(ele => {
+      sentAll = Number(ele.sentAll) + Number(sentQtyMap[ele.ordUuid])
+    })
 
     delivery.forEach(ele => {
       let list = []
+      let sentQty = Number(ele.sentQty) + Number(ele.qty)
       ele.createTime = currentTime
-      list.push(`'${id}'`, `'${ele.ord}'`, ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
+      list.push(`'${id}'`, `'${ele.ord}'`, `'${ele.ordId}'`, `'${ele.ordUuid}'`, sentQty, sentAll,
+        ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
         `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime)
       str += `( ${list.join()} ),`
     });
@@ -36,7 +49,7 @@ router.post('/saveDelivery', async (ctx) => {
     }
     await query(
       `
-      INSERT INTO delivery (id, ord, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime)
+      INSERT INTO delivery (id, ord, ordId, ordUuid, sentQty, sentAll, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime)
       VALUES
       ${str}
       `
@@ -45,16 +58,10 @@ router.post('/saveDelivery', async (ctx) => {
 
     // 订单已送数量更新
     if (template === 3) {
-      let sentQtyMap = {}
       for (let i = 0, len = delivery.length; i < len; i++) {
         let ele = delivery[i]
         let sentQty = Number(ele.sentQty) + Number(ele.qty)
         let ordFinished = sentQty >= ele.ordQty ? 1 : 0
-        if (sentQtyMap[ele.ordUuid]) {
-          sentQtyMap[ele.ordUuid] += Number(ele.qty)
-        } else {
-          sentQtyMap[ele.ordUuid] = Number(ele.qty)
-        }
         await query(`UPDATE ord SET sentQty = ${sentQty}, finished = ${ordFinished} WHERE id = ${ele.ordId}`)
       }
       for (let i = 0, len = delivery.length; i < len; i++) {
@@ -123,6 +130,8 @@ router.post('/deleteDelivery', async (ctx) => {
     }
     
     const data = ctx.request.body.data
+    const deliveryData = data.deliveryData
+    const template = data.template
     const grp = data.grp
     const ids = data.ids
     const counter = data.counter
@@ -136,6 +145,25 @@ router.post('/deleteDelivery', async (ctx) => {
     await query(`UPDATE deliverygrp SET off = 1 WHERE id = ${grp}`)
     await query(`UPDATE delivery SET off = 1 WHERE id IN (${str})`)
     await query(`UPDATE counter SET number = ${no}, time = ${new Date().getTime()} WHERE id = ${counter}`)
+
+    if (template === 3) {
+      let ordMap = {}
+      for (let i = 0, len = deliveryData.length; i < len; i++) {
+        let ele = deliveryData[i]
+        let ordUuid = ele.ordUuid
+        if (ordMap[ordUuid]) {
+          ordMap[ordUuid].qty += Number(ele.qty)
+        } else {
+          ordMap[ordUuid] = {uuid: ele.ordUuid, qty: Number(ele.qty)}
+        }
+        let qty = Number(ele.sentQty) - Number(ele.qty)
+        await query(`UPDATE ord SET sentQty = ${qty}, finished = 0 WHERE id = ${ele.ordId}`)
+      }
+      for (let key in ordMap) {
+        await query(`UPDATE ordgrp SET sentAll = ${ordMap[key].qty}, finished = 0 WHERE ord = ${ordMap[key].uuid}`)
+      }
+    }
+
     const result = await query(`SELECT * FROM delivery WHERE cust = ${cust} AND off != 1 ORDER BY createTime DESC LIMIT 1`)
     ctx.body = {code: 200, message: '删除成功', cust: result.length === 0 ? '-1' : result[0].id}
   } catch(err) {
