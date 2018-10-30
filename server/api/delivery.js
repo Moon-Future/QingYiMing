@@ -147,10 +147,11 @@ router.post('/deleteDelivery', async (ctx) => {
     await query(`UPDATE counter SET number = ${no}, time = ${new Date().getTime()} WHERE id = ${counter}`)
 
     if (template === 3) {
-      let ordMap = {}
+      let ordMap = {}, sentAll = 0
       for (let i = 0, len = deliveryData.length; i < len; i++) {
         let ele = deliveryData[i]
         let ordUuid = ele.ordUuid
+        sentAll = ele.sentAll
         if (ordMap[ordUuid]) {
           ordMap[ordUuid].qty += Number(ele.qty)
         } else {
@@ -160,7 +161,7 @@ router.post('/deleteDelivery', async (ctx) => {
         await query(`UPDATE ord SET sentQty = ${qty}, finished = 0 WHERE id = ${ele.ordId}`)
       }
       for (let key in ordMap) {
-        await query(`UPDATE ordgrp SET sentAll = ${ordMap[key].qty}, finished = 0 WHERE ord = ${ordMap[key].uuid}`)
+        await query(`UPDATE ordgrp SET sentAll = ${sentAll - ordMap[key].qty}, finished = 0 WHERE ord = '${ordMap[key].uuid}'`)
       }
     }
 
