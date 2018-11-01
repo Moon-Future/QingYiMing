@@ -49,7 +49,7 @@ router.post('/insertOrder', async (ctx) => {
 
 router.post('/getOrder', async (ctx) => {
   try {
-    const checkResult = checkRoot(ctx)
+    const checkResult = checkRoot(ctx, true)
     if (checkResult.code === 500) {
       ctx.body = checkResult
       return

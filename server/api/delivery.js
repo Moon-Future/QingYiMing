@@ -6,7 +6,7 @@ const checkRoot = require('./root')
 
 router.post('/saveDelivery', async (ctx) => {
   try {
-    const checkResult = checkRoot(ctx)
+    const checkResult = checkRoot(ctx, true)
     if (checkResult.code === 500) {
       ctx.body = checkResult
       return
@@ -83,7 +83,7 @@ router.post('/saveDelivery', async (ctx) => {
 
 router.post('/getDeliveryHistory', async (ctx) => {
   try {
-    const checkResult = checkRoot(ctx)
+    const checkResult = checkRoot(ctx, true)
     if (checkResult.code === 500) {
       ctx.body = checkResult
       return
@@ -123,7 +123,7 @@ router.post('/getDeliveryHistory', async (ctx) => {
 
 router.post('/deleteDelivery', async (ctx) => {
   try {
-    const checkResult = checkRoot(ctx)
+    const checkResult = checkRoot(ctx, true)
     if (checkResult.code === 500) {
       ctx.body = checkResult
       return
