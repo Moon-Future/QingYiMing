@@ -70,7 +70,12 @@
               </el-select>
             </td> 
             <td>
-              <el-input type="number" size="mini" v-model="data.message[0].qty" placeholder="请输入订单数量"></el-input>
+              <el-input
+                v-model="data.message[0].qty"
+                type="number" 
+                size="mini" 
+                placeholder="请输入订单数量"
+                @blur="qtyBlur(data.message[0])"></el-input>
             </td> 
             <td></td>
             <td :rowspan="data.message.length + 1">
@@ -97,7 +102,12 @@
                 </el-select>
               </td> 
               <td>
-                <el-input type="number" size="mini" v-model="data.message[index].qty" placeholder="请输入订单数量"></el-input>
+                <el-input 
+                  v-model="data.message[index].qty" 
+                  type="number" 
+                  size="mini" 
+                  placeholder="请输入订单数量" 
+                  @blur="qtyBlur(data.message[index])"></el-input>
               </td>
               <td><icon-font icon="icon-minus" @click.native="delPrdRow(data.message, index)"></icon-font></td>
             </tr>
@@ -144,6 +154,7 @@
         siftMap: {},
         editMap: {},
         dataUpd: [],
+        dataDel: [],
         dataAdd: [
           {ord: '', cust: '', message: [{prd: '', qty: ''}], productOptions: [], time: ''}
         ],
@@ -152,6 +163,7 @@
         customerMap: {},
         productMap: {},
         optionFlag: false,
+        delAll: false,
         updFlag: false,
         addFlag: false,
         loading: false,
@@ -192,12 +204,14 @@
                   ord: ele.ord,
                   cust: ele.cust,
                   time: ele.time,
-                  message: [{prd: ele.prd, qty: ele.qty, id: ele.id}],
-                  productOptions: []
+                  message: [{prd: ele.prd, qty: ele.qty, id: ele.id, sentQty: ele.sentQty}],
+                  productOptions: [],
+                  sentAll: ele.sentAll,
+                  qtyAll: ele.qtyAll
                 }]
               } else {
                 this.siftMap[ele.ord].num += 1
-                this.editMap[this.siftMap[ele.ord].rowIndex][0].message.push({prd: ele.prd, qty: ele.qty, id: ele.id})
+                this.editMap[this.siftMap[ele.ord].rowIndex][0].message.push({prd: ele.prd, qty: ele.qty, id: ele.id, sentQty: ele.sentQty})
               }
               ele.time = dateFormat(ele.time, 'yyyy-MM-dd')
             })
@@ -232,9 +246,19 @@
       },
       goAdd(data) {
         this.addFlag = true
+        this.delAll = false
+        this.dataDel = []
         if (this.updFlag) {
           data[0].productOptions = this.customerProduct[data[0].cust]
+          data[0].message.forEach(ele => {
+            ele.prdm = this.productMap[ele.prd].name
+            ele.model = this.productMap[ele.prd].model
+          })
           this.dataAdd = data
+          this.dataUpd = deepClone(data)
+          this.dataUpd.forEach(ele => {
+            ele.off = 1
+          })
         } else {
           this.currentTime = new Date().getTime()
           this.dataAdd = [{ord: '', cust: '', message: [{prd: '', qty: ''}], productOptions: [], time: this.currentTime}]
@@ -248,33 +272,41 @@
         if (this.subWait) {
           return
         }
-        let ordMap = {}
-        for (let i = 0, len = this.dataAdd.length; i < len; i++) {
-          let data = this.dataAdd[i]
-          let message = data.message
-          if (ordMap[data.ord]) {
-            this.$message.error('存在相同订单编号')
-            return
-          }
-          ordMap[data.ord] = true
-          if (data.ord === '' || data.cust === '') {
-            this.$message.error('* 为必填字段')
-            return
-          }
-          data.custm = this.customerMap[data.cust]
-          for (let j = 0; j < message.length; j++) {
-            let prd = message[j].prd
-            let qty = message[j].qty
-            if (prd === '' || qty === '') {
+        let ordMap = {}, subData = []
+        if (this.delAll) {
+          subData = this.dataUpd
+        } else {
+          subData = deepClone(this.dataAdd)
+          for (let i = 0, len = subData.length; i < len; i++) {
+            let data = subData[i]
+            let message = data.message
+            if (ordMap[data.ord]) {
+              this.$message.error('存在相同订单编号')
+              return
+            }
+            ordMap[data.ord] = true
+            if (data.ord === '' || data.cust === '') {
               this.$message.error('* 为必填字段')
               return
             }
-            message[j].model = this.productMap[prd].model
-            message[j].prdm = this.productMap[prd].name
+            data.custm = this.customerMap[data.cust]
+            for (let j = 0; j < message.length; j++) {
+              let prd = message[j].prd
+              let qty = message[j].qty
+              if (prd === '' || qty === '') {
+                this.$message.error('* 为必填字段')
+                return
+              }
+              message[j].model = this.productMap[prd].model
+              message[j].prdm = this.productMap[prd].name
+            }
+            this.dataDel.forEach(ele => {
+              message.splice(message.length, 1, ele)
+            })
           }
         }
         this.$http.post(this.updFlag ? apiUrl.updOrder : apiUrl.insertOrder, {
-          data: this.dataAdd
+          data: subData
         }).then(res => {
           if (res.data.code === 200) {
             this.addFlag = false
@@ -293,6 +325,7 @@
       },
       deleteRow(index) {
         this.dataAdd.splice(index, 1)
+        this.delAll = true
       },
       updateRow({data, row}) {
         data.templatem = templateMap[data.template]
@@ -312,7 +345,18 @@
         row.push({prd: '', qty: ''})
       },
       delPrdRow(row, index) {
+        if (row[index].id) {
+          let delData = deepClone(row[index])
+          delData.off = 1
+          this.dataDel.push(delData)
+        }
         row.splice(index, 1)
+      },
+      qtyBlur(data) {
+        if (data.sentQty !== undefined && Number(data.qty) < Number(data.sentQty)) {
+          this.$message.error(`不得小于已送数量${data.sentQty}`)
+          data.qty = ''
+        }
       },
       handleEdit(index) {
         this.updFlag = true

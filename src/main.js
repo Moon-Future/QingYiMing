@@ -11,6 +11,7 @@ import { Pagination,
   Submenu,
   MenuItem,
   Input,
+  Radio,
   Checkbox,
   Select,
   Option,
@@ -40,6 +41,7 @@ Vue.use(Menu)
 Vue.use(Submenu)
 Vue.use(MenuItem)
 Vue.use(Input)
+Vue.use(Radio)
 Vue.use(Checkbox)
 Vue.use(Select)
 Vue.use(Option)

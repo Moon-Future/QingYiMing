@@ -102,6 +102,10 @@ router.post('/getOrder', async (ctx) => {
           AND o.off != 1 AND o.uuid = '${ids[i].ord}'
           `
         )
+        list.forEach(ele => {
+          ele.qtyAll = ids[i].qtyAll
+          ele.sentAll = ids[i].sentAll
+        })
         orderList = orderList.concat(list)
       }
       ctx.body = {code: 200, message: orderList, count: count[0].count}
@@ -157,25 +161,36 @@ router.post('/updOrder', async (ctx) => {
     let result = []
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
+      const off = item.off || 0
+      let sentAll = item.sentAll
       const currentTime = new Date().getTime()
       let strInsert = '', qtyAll = 0
       for (let j = 0; j < item.message.length; j++) {
         let ele = item.message[j]
-        qtyAll += Number(ele.qty)
+        if (ele.off !== 1) {
+          qtyAll += Number(ele.qty)
+        }
         if (ele.id === undefined) {
           let list = [
             `'${item.uuid}'`, `'${item.ord}'`, item.cust, `'${item.custm}'`, ele.prd, `'${ele.prdm}'`, `'${ele.model}'`,
-            ele.qty, item.createTime, item.time
+            ele.qty, currentTime, item.time
           ]
           strInsert += `( ${list.join()} ),`
+        } else if (ele.off === 1) {
+          sentAll -= Number(ele.sentQty)
+          await query(`UPDATE ord SET off = 1 WHERE id = ${ele.id}`)
         } else {
+          let finished = Number(ele.sentQty) >= Number(ele.qty) ? 1 : 0
           await query(`UPDATE ord SET prd = ${ele.prd}, prdm = '${ele.prdm}', model = '${ele.model}', 
-            qty = ${ele.qty}, time = ${item.time}, updateTime = ${currentTime}, off = ${ele.off} WHERE id = ${ele.id}`)
+            qty = ${ele.qty}, finished = ${finished}, time = ${item.time}, updateTime = ${currentTime} WHERE id = ${ele.id}`)
         }
       }
-      strInsert = strInsert.slice(0, strInsert.length - 1)
-      await query(`INSERT INTO ord (uuid, ord, cust, custm, prd, prdm, model, qty, createTime, time) VALUES ${strInsert}`)
-      await query(`UPDATE ordgrp SET qtyAll = ${qtyAll}, updateTime = ${currentTime} WHERE ord = ${item.uuid}`)
+      if (strInsert !== '') {
+        strInsert = strInsert.slice(0, strInsert.length - 1)
+        await query(`INSERT INTO ord (uuid, ord, cust, custm, prd, prdm, model, qty, createTime, time) VALUES ${strInsert}`)
+      }
+      let finished = sentAll >= qtyAll ? 1 : 0
+      await query(`UPDATE ordgrp SET qtyAll = ${qtyAll}, finished = ${finished}, updateTime = ${currentTime}, off = ${off} WHERE ord = '${item.uuid}'`)
     }
     ctx.body = {code: 200, message: '更新成功'}
   } catch(err) {

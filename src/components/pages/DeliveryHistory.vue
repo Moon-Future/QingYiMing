@@ -101,7 +101,7 @@
         currentPage: 1,
         pageSize: 5,
         printFlag: false,
-        cust: {}
+        cust: {},
       }
     },
     created() {
