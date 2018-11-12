@@ -40,7 +40,7 @@
             { prop: 'nun', label: '编码' },
             { prop: 'unitm', label: '单位' }
           ],
-          checkRepeat: {field: ['customer', 'product'], message: '客户对应产品重复'},
+          checkRepeat: {field: ['cust', 'prd'], message: '客户对应产品重复'},
           dataSift: [],
           addTemplate: { cust: '', prd: '', nun: '' },
           addApi: apiUrl.insertSupply,

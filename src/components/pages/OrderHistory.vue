@@ -76,10 +76,10 @@
             this.dataSift = res.data.message
             this.dataSift.forEach((ele, index) => {
               ele.restQty = Number(ele.qty) - Number(ele.sentQty)
-              if (this.siftMap[ele.ord] === undefined) {
-                this.siftMap[ele.ord] = {rowIndex: index, num: 1}
+              if (this.siftMap[ele.ord + ele.cust] === undefined) {
+                this.siftMap[ele.ord + ele.cust] = {rowIndex: index, num: 1}
               } else {
-                this.siftMap[ele.ord].num += 1
+                this.siftMap[ele.ord + ele.cust].num += 1
               }
               ele.time = dateFormat(ele.time, 'yyyy-MM-dd')
             })
@@ -101,13 +101,13 @@
         })
       },
       spanMethod({ row, column, rowIndex, columnIndex }) {
-        if (!this.siftMap[row.ord]) {
+        if (!this.siftMap[row.ord + row.cust]) {
           return
         }
-        if (this.siftMap[row.ord].rowIndex === rowIndex) {
+        if (this.siftMap[row.ord + row.cust].rowIndex === rowIndex) {
           if ([0, 1, 7, 8].indexOf(columnIndex) !== -1) {
             return {
-              rowspan: this.siftMap[row.ord].num,
+              rowspan: this.siftMap[row.ord + row.cust].num,
               colspan: 1
             }
           }

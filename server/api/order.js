@@ -18,11 +18,14 @@ router.post('/insertOrder', async (ctx) => {
       const item = data[i]
       const uuid = uuidv1()
       const currentTime = new Date().getTime()
-      const order = await query(`SELECT * FROM ord WHERE ord = '${item.ord}' AND createTime != ${currentTime} AND off != 1`)
+      const order = await query(`SELECT * FROM ord WHERE ord = '${item.ord}' AND cust = ${item.cust} AND createTime != ${currentTime} AND off != 1`)
       let str = '', qtyAll = 0
       if (order.length !== 0) {
-        result.push(item.name)
-        continue
+        const ordgrp = await query(`SELECT * FROM ordgrp WHERE ord = '${order[0].uuid}'`)
+        if (ordgrp.length !== 0 && ordgrp[0].off !== 1) {
+          result.push(item.name)
+          continue
+        }
       }
       item.message.forEach(ele => {
         qtyAll += Number(ele.qty)

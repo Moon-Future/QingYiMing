@@ -196,8 +196,8 @@
             this.dataSift = res.data.message
             this.dataSift.forEach((ele, index) => {
               ele.restQty = Number(ele.qty) - Number(ele.sentQty)
-              if (this.siftMap[ele.ord] === undefined) {
-                this.siftMap[ele.ord] = {rowIndex: index, num: 1}
+              if (this.siftMap[ele.ord + ele.cust] === undefined) {
+                this.siftMap[ele.ord + ele.cust] = {rowIndex: index, num: 1}
                 this.editMap[index] = [{
                   id: ele.id,
                   uuid: ele.uuid,
@@ -210,8 +210,8 @@
                   qtyAll: ele.qtyAll
                 }]
               } else {
-                this.siftMap[ele.ord].num += 1
-                this.editMap[this.siftMap[ele.ord].rowIndex][0].message.push({prd: ele.prd, qty: ele.qty, id: ele.id, sentQty: ele.sentQty})
+                this.siftMap[ele.ord + ele.cust].num += 1
+                this.editMap[this.siftMap[ele.ord + ele.cust].rowIndex][0].message.push({prd: ele.prd, qty: ele.qty, id: ele.id, sentQty: ele.sentQty})
               }
               ele.time = dateFormat(ele.time, 'yyyy-MM-dd')
             })
@@ -280,11 +280,11 @@
           for (let i = 0, len = subData.length; i < len; i++) {
             let data = subData[i]
             let message = data.message
-            if (ordMap[data.ord]) {
+            if (ordMap[data.ord + data.cust]) {
               this.$message.error('存在相同订单编号')
               return
             }
-            ordMap[data.ord] = true
+            ordMap[data.ord + data.cust] = true
             if (data.ord === '' || data.cust === '') {
               this.$message.error('* 为必填字段')
               return
@@ -368,13 +368,13 @@
         // }
       },
       spanMethod({ row, column, rowIndex, columnIndex }) {
-        if (!this.siftMap[row.ord]) {
+        if (!this.siftMap[row.ord + row.cust]) {
           return
         }
-        if (this.siftMap[row.ord].rowIndex === rowIndex) {
+        if (this.siftMap[row.ord + row.cust].rowIndex === rowIndex) {
           if ([0, 1, 7, 8].indexOf(columnIndex) !== -1) {
             return {
-              rowspan: this.siftMap[row.ord].num,
+              rowspan: this.siftMap[row.ord + row.cust].num,
               colspan: 1
             }
           }
