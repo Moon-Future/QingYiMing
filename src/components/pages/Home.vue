@@ -1,6 +1,6 @@
 <template>
   <div class="home-container">
-    <Aside :userInfo="userInfo"></Aside>
+    <Aside :userInfo="userInfo" :mobileFlag="mobileFlag"></Aside>
     <Header :userInfo="userInfo"></Header>
     <div class="home-right">
       <div class="home-breadcrumb">
@@ -27,7 +27,8 @@
     data() {
       return {
         homeFlag: true,
-        userInfo: {}
+        userInfo: {},
+        mobileFlag: false
       }
     },
     beforeCreate() {
@@ -47,6 +48,7 @@
       })
     },
     created() {
+      this.mobileFlag = document.documentElement.clientWidth <= 500 ? true : false
       this.homeFlag = this.$route.name === 'Home' ? true : false
       this.$nextTick(() => {
         const windowH = window.innerHeight

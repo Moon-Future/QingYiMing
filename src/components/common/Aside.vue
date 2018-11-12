@@ -1,5 +1,5 @@
 <template>
-  <div class="aside-container">
+  <div class="aside-container" v-if="showFlag">
     <div class="user-message">
       <div class="user-avatar">
         <img :src="userInfo.avatar || avatar" alt="">
@@ -46,11 +46,18 @@
       userInfo: {
         type: Object,
         default: null
+      },
+      mobileFlag: {
+        type: Boolean,
+        default: false
       }
     },
     computed: {
       items() {
         return this.userInfo.root == 1 ? this.items1 : this.items0
+      },
+      showFlag() {
+        return !this.mobileFlag
       }
     },
     data() {
