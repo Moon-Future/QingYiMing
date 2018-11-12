@@ -1,8 +1,8 @@
 <template>
   <div class="home-container">
     <Aside :userInfo="userInfo" :mobileFlag="mobileFlag"></Aside>
-    <Header :userInfo="userInfo"></Header>
-    <div class="home-right">
+    <Header :userInfo="userInfo" v-if="!mobileFlag"></Header>
+    <div class="home-right" :class="{mobile: mobileFlag}">
       <div class="home-breadcrumb">
         <el-breadcrumb separator-class="el-icon-arrow-right">
           <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
@@ -13,7 +13,7 @@
         <div class="home-descr" v-show="homeFlag">
           主页面 - 介绍
         </div>
-        <router-view :userInfo="userInfo"></router-view>
+        <router-view :userInfo="userInfo" :mobileFlag="mobileFlag"></router-view>
       </div>
     </div>
   </div>
@@ -48,7 +48,7 @@
       })
     },
     created() {
-      this.mobileFlag = document.documentElement.clientWidth <= 500 ? true : false
+      this.mobileFlag = document.documentElement.clientWidth <= 500 || document.documentElement.clientHeight <= 500 ? true : false
       this.homeFlag = this.$route.name === 'Home' ? true : false
       this.$nextTick(() => {
         const windowH = window.innerHeight
@@ -86,6 +86,12 @@
       .home-content {
         padding: 10px;
         overflow: auto;
+      }
+      &.mobile {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 650px;
       }
     }
   }

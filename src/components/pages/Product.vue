@@ -25,6 +25,10 @@
       userInfo: {
         type: Object,
         default: null
+      },
+      mobileFlag: {
+        type: Boolean,
+        default: false
       }
     },
     data() {
@@ -54,6 +58,11 @@
         },
         loading: false,
         total: 0
+      }
+    },
+    computed: {
+      mobile() {
+        return this.mobileFlag
       }
     },
     created() {
