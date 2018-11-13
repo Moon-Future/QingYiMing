@@ -49,3 +49,13 @@ export function deepClone(obj) {
   }
   return objClone;
 }
+
+export function judgeMobile() {
+  const width = document.documentElement.clientWidth
+  const height = document.documentElement.clientHeight
+  if (width <= 800) {
+    return true
+  } else {
+    return false
+  }
+}

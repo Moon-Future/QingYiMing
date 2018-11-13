@@ -1,6 +1,6 @@
 <template>
   <div class="home-container">
-    <Aside :userInfo="userInfo" :mobileFlag="mobileFlag"></Aside>
+    <Aside :userInfo="userInfo"></Aside>
     <Header :userInfo="userInfo" v-if="!mobileFlag"></Header>
     <div class="home-right" :class="{mobile: mobileFlag}">
       <div class="home-breadcrumb">
@@ -20,9 +20,11 @@
 </template>
 
 <script>
+  import IconFont from 'components/common/Iconfont'
   import Aside from 'components/common/Aside'
   import Header from 'components/common/Header'
   import apiUrl from '@/serviceAPI.config.js'
+  import { judgeMobile } from 'common/js/tool'
   export default {
     data() {
       return {
@@ -48,7 +50,7 @@
       })
     },
     created() {
-      this.mobileFlag = document.documentElement.clientWidth <= 500 || document.documentElement.clientHeight <= 500 ? true : false
+      this.mobileFlag = judgeMobile()
       this.homeFlag = this.$route.name === 'Home' ? true : false
       this.$nextTick(() => {
         const windowH = window.innerHeight
@@ -64,7 +66,8 @@
     },
     components: {
       Aside,
-      Header
+      Header,
+      IconFont
     }
   }
 </script>
@@ -73,6 +76,10 @@
   @import 'common/css/variable.scss';
 
   .home-container {
+    .mobile-menu {
+      position: fixed;
+      padding: 5px;
+    }
     .home-right {
       position: fixed;
       top: 50px;
@@ -89,9 +96,9 @@
       }
       &.mobile {
         position: absolute;
-        top: 0;
+        top: 40px;
         left: 0;
-        width: 650px;
+        // width: 650px;
       }
     }
   }

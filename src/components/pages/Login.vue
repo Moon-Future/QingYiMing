@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <div class="background">
+    <div class="background" v-if="!mobileFlag">
       <img src="https://source.unsplash.com/random/1080x720" alt="">
     </div>
     <div class="login-wrapper">
@@ -76,7 +76,7 @@
 <script>
   import IconFont from 'components/common/Iconfont'
   import apiUrl from '@/serviceAPI.config.js'
-  import { getCookie, setCookie, delCookie } from 'common/js/tool'
+  import { getCookie, setCookie, delCookie, judgeMobile } from 'common/js/tool'
   const crypto = require('crypto')
   export default {
     data() {
@@ -111,7 +111,8 @@
         remember: false,
         cookiePassword: '88888888',
         password: '',
-        cookieInfo: {}
+        cookieInfo: {},
+        mobileFlag: false
       }
     },
     created() {
@@ -123,6 +124,7 @@
         this.form.password = this.cookiePassword
         this.cookieInfo = {account, password}
       }
+      this.mobileFlag = judgeMobile()
     },
     methods: {
       register() {
