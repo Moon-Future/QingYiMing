@@ -89,7 +89,7 @@
             </el-table> -->
             <table style="width: 740px">
               <tr>
-                <th v-for="(item, i) in field" :key="i">{{ item.label }}</th>
+                <th v-for="(item, i) in field" :key="i" :width="item.printWidth ? item.printWidth : ''">{{ item.label }}</th>
               </tr>
               <tr v-for="(data, i) in selectData" :key="i">
                 <td v-for="(item, j) in field" :key="j">{{ data[item.prop] }}</td>

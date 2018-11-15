@@ -37,15 +37,15 @@ const templateDelivery = {
       {prop: 'nun', label: '物料编码', width: '100'}
     ],
     field: [
-      {prop: 'model', label: '产品名称'},
-      {prop: 'unitm', label: '单位', width: '50'},
-      {prop: 'qty', label: '数量', width: '50', input: true, type: 'number'},
+      {prop: 'model', label: '产品名称', printWidth: '325'},
+      {prop: 'unitm', label: '单位', width: '50', printWidth: '60'},
+      {prop: 'qty', label: '数量', width: '50', printWidth: '60', input: true, type: 'number'},
       {prop: 'remark', label: '备注', input: true}
     ],
     history: [
-      {prop: 'model', label: '产品名称'},
-      {prop: 'unitm', label: '单位', width: '50'},
-      {prop: 'qty', label: '数量', width: '50', input: true},
+      {prop: 'model', label: '产品名称', printWidth: '325'},
+      {prop: 'unitm', label: '单位', width: '50', printWidth: '60'},
+      {prop: 'qty', label: '数量', width: '50', printWidth: '60', input: true},
       {prop: 'remark', label: '备注', input: true}
     ],
     sumFlag: false,

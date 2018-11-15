@@ -43,7 +43,7 @@
           <div class="delivery-table" v-show="printFlag">
             <table style="width: 740px">
               <tr>
-                <th v-for="(item, i) in templateDelivery[data[0].template].history" :key="i">{{ item.label }}</th>
+                <th v-for="(item, i) in templateDelivery[data[0].template].history" :width="item.printWidth ? item.printWidth : ''" :key="i">{{ item.label }}</th>
               </tr>
               <tr v-for="(trData, i) in data" :key="i">
                 <td v-for="(item, j) in templateDelivery[data[0].template].history" :key="j">{{ trData[item.prop] }}</td>
