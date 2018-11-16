@@ -30,18 +30,18 @@
             <div class="receive-company">收货单位：{{ data[0].custm }}</div>
             <div class="delivery-number">
               <span>送货日期：{{ new Date(data[0].time).getFullYear() }} 年 {{ new Date(data[0].time).getMonth() + 1 }} 月 {{ new Date(data[0].time).getDate() }} 日</span>
-              <span>NO:{{ data[0].no | noFilter }}</span>
+              <span v-show="data[0].template !== 3">NO:{{ data[0].no | noFilter }}</span>
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
-            <el-table size="mini" :show-summary="templateDelivery[data[0].template].sumFlag" :summary-method="getSummaries" :data="data">
+            <el-table size="mini" :show-summary="templateDelivery[data[0].template].sumFlag" :summary-method="getSummaries" :data="data" :class="{morePadding: data[0].template === 3}">
               <template v-for="(item, i) in templateDelivery[data[0].template].history">
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
               </template>
             </el-table>
           </div>
           <div class="delivery-table" v-show="printFlag">
-            <table style="width: 740px">
+            <table style="width: 740px" :class="{morePadding: data[0].template === 3}">
               <tr>
                 <th v-for="(item, i) in templateDelivery[data[0].template].history" :width="item.printWidth ? item.printWidth : ''" :key="i">{{ item.label }}</th>
               </tr>
@@ -254,7 +254,7 @@
           result = '刚刚'
         } else if (diffTime > oneMin && diffTime < oneHour) {
           result = Math.floor(diffTime / oneMin) + ' 分钟前'
-        } else if (diffTime > oneHour && diffTime < oneDay) {
+        } else if (diffTime > oneHour && diffTime < oneDay && new Date().getDate() === new Date(time).getDate()) {
           result = '今天 ' + dateFormat(time, 'hh:mm')
         } else {
           result = dateFormat(time, 'yyyy-MM-dd hh:mm')

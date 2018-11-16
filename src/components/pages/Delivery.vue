@@ -59,13 +59,13 @@
             <div class="receive-company">收货单位：{{ receiveCompany }}</div>
             <div class="delivery-number">
               <span>送货日期：{{ deliveryTime.getFullYear() }} 年 {{ deliveryTime.getMonth() + 1 }} 月 {{ deliveryTime.getDate() }} 日</span>
-              <span>NO:{{ no }}</span>
+              <span v-show="template !== 3">NO:{{ no }}</span>
             </div>
           </div>
           <div class="delivery-table" v-show="!printFlag">
-            <el-table :border="!hasSelected" size="mini" :show-summary="sumFlag" :summary-method="getSummaries" :data="selectData" :key="receiveCompany">
+            <el-table :border="!hasSelected" size="mini" :show-summary="sumFlag" :summary-method="getSummaries" :data="selectData" :class="{morePadding: template === 3}" :key="receiveCompany">
               <template v-for="(item, i) in field">
-                <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="item.input" :width="item.width ? item.width : ''">
+                <el-table-column :prop="item.prop" :label="item.label" :key="i" v-if="item.input" :width="item.width ? item.width : ''" height="100">
                   <template slot-scope="scope">
                     <template v-if="item.tooltip">
                       <el-tooltip :content="`不得大于${scope.row.restQty}`" placement="right" effect="dark">
@@ -87,7 +87,7 @@
                 <el-table-column :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''" :min-width="item.minWidth ? item.minWidth : ''"></el-table-column>
               </template>
             </el-table> -->
-            <table style="width: 740px">
+            <table style="width: 740px" :class="{morePadding: template === 3}">
               <tr>
                 <th v-for="(item, i) in field" :key="i" :width="item.printWidth ? item.printWidth : ''">{{ item.label }}</th>
               </tr>

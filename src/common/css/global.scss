@@ -25,6 +25,11 @@
         white-space: nowrap;
         font-size: 14px;
       }
+      &.morePadding {
+        th, td {
+          padding: 8px;
+        }
+      }
     }
   }
   .delivery-title, th {
@@ -63,17 +68,24 @@
     }
   }
 }
-.el-table th, .el-table td {
-  text-align: center !important;
-  padding: 2px 0 !important;
-  color: #000;
-  .cell {
-    .el-select {
-      width: 100% !important;
+.el-table {
+  th, td {
+    text-align: center !important;
+    padding: 2px 0 !important;
+    color: #000;
+    .cell {
+      .el-select {
+        width: 100% !important;
+      }
+    }
+    input {
+      padding: initial !important;
     }
   }
-  input {
-    padding: initial !important;
+  &.morePadding {
+    th, td {
+      padding: 6px 0 !important;
+    }
   }
 }
 

@@ -61,17 +61,17 @@ const templateDelivery = {
       {prop: 'restQty', label: '待送数量', width: '80'},
     ],
     field: [
-      {prop: 'ord', label: '订单编号'},
-      {prop: 'model', label: '产品名称'},
-      {prop: 'unitm', label: '单位', width: '50'},
-      {prop: 'qty', label: '数量', width: '50', input: true, tooltip: true, type: 'number'},
+      {prop: 'ord', label: '订单编号', printWidth: '200'},
+      {prop: 'model', label: '产品名称', printWidth: '200'},
+      {prop: 'unitm', label: '单位', width: '50', printWidth: '50'},
+      {prop: 'qty', label: '数量', width: '50', input: true, tooltip: true, type: 'number', printWidth: '50'},
       {prop: 'remark', label: '备注', input: true}
     ],
     history: [
-      {prop: 'ord', label: '订单编号', input: true},
-      {prop: 'model', label: '产品名称'},
-      {prop: 'unitm', label: '单位', width: '50'},
-      {prop: 'qty', label: '数量', width: '50', input: true},
+      {prop: 'ord', label: '订单编号', input: true, printWidth: '200'},
+      {prop: 'model', label: '产品名称', printWidth: '200'},
+      {prop: 'unitm', label: '单位', width: '50', printWidth: '50'},
+      {prop: 'qty', label: '数量', width: '50', input: true, printWidth: '50'},
       {prop: 'remark', label: '备注', input: true}
     ],
     sumFlag: false,
