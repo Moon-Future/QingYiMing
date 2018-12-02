@@ -86,7 +86,7 @@
                 title: '公司'
               },
               {
-                icon: 'icon-measurementunit',
+                icon: 'icon-jiliang',
                 index: '/baseinfo/unit',
                 title: '单位'
               }
@@ -122,18 +122,23 @@
             ]
           },
           {
-            icon: 'icon-kucunguanli',
-            index: '4',
-            title: '库存管理',
+            icon: 'icon-kucun',
+            index: '/inventory',
+            title: '库存'
+          },
+          {
+            icon: 'icon-invoice',
+            index: '5',
+            title: '送货单',
             subs: [
               {
                 icon: 'icon-shenqingfahuo',
-                index: '/inventory/delivery',
+                index: '/invoice/delivery',
                 title: '打印送货单'
               },
               {
                 icon: 'icon-history',
-                index: '/inventory/history',
+                index: '/invoice/history',
                 title: '历史送货单'
               }
             ]
@@ -142,12 +147,12 @@
         items0: [
           {
             icon: 'icon-shenqingfahuo',
-            index: '/inventory/delivery',
+            index: '/invoice/delivery',
             title: '打印送货单'
           },
           {
             icon: 'icon-history',
-            index: '/inventory/history',
+            index: '/invoice/history',
             title: '历史送货单'
           }
         ]

@@ -10,6 +10,7 @@ import Delivery from '@/components/pages/Delivery'
 import DeliveryHistory from '@/components/pages/DeliveryHistory'
 import Order from '@/components/pages/Order'
 import OrderHistory from '@/components/pages/OrderHistory'
+import Inventory from '@/components/pages/Inventory'
 
 Vue.use(Router)
 
@@ -55,14 +56,19 @@ export default new Router({
           component: OrderHistory
         },
         {
-          path: '/inventory/delivery',
+          path: '/invoice/delivery',
           name: 'Delivery',
           component: Delivery
         },
         {
-          path: '/inventory/history',
+          path: '/invoice/history',
           name: 'DeliveryHistory',
           component: DeliveryHistory
+        },
+        {
+          path: '/inventory',
+          name: 'Inventory',
+          component: Inventory
         }
       ]
     },
