@@ -123,8 +123,20 @@
           },
           {
             icon: 'icon-kucun',
-            index: '/inventory',
-            title: '库存'
+            index: '4',
+            title: '库存管理',
+            subs: [
+              {
+                icon: 'icon-shenqingfahuo',
+                index: '/inventor/list',
+                title: '库存清单'
+              },
+              {
+                icon: 'icon-history',
+                index: '/inventor/out',
+                title: '出库清单'
+              }
+            ]
           },
           {
             icon: 'icon-invoice',
