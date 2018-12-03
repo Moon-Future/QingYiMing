@@ -34,10 +34,10 @@
             { prop: 'nun', label: '编码', input: true }
           ],
           fieldSift: [
-            { prop: 'custm', label: '客户' },
             { prop: 'prdm', label: '产品名称' },
             { prop: 'model', label: '产品型号' },
-            { prop: 'nun', label: '编码' },
+            { prop: 'qty', label: '库存数量' },
+            { prop: 'sentQty', label: '已送数量' },
             { prop: 'unitm', label: '单位' }
           ],
           checkRepeat: {field: ['cust', 'prd'], message: '客户对应产品重复'},

@@ -127,13 +127,13 @@
             title: '库存管理',
             subs: [
               {
-                icon: 'icon-shenqingfahuo',
-                index: '/inventor/list',
+                icon: 'icon-ruku',
+                index: '/inventory/list',
                 title: '库存清单'
               },
               {
-                icon: 'icon-history',
-                index: '/inventor/out',
+                icon: 'icon-chuku',
+                index: '/inventory/out',
                 title: '出库清单'
               }
             ]
