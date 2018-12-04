@@ -38,7 +38,7 @@
           width="35">
         </el-table-column>
         <template v-for="(item, i) in fieldAdd">
-          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select">
+          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select|| item.date">
             <template slot-scope="scope">
               <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :type="item.type || 'text'" :placeholder="item.placeholder"></el-input>
               <el-select size="mini" v-if="item.select" v-model="scope.row[item.prop]" :filterable="item['allow-create'] || item.filterable" :allow-create="item['allow-create']" clearable :placeholder="item.placeholder">
@@ -46,9 +46,18 @@
                   v-for="option in item.options" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
               </el-select>
+              <el-date-picker
+                v-if="item.date"
+                v-model="scope.row[item.prop]"
+                size="mini"
+                type="date"
+                format="yyyy 年 MM 月 dd 日"
+                value-format="timestamp"
+                :clearable="false">
+              </el-date-picker>
             </template>
           </el-table-column>
-          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="!item.input && !item.select">
+          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="!item.input && !item.select && !item.date">
           </el-table-column>
         </template>
         <el-table-column v-if="userInfo && userInfo.root === 1" width="100" label="操作">
@@ -64,7 +73,7 @@
     <el-dialog :modal-append-to-body="false" :modal="false" :visible.sync="dialogVisible">
       <el-table :data="updData.data">
         <template v-for="(item, i) in fieldAdd">
-          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select">
+          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select || item.date">
             <template slot-scope="scope">
               <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder"></el-input>
               <el-select size="mini" v-if="item.select" v-model="scope.row[item.prop]" :filterable="item['allow-create'] || item.filterable" :allow-create="item['allow-create']" clearable :placeholder="item.placeholder">
@@ -72,9 +81,18 @@
                   v-for="option in item.options" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
               </el-select>
+              <el-date-picker
+                v-if="item.date"
+                v-model="scope.row[item.prop]"
+                size="mini"
+                type="date"
+                format="yyyy 年 MM 月 dd 日"
+                value-format="timestamp"
+                :clearable="false">
+              </el-date-picker>
             </template>
           </el-table-column>
-          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="!item.input && !item.select">
+          <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="!item.input && !item.select && !item.date">
           </el-table-column>
         </template>
       </el-table>

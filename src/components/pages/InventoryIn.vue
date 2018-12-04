@@ -30,8 +30,9 @@
         tableOptions: {
           fieldAdd: [
             { prop: 'prd', label: '产品', required: true, options: [], select: true, key: 'model' },
-            { prop: 'qty', label: '库存数量', required: true, input: true, type: 'number', placeholder: '输入库存数量' },
-            { prop: 'sentQty', label: '已送数量', input: true, type: 'number', placeholder: '输入已送数量' }
+            { prop: 'qty', label: '入库数量', required: true, input: true, type: 'number', placeholder: '输入入库数量' },
+            { prop: 'sentQty', label: '送货数量', input: true, type: 'number', placeholder: '输入已送数量' },
+            { prop: 'time', label: '日期', date: true }
           ],
           fieldSift: [
             { prop: 'prdm', label: '产品名称' },
@@ -39,13 +40,11 @@
             { prop: 'qty', label: '库存数量' },
             { prop: 'sentQty', label: '已送数量' }
           ],
-          checkRepeat: {field: ['prd'], message: '产品重复'},
           dataSift: [],
-          addTemplate: { prd: '', prdm: '', qty: '', sentQty: '' },
+          addTemplate: { prd: '', qty: '', sentQty: '', time: '' },
           addApi: apiUrl.insertInverntoy,
           deleteApi: apiUrl.deleteInventory,
-          updApi: apiUrl.updInventory,
-          onlySift: true
+          updApi: apiUrl.updInventory
         },
         loading: false,
         total: 0
