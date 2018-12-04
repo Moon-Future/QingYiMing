@@ -127,9 +127,14 @@
             title: '库存管理',
             subs: [
               {
-                icon: 'icon-ruku',
+                icon: 'icon-kucun1',
                 index: '/inventory/list',
                 title: '库存清单'
+              },
+              {
+                icon: 'icon-ruku',
+                index: '/inventory/in',
+                title: '入库'
               },
               {
                 icon: 'icon-chuku',

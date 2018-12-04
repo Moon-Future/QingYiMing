@@ -1,6 +1,6 @@
 <template>
   <div class="table-container">
-    <div class="btn-operate">
+    <div class="btn-operate" v-if="!tableOptions.onlySift">
       <el-button v-if="userInfo && userInfo.root === 1" type="primary" size="mini" v-show="!this.addFlag" @click="goAdd">新增</el-button>
       <el-button type="primary" size="mini" v-show="this.addFlag" @click="goBack">返回</el-button>
       <!-- <el-button type="danger" size="mini" @click="submitDelete(false)">删除</el-button> -->
@@ -14,7 +14,7 @@
         <template v-for="(item, i) in fieldSift">
           <el-table-column :min-width="item.minWidth ? item.minWidth : ''" :prop="item.prop" :label="item.label" :key="i"></el-table-column>
         </template>
-        <el-table-column v-if="userInfo && userInfo.root === 1" width="80" label="操作">
+        <el-table-column v-if="!tableOptions.onlySift && userInfo && userInfo.root === 1" width="80" label="操作">
           <template slot-scope="scope" v-if="scope.row.type != 1">
             <el-button size="mini" @click="handleEdit(scope.row, scope.$index)">编辑</el-button>
           </template>
@@ -40,7 +40,7 @@
         <template v-for="(item, i) in fieldAdd">
           <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select">
             <template slot-scope="scope">
-              <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder"></el-input>
+              <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :type="item.type || 'text'" :placeholder="item.placeholder"></el-input>
               <el-select size="mini" v-if="item.select" v-model="scope.row[item.prop]" :filterable="item['allow-create'] || item.filterable" :allow-create="item['allow-create']" clearable :placeholder="item.placeholder">
                 <el-option
                   v-for="option in item.options" :label="option.name" :value="option.id" :key="option.id">

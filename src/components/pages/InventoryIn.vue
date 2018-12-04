@@ -5,7 +5,7 @@
       :tableOptions="tableOptions"
       :userInfo="userInfo"
       :total="total"
-      @goBack="getInventoryList"
+      @goBack="getInventoryIn"
       @goAdd="getOptions"
       @delete="deleteRow"
       @update="updateRow"
@@ -52,13 +52,13 @@
       }
     },
     created() {
-      this.getInventoryList()
+      this.getInventoryIn()
       this.getOptions()
     },
     methods: {
-      getInventoryList(pageNo = 1) {
+      getInventoryIn(pageNo = 1) {
         this.loading = true
-        this.$http.post(apiUrl.getInventoryList, {
+        this.$http.post(apiUrl.getInventoryIn, {
           data: {pageNo}
         }).then(res => {
           this.loading = false
@@ -90,7 +90,7 @@
         this.tableOptions.dataSift.splice(row, 1, data)
       },
       currentChange(pageNo) {
-        this.getInventoryList(pageNo)
+        this.getInventoryIn(pageNo)
       }
     },
     components: {
