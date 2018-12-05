@@ -30,14 +30,14 @@
         tableOptions: {
           fieldAdd: [
             { prop: 'prd', label: '产品', required: true, options: [], select: true, key: 'model' },
-            { prop: 'qty', label: '库存数量', required: true, input: true, type: 'number', placeholder: '输入库存数量' },
-            { prop: 'sentQty', label: '已送数量', input: true, type: 'number', placeholder: '输入已送数量' }
+            { prop: 'qty', label: '现库存量', required: true, input: true, type: 'number', placeholder: '输入库存数量' },
+            { prop: 'sentQty', label: '累计已送量', input: true, type: 'number', placeholder: '输入已送数量' }
           ],
           fieldSift: [
             { prop: 'prdm', label: '产品名称' },
             { prop: 'model', label: '产品型号' },
-            { prop: 'qty', label: '库存数量' },
-            { prop: 'sentQty', label: '已送数量' }
+            { prop: 'qty', label: '现库存量' },
+            { prop: 'sentQty', label: '累计已送量' }
           ],
           checkRepeat: {field: ['prd'], message: '产品重复'},
           dataSift: [],
