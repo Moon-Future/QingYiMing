@@ -117,4 +117,30 @@ router.post('/updInventoryIn', async (ctx) => {
   }
 })
 
+router.post('/getInventoryOut', async (ctx) => {
+  try {
+    const checkResult = checkRoot(ctx, true)
+    if (checkResult.code === 500) {
+      ctx.body = checkResult
+      return
+    }
+
+    const data = ctx.request.body.data
+    const pageNo = data && data.pageNo || 1
+    const pageSize = data && data.pageSize || 10
+    let inventory
+    if (data && data.prd) {
+      inventory = await query(`SELECT * FROM inventoryOut WHERE type = 0 AND off != 1 ORDER BY createTime ASC`)
+      ctx.body = {code: 200, message: inventory}
+    } else {
+      const count = await query(`SELECT COUNT(*) as count FROM inventoryOut WHERE off != 1`)
+      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryOut i 
+        WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ORDER BY i.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+      ctx.body = {code: 200, message: inventory, count: count[0].count}
+    }
+  } catch(err) {
+    throw new Error(err)
+  }
+})
+
 module.exports = router
