@@ -3,7 +3,7 @@ const router = new Router()
 const query = require('../database/init')
 const checkRoot = require('./root')
 
-router.post('/insertInverntoy', async (ctx) => {
+router.post('/insertInventory', async (ctx) => {
   try {
     const checkResult = checkRoot(ctx)
     if (checkResult.code === 500) {
@@ -29,9 +29,29 @@ router.post('/insertInverntoy', async (ctx) => {
       ctx.body = {code: 200, message: `产品已存在`, repeat: true}
     }
   } catch(err) {
-    ctx.body = {code: 500, message: err}
+    throw new Error(err)
   }
 })
+
+router.post('/insertInventoryIn', async (ctx) => {
+    try {
+      const checkResult = checkRoot(ctx)
+      if (checkResult.code === 500) {
+        ctx.body = checkResult
+        return
+      }
+      const data = ctx.request.body.data
+      for (let i = 0 , len = data.length; i < len; i++) {
+        const item = data[i]
+        const currentTime = new Date().getTime()
+        const sentQty = item.sentQty || 0
+        await query(`INSERT INTO inventoryIn (prd, qty, sentQty, time, createTime) VALUES (${item.prd}, ${item.qty}, ${sentQty}, ${item.time}, ${currentTime})`)
+      }
+      ctx.body = {code: 200, message: '新增成功'}
+    } catch(err) {
+      throw new Error(err)
+    }
+  })
 
 router.post('/getInventoryList', async (ctx) => {
   try {
@@ -56,7 +76,7 @@ router.post('/getInventoryList', async (ctx) => {
       ctx.body = {code: 200, message: inventory, count: count[0].count}
     }
   } catch(err) {
-    ctx.body = {code: 500, message: err}
+    throw new Error(err)
   }
 })
 
@@ -76,7 +96,7 @@ router.post('/deleteCompany', async (ctx) => {
     await query(`UPDATE company SET off = 1, updateTime = ${new Date().getTime()} WHERE id IN ( ${ids.join()} )`)
     ctx.body = {code: 200, message: '删除成功'}
   } catch(err) {
-    ctx.body = {code: 500, message: err}
+    throw new Error(err)
   }
 })
 
@@ -98,7 +118,7 @@ router.post('/updCompany', async (ctx) => {
     const result = await query(`SELECT * FROM company WHERE off != 1 AND id = ${data.id}`)
     ctx.body = {code: 200, message: '更新成功', result: result}
   } catch(err) {
-    ctx.body = {code: 500, message: err}
+    throw new Error(err)
   }
 })
 

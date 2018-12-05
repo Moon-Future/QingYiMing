@@ -52,8 +52,7 @@
                 size="mini"
                 type="date"
                 format="yyyy 年 MM 月 dd 日"
-                value-format="timestamp"
-                :clearable="false">
+                value-format="timestamp">
               </el-date-picker>
             </template>
           </el-table-column>
@@ -88,7 +87,7 @@
                 type="date"
                 format="yyyy 年 MM 月 dd 日"
                 value-format="timestamp"
-                :clearable="false">
+                :clearable="true">
               </el-date-picker>
             </template>
           </el-table-column>

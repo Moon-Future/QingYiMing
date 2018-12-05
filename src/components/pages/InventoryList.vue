@@ -42,7 +42,7 @@
           checkRepeat: {field: ['prd'], message: '产品重复'},
           dataSift: [],
           addTemplate: { prd: '', prdm: '', qty: '', sentQty: '' },
-          addApi: apiUrl.insertInverntoy,
+          addApi: apiUrl.insertInventory,
           deleteApi: apiUrl.deleteInventory,
           updApi: apiUrl.updInventory,
           onlySift: true

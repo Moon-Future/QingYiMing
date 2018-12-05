@@ -32,7 +32,7 @@
             { prop: 'prd', label: '产品', required: true, options: [], select: true, key: 'model' },
             { prop: 'qty', label: '入库数量', required: true, input: true, type: 'number', placeholder: '输入入库数量' },
             { prop: 'sentQty', label: '送货数量', input: true, type: 'number', placeholder: '输入已送数量' },
-            { prop: 'time', label: '日期', date: true }
+            { prop: 'time', label: '日期', required: true, date: true }
           ],
           fieldSift: [
             { prop: 'prdm', label: '产品名称' },
@@ -42,8 +42,8 @@
           ],
           dataSift: [],
           addTemplate: { prd: '', qty: '', sentQty: '', time: '' },
-          addApi: apiUrl.insertInverntoy,
-          deleteApi: apiUrl.deleteInventory,
+          addApi: apiUrl.insertInventoryIn,
+          deleteApi: apiUrl.deleteInventoryIn,
           updApi: apiUrl.updInventory
         },
         loading: false,
