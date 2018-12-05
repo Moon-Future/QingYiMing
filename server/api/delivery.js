@@ -74,6 +74,18 @@ router.post('/saveDelivery', async (ctx) => {
       }
     }
 
+    // 库存出库数量记录
+    for (let i = 0, len = delivery.length; i < len; i++) {
+      let item = delivery[i]
+      await query(`INSERT INTO inventoryOut (prd, sentQty, sentTime, cust, createTime) VALUES (${item.prd}, ${item.qty}, ${item.time}, ${item.cust}, ${currentTime})`)
+      const inventory = await query(`SELECT * FROM inventory WHERE prd = ${item.prd}`)
+      if (inventory.length !== 0) {
+        await query(`UPDATE inventory SET qty = ${Number(inventory[0].qty) - Number(item.qty)}, 
+          sentQty = ${Number(inventory[0].sentQty) + Number(item.qty)}, 
+          updateTime = ${currentTime}`)
+      }
+    }
+
     ctx.body = {code: 200, message: '已保存到历史'}
   } catch(err) {
     ctx.body = {code: 500, message: err}

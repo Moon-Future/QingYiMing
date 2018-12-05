@@ -14,6 +14,7 @@
 
 <script>
   import BaseTable from 'components/common/BaseTable'
+  import { dateFormat } from 'common/js/tool'
   import apiUrl from '@/serviceAPI.config.js'
   export default {
     props: {
@@ -25,16 +26,12 @@
     data() {
       return {
         tableOptions: {
-          fieldAdd: [
-            { prop: 'prd', label: '产品', required: true, options: [], select: true, key: 'model' },
-            { prop: 'qty', label: '现库存量', required: true, input: true, type: 'number', placeholder: '输入库存数量' },
-            { prop: 'sentQty', label: '累计已送量', input: true, type: 'number', placeholder: '输入已送数量' }
-          ],
           fieldSift: [
             { prop: 'prdm', label: '产品名称' },
             { prop: 'model', label: '产品型号' },
-            { prop: 'qty', label: '现库存量' },
-            { prop: 'sentQty', label: '累计已送量' }
+            { prop: 'sentQty', label: '送货量' },
+            { prop: 'custm', label: '客户' },
+            { prop: 'sentTime', label: '送货日期'}
           ],
           dataSift: [],
           onlySift: true
@@ -55,6 +52,9 @@
           this.loading = false
           if (res.data.code === 200) {
             this.tableOptions.dataSift = res.data.message
+            this.tableOptions.dataSift.forEach(ele => {
+                ele.sentTime = dateFormat(ele.sentTime, 'yyyy-MM-dd')
+            })
             this.total = res.data.count
           }
         }).catch(err => {
