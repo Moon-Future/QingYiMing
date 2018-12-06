@@ -1,5 +1,6 @@
 <template>
   <div class="supply-container">
+    <search :showElements="showElements"></search>
     <base-table
       :loading="loading"
       :tableOptions="tableOptions"
@@ -13,6 +14,7 @@
 </template>
 
 <script>
+  import Search from 'components/common/Search'
   import BaseTable from 'components/common/BaseTable'
   import { dateFormat } from 'common/js/tool'
   import apiUrl from '@/serviceAPI.config.js'
@@ -25,6 +27,11 @@
     },
     data() {
       return {
+        showElements: {
+          product: {'allow-create': true, placeholder: '请选择或输入产品名'},
+          time: true,
+          searchBtn: true
+        },
         tableOptions: {
           fieldSift: [
             { prop: 'prdm', label: '产品名称' },
@@ -66,6 +73,7 @@
       }
     },
     components: {
+      Search,
       BaseTable
     }
   }
