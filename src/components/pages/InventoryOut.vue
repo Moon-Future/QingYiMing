@@ -1,6 +1,6 @@
 <template>
   <div class="supply-container">
-    <search :showElements="showElements"></search>
+    <search :showElements="showElements" :customerOptions="customerOptions" :productOptions="productOptions" @search="search"></search>
     <base-table
       :loading="loading"
       :tableOptions="tableOptions"
@@ -28,9 +28,11 @@
     data() {
       return {
         showElements: {
-          product: {'allow-create': true, placeholder: '请选择或输入产品名'},
+          product: {'filterable': true, placeholder: '请选择或输入产品名'},
+          customer: {'filterable': true, placeholder: '请选择或输入客户'},
           time: true,
-          searchBtn: true
+          searchBtn: true,
+          print: true
         },
         tableOptions: {
           fieldSift: [
@@ -43,18 +45,21 @@
           dataSift: [],
           onlySift: true
         },
+        customerOptions: [],
+        productOptions: [],
         loading: false,
         total: 0
       }
     },
     created() {
-      this.getInventoryOut()
+      this.getInventoryOut({})
+      this.getOptions()
     },
     methods: {
-      getInventoryOut(pageNo = 1) {
+      getInventoryOut({pageNo = 1, cust, prd, time}) {
         this.loading = true
         this.$http.post(apiUrl.getInventoryOut, {
-          data: {pageNo}
+          data: {pageNo, cust, prd, time}
         }).then(res => {
           this.loading = false
           if (res.data.code === 200) {
@@ -68,8 +73,38 @@
           this.loading = false
         })
       },
+      getOptions() {
+        this.customerOptions = []
+        this.productOptions = []
+        this.$http.post(apiUrl.getOptions).then(res => {
+          if (res.data.code === 200) {
+            const customer = res.data.message.customer
+            const product = res.data.message.product
+            customer.forEach(ele => {
+              this.customerOptions.push({value: ele.id, label: ele.name})
+            });
+            product.forEach(ele => {
+              this.productOptions.push({value: ele.id, label: ele.model})
+            });
+          }
+        }).catch(err => {
+
+        })
+      },
       currentChange(pageNo) {
-        this.getInventoryIn(pageNo)
+        this.getInventoryOut({pageNo: 1})
+      },
+      search(conditions) {
+        const cust = conditions.customerId
+        const prd = conditions.productId
+        const time = conditions.time
+        if (time) {
+          time.forEach((ele, index)=> {
+            ele = new Date(ele).getTime()
+            time.splice(index, 1, ele)
+          })
+        }
+        this.getInventoryOut({pageNo: 1, cust, prd, time})
       }
     },
     components: {

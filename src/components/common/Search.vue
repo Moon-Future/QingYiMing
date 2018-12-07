@@ -6,7 +6,7 @@
         @change="changeCustomer"
         :filterable="showElements && showElements.customer && (showElements.customer.filterable || showElements.customer['allow-create'])"
         :allow-create="showElements && showElements.customer && showElements.customer['allow-create']"
-        :clearable="showElements && showElements.customer && showElements.customer.clearable"
+        clearable
         :placeholder="showElements && showElements.customer && showElements.customer.placeholder" 
         v-if="showElements && showElements.customer">
         <el-option
@@ -14,14 +14,14 @@
         </el-option>
       </el-select>
       <el-select
-        v-model="prdName" 
+        v-model="productId" 
         :filterable="showElements && showElements.product && (showElements.product.filterable || showElements.product['allow-create'])"
         :allow-create="showElements && showElements.product && showElements.product['allow-create']"
         clearable
         :placeholder="showElements && showElements.product && showElements.product.placeholder" 
         v-if="showElements && showElements.product">
         <el-option
-          v-for="item in prdOptions" :label="item.label" :value="item.value" :key="item.value">
+          v-for="item in productOptions" :label="item.label" :value="item.value" :key="item.value">
         </el-option>
       </el-select>
       <el-date-picker
@@ -37,7 +37,8 @@
       </el-date-picker>
     </div>
     <div class="search-btn" v-if="showElements && showElements.searchBtn">
-      <el-button>查询</el-button>
+      <el-button @click="search">查询</el-button>
+      <el-button v-if="showElements.print" @click="search">打印</el-button>
     </div>
   </div>
 </template>
@@ -52,13 +53,16 @@
       customerOptions: {
         type: Array,
         default: null
+      },
+      productOptions: {
+        type: Array,
+        default: null
       }
     },
     data() {
       return {
         customerId: '',
-        prdName: '',
-        prdOptions: [],
+        productId: '',
         time: '',
         pickerOptions: {
           shortcuts: [{
@@ -99,6 +103,12 @@
           }
         }
         this.$emit('changeCustomer', {customerId: this.customerId, customer})
+      },
+      search() {
+        this.$emit('search', {customerId: this.customerId, productId: this.productId, time: this.time})
+      },
+      print() {
+
       }
     }
   }

@@ -44,7 +44,6 @@ router.post('/getCompany', async (ctx) => {
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
-    const currentTime = new Date()
     let company
     if (data && data.type === 0) {
       company = await query(`SELECT * FROM company WHERE type = 0 AND off != 1 ORDER BY createTime ASC`)

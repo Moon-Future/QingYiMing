@@ -128,16 +128,17 @@ router.post('/getInventoryOut', async (ctx) => {
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
+    const cust = data && data.cust
+    const prd = data && data.prd
+    const time = data && data.time
+    let sql = cust ? ` AND i.cust = ${cust}` : ''
+    sql += prd ? ` AND i.prd = ${prd}` : ''
+    sql += time && time.length !== 0 ? ` AND i.sentTime >= ${time[0]} AND i.sentTime <= ${time[1]}` : ''
     let inventory
-    if (data && data.prd) {
-      inventory = await query(`SELECT * FROM inventoryOut WHERE type = 0 AND off != 1 ORDER BY createTime ASC`)
-      ctx.body = {code: 200, message: inventory}
-    } else {
-      const count = await query(`SELECT COUNT(*) as count FROM inventoryOut WHERE off != 1`)
-      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryOut i 
-        WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ORDER BY i.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
-      ctx.body = {code: 200, message: inventory, count: count[0].count}
-    }
+    const count = await query(`SELECT COUNT(*) as count FROM inventoryOut i WHERE i.off != 1 ${sql}`)
+    inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryOut i 
+      WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    ctx.body = {code: 200, message: inventory, count: count[0].count}
   } catch(err) {
     throw new Error(err)
   }

@@ -15,6 +15,7 @@
       </div>
       <el-menu class="aside-menu"
         :default-active="activeIndex"
+        unique-opened
         background-color="#324157"
         text-color="#fff"
         active-text-color="#E9F01D"
