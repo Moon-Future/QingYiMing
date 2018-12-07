@@ -3,12 +3,12 @@
     <div class="search-condition">
       <el-select 
         v-model="customerId"
-        @change="changeCustomer"
         :filterable="showElements && showElements.customer && (showElements.customer.filterable || showElements.customer['allow-create'])"
         :allow-create="showElements && showElements.customer && showElements.customer['allow-create']"
         clearable
         :placeholder="showElements && showElements.customer && showElements.customer.placeholder" 
-        v-if="showElements && showElements.customer">
+        v-if="showElements && showElements.customer"
+        @change="changeCustomer">
         <el-option
           v-for="item in customerOptions" :label="item.label" :value="item.value" :key="item.value">
         </el-option>
@@ -19,7 +19,8 @@
         :allow-create="showElements && showElements.product && showElements.product['allow-create']"
         clearable
         :placeholder="showElements && showElements.product && showElements.product.placeholder" 
-        v-if="showElements && showElements.product">
+        v-if="showElements && showElements.product"
+        @change="changeProduct">
         <el-option
           v-for="item in productOptions" :label="item.label" :value="item.value" :key="item.value">
         </el-option>
@@ -33,17 +34,22 @@
         range-separator="至"
         start-placeholder="开始日期"
         end-placeholder="结束日期"
-        :picker-options="pickerOptions">
+        :picker-options="pickerOptions"
+        @change="changeTime">
       </el-date-picker>
     </div>
     <div class="search-btn" v-if="showElements && showElements.searchBtn">
       <el-button @click="search">查询</el-button>
-      <el-button v-if="showElements.print" @click="search">打印</el-button>
+      <el-button v-if="showElements.export" @click="exportToExcel">导出Excel</el-button>
+    </div>
+    <div class="file-link" v-show="false">
+      <a :href="fileLink" target="_blank" download="情义明出货数据.xlsx" ref="downloadLink"></a>
     </div>
   </div>
 </template>
 
 <script>
+  import apiUrl from '@/serviceAPI.config.js'
   export default {
     props: {
       showElements: {
@@ -64,6 +70,7 @@
         customerId: '',
         productId: '',
         time: '',
+        fileLink: '',
         pickerOptions: {
           shortcuts: [{
             text: '最近一周',
@@ -103,12 +110,35 @@
           }
         }
         this.$emit('changeCustomer', {customerId: this.customerId, customer})
+        this.search()
+      },
+      changeProduct() {
+        this.search()
+      },
+      changeTime() {
+        this.search()
       },
       search() {
         this.$emit('search', {customerId: this.customerId, productId: this.productId, time: this.time})
       },
-      print() {
-
+      exportToExcel() {
+        let time = this.time
+        if (time) {
+          time.forEach((ele, index)=> {
+            ele = new Date(ele).getTime()
+            time.splice(index, 1, ele)
+          })
+        }
+        this.$http.post(apiUrl.getInventoryOut, {
+          data: {pageNo: 1, cust: this.customerId, prd: this.productId, time, export: true}
+        }).then(res => {
+          if (res.data.code === 200) {
+            this.fileLink = res.data.fileLink
+            this.$nextTick(() => {
+              this.$refs.downloadLink.click()
+            })
+          }
+        })
       }
     }
   }

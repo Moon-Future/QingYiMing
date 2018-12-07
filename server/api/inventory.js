@@ -2,6 +2,16 @@ const Router = require('koa-router')
 const router = new Router()
 const query = require('../database/init')
 const checkRoot = require('./root')
+const { dateFormat } = require('./base')
+const xlsx = require('node-xlsx').default
+const fs = require('fs')
+const path = require('path')
+const exprotFilePath = path.join(__dirname, '../../dist/exportFile')
+
+const exists = fs.existsSync(exprotFilePath)
+if (!exists) {
+  fs.mkdirSync(exprotFilePath)
+}
 
 router.post('/insertInventoryIn', async (ctx) => {
     try {
@@ -131,6 +141,7 @@ router.post('/getInventoryOut', async (ctx) => {
     const cust = data && data.cust
     const prd = data && data.prd
     const time = data && data.time
+    let fileName = ''
     let sql = cust ? ` AND i.cust = ${cust}` : ''
     sql += prd ? ` AND i.prd = ${prd}` : ''
     sql += time && time.length !== 0 ? ` AND i.sentTime >= ${time[0]} AND i.sentTime <= ${time[1]}` : ''
@@ -138,10 +149,49 @@ router.post('/getInventoryOut', async (ctx) => {
     const count = await query(`SELECT COUNT(*) as count FROM inventoryOut i WHERE i.off != 1 ${sql}`)
     inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryOut i 
       WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
-    ctx.body = {code: 200, message: inventory, count: count[0].count}
+    
+    if (data.export) {
+      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryOut i 
+        WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.createTime ASC`)
+      fileName = await exportToExcel(inventory)
+      ctx.body = {code: 200, message: inventory, fileLink: `./exportFile/${fileName}`}
+    } else {
+      ctx.body = {code: 200, message: inventory, count: count[0].count}
+    }
   } catch(err) {
     throw new Error(err)
   }
 })
+
+// router.get('/exportData', async (ctx) => {
+//   try {
+//     const delivery = await query(`SELECT * FROM delivery WHERE off != 1`)
+//     const currentTime = new Date().getTime()
+//     for (let i = 0, len = delivery.length; i < len; i++) {
+//       const item = delivery[i]
+//       const qty = item.qty || 0
+//       await query(`INSERT INTO inventoryOut (prd, sentQty, sentTime, cust, createTime) VALUES (${item.prd}, ${qty}, ${item.time}, ${item.cust}, ${currentTime})`)
+//     }
+//     ctx.body = '导数据'
+//   } catch(err) {
+//     throw new Error(err)
+//   }
+// })
+
+function exportToExcel(data) {
+  return new Promise((resolve, reject) => {
+    let exportData = [{name: '出货单', data: []}]
+    let sheetData = exportData[0].data
+    sheetData.push(['产品名称', '产品型号', '送货量', '客户', '送货日期'])
+    data.forEach(ele => {
+      sheetData.push([ele.prdm, ele.model, ele.sentQty, ele.custm, dateFormat(ele.sentTime, 'yyyy-MM-dd')])
+    })
+    const buffer = xlsx.build(exportData)
+    const fileName = `情义明出货数据.xlsx`
+    const filePath = path.join(exprotFilePath, fileName)
+    fs.writeFileSync(filePath, buffer, {falg: 'w'})
+    resolve(fileName)
+  })
+}
 
 module.exports = router

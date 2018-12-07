@@ -32,7 +32,7 @@
           customer: {'filterable': true, placeholder: '请选择或输入客户'},
           time: true,
           searchBtn: true,
-          print: true
+          export: true
         },
         tableOptions: {
           fieldSift: [
@@ -48,16 +48,25 @@
         customerOptions: [],
         productOptions: [],
         loading: false,
-        total: 0
+        total: 0,
+        oneday: 24 * 60 * 60 * 1000,
+        condition: {
+          cust: '',
+          prd: '',
+          time: ''
+        }
       }
     },
     created() {
-      this.getInventoryOut({})
+      this.getInventoryOut()
       this.getOptions()
     },
     methods: {
-      getInventoryOut({pageNo = 1, cust, prd, time}) {
+      getInventoryOut(pageNo = 1) {
         this.loading = true
+        const cust = this.condition.cust
+        const prd = this.condition.prd
+        const time = this.condition.time
         this.$http.post(apiUrl.getInventoryOut, {
           data: {pageNo, cust, prd, time}
         }).then(res => {
@@ -92,19 +101,21 @@
         })
       },
       currentChange(pageNo) {
-        this.getInventoryOut({pageNo: 1})
+        this.getInventoryOut(pageNo)
       },
       search(conditions) {
-        const cust = conditions.customerId
-        const prd = conditions.productId
+        this.condition.cust = conditions.customerId
+        this.condition.prd = conditions.productId
         const time = conditions.time
         if (time) {
           time.forEach((ele, index)=> {
             ele = new Date(ele).getTime()
+            ele = index === 1 ? ele + this.oneday - 1 : ele 
             time.splice(index, 1, ele)
           })
         }
-        this.getInventoryOut({pageNo: 1, cust, prd, time})
+        this.condition.time = time
+        this.getInventoryOut()
       }
     },
     components: {
