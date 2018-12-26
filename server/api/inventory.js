@@ -148,11 +148,11 @@ router.post('/getInventoryOut', async (ctx) => {
     let inventory
     const count = await query(`SELECT COUNT(*) as count FROM inventoryOut i WHERE i.off != 1 ${sql}`)
     inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryOut i 
-      WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+      WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.sentTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
     
     if (data.export) {
       inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryOut i 
-        WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.createTime ASC`)
+        WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.sentTime ASC`)
       fileName = await exportToExcel(inventory)
       ctx.body = {code: 200, message: inventory, fileLink: `./exportFile/${fileName}`}
     } else {
