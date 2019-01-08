@@ -137,7 +137,7 @@
         receiveCompany: '',
         printFlag: false,
         listShowFlag: false,
-        maxRow: 8,
+        maxRow: 9,
         counter: {number: 1},
         loading: false
       }
@@ -412,7 +412,7 @@
   .print-wrapper {
     width: 22.3cm;
     height: 9.4cm;
-    padding: 0.48cm 1.1cm 0.42cm 1.8cm;
+    padding: 0.2cm 1.1cm 0.42cm 1.8cm;
     border: 1px solid $color-deepgray;
     margin-top: 10px;
     box-sizing: border-box;
@@ -421,7 +421,7 @@
     }
     .delivery-title {
       font-weight: bold;
-      font-size: $font-size-large-xx;
+      font-size: 30px;
       margin-bottom: 5px;
       text-align: center;
     }
@@ -429,7 +429,7 @@
       display: flex;
       justify-content: space-between;
       padding: 0 10px;
-      margin-top: 10px;
+      margin-top: 5px;
       margin-bottom: 5px;
       .delivery-number span {
         margin-left: 10px;
@@ -437,7 +437,7 @@
     }
     .delivery-footer {
       display: flex;
-      margin-top: 10px;
+      margin-top: 5px;
       margin-bottom: 20px;
       justify-content: space-between;
       padding: 0 10px;
