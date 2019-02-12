@@ -170,7 +170,7 @@ router.post('/getInventoryOut', async (ctx) => {
 //     for (let i = 0, len = delivery.length; i < len; i++) {
 //       const item = delivery[i]
 //       const qty = item.qty || 0
-//       await query(`INSERT INTO inventoryOut (prd, sentQty, sentTime, cust, createTime) VALUES (${item.prd}, ${qty}, ${item.time}, ${item.cust}, ${currentTime})`)
+//       await query(`INSERT INTO inventoryOut (delivery, prd, sentQty, sentTime, cust, createTime) VALUES ('${item.id}', ${item.prd}, ${qty}, ${item.time}, ${item.cust}, ${currentTime})`)
 //     }
 //     ctx.body = '导数据'
 //   } catch(err) {

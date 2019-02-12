@@ -77,7 +77,7 @@ router.post('/saveDelivery', async (ctx) => {
     // 库存出库数量记录
     for (let i = 0, len = delivery.length; i < len; i++) {
       let item = delivery[i]
-      await query(`INSERT INTO inventoryOut (prd, sentQty, sentTime, cust, createTime) VALUES (${item.prd}, ${item.qty}, ${item.time}, ${item.cust}, ${currentTime})`)
+      await query(`INSERT INTO inventoryout (delivery, prd, sentQty, sentTime, cust, createTime) VALUES ('${id}', ${item.prd}, ${item.qty}, ${item.time}, ${item.cust}, ${currentTime})`)
       const inventory = await query(`SELECT * FROM inventory WHERE prd = ${item.prd}`)
       if (inventory.length !== 0) {
         await query(`UPDATE inventory SET qty = ${Number(inventory[0].qty) - Number(item.qty)}, 
@@ -141,6 +141,7 @@ router.post('/deleteDelivery', async (ctx) => {
       return
     }
     
+    const currentTime = new Date().getTime()
     const data = ctx.request.body.data
     const deliveryData = data.deliveryData
     const template = data.template
@@ -157,6 +158,7 @@ router.post('/deleteDelivery', async (ctx) => {
     await query(`UPDATE deliverygrp SET off = 1 WHERE id = ${grp}`)
     await query(`UPDATE delivery SET off = 1 WHERE id IN (${str})`)
     await query(`UPDATE counter SET number = ${no}, time = ${new Date().getTime()} WHERE id = ${counter}`)
+    await query(`UPDATE inventoryout SET off = 1 WHERE delivery IN (${str})`)
 
     if (template === 3) {
       let ordMap = {}, sentAll = 0
@@ -174,6 +176,16 @@ router.post('/deleteDelivery', async (ctx) => {
       }
       for (let key in ordMap) {
         await query(`UPDATE ordgrp SET sentAll = ${sentAll - ordMap[key].qty}, finished = 0 WHERE ord = '${ordMap[key].uuid}'`)
+      }
+    }
+
+    for (let i = 0, len = deliveryData.length; i < len; i++) {
+      const item = deliveryData[i]
+      const inventory = await query(`SELECT * FROM inventory WHERE prd = ${item.prd}`)
+      if (inventory.length !== 0) {
+        await query(`UPDATE inventory SET qty = ${Number(inventory[0].qty) + Number(item.qty)}, 
+          sentQty = ${Number(inventory[0].sentQty) - Number(item.qty)}, 
+          updateTime = ${currentTime}`)
       }
     }
 
