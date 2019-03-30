@@ -7,6 +7,7 @@ const order = require('./api/order')
 const delivery = require('./api/delivery')
 const inventory = require('./api/inventory')
 const user = require('./api/user')
+const handleData = require('./api/handleData')
 const router = new Router({
   prefix: '/api'
 })
@@ -19,5 +20,6 @@ router.use('/order', order.routes())
 router.use('/delivery', delivery.routes())
 router.use('/inventory', inventory.routes())
 router.use('/user', user.routes())
+// router.use('/handleData', handleData.routes())
 
 module.exports = router

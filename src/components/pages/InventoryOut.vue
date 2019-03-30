@@ -6,6 +6,7 @@
       :tableOptions="tableOptions"
       :userInfo="userInfo"
       :total="total"
+      :pageNo="pageNo"
       @goBack="getInventoryOut"
       @currentChange="currentChange"
       >
@@ -49,6 +50,7 @@
         productOptions: [],
         loading: false,
         total: 0,
+        pageNo: 1,
         oneday: 24 * 60 * 60 * 1000,
         condition: {
           cust: '',
@@ -77,6 +79,7 @@
                 ele.sentTime = dateFormat(ele.sentTime, 'yyyy-MM-dd')
             })
             this.total = res.data.count
+            this.pageNo = pageNo
           }
         }).catch(err => {
           this.loading = false

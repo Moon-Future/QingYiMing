@@ -26,6 +26,7 @@
           layout="prev, pager, next"
           :disabled="loading"
           :total="total"
+          :current-page="pageNo"
           @current-change="currentChange">
         </el-pagination>
       </div>
@@ -125,6 +126,10 @@
       total: {
         type: Number,
         default: 0
+      },
+      pageNo: {
+        type: Number,
+        default: 1
       }
     },
     data() {

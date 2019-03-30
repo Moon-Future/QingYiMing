@@ -25,7 +25,7 @@
           v-for="item in productOptions" :label="item.label" :value="item.value" :key="item.value">
         </el-option>
       </el-select>
-      <el-date-picker
+      <!-- <el-date-picker
         v-if="showElements && showElements.time"
         v-model="time"
         type="daterange"
@@ -36,6 +36,25 @@
         end-placeholder="结束日期"
         :picker-options="pickerOptions"
         @change="changeTime">
+      </el-date-picker> -->
+      <el-date-picker
+        v-if="showElements && showElements.time"
+        v-model="startTime"
+        align="right"
+        placeholder="开始日期"
+        clearable
+        value-format="timestamp"
+        @change="changeStartTime">
+      </el-date-picker>
+      <el-date-picker
+        v-if="showElements && showElements.time"
+        v-model="endTime"
+        align="right"
+        unlink-panels
+        placeholder="结束日期"
+        clearable
+        value-format="timestamp"
+        @change="changeEndTime">
       </el-date-picker>
     </div>
     <div class="search-btn" v-if="showElements && showElements.searchBtn">
@@ -70,6 +89,8 @@
         customerId: '',
         productId: '',
         time: '',
+        startTime: null,
+        endTime: null,
         fileLink: '',
         pickerOptions: {
           shortcuts: [{
@@ -116,9 +137,27 @@
         this.search()
       },
       changeTime() {
+        console.log('arg', arguments)
+        this.search()
+      },
+      changeStartTime(startTime) {
+        this.startTime = startTime
+        if (this.startTime && this.endTime && this.startTime > this.endTime) {
+          this.endTime = null
+        }
+        this.search()
+      },
+      changeEndTime(endTime) {
+        this.endTime = endTime
+        if (this.startTime && this.endTime && this.startTime > this.endTime) {
+          this.startTime = null
+        }
         this.search()
       },
       search() {
+        const timeStart = this.startTime || new Date('2008-08-08').getTime()
+        const timeEnd = this.endTime || new Date().getTime() + 3600 * 1000 * 24 * 1
+        this.time = [timeStart, timeEnd]
         this.$emit('search', {customerId: this.customerId, productId: this.productId, time: this.time})
       },
       exportToExcel() {

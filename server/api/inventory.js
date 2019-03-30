@@ -25,7 +25,7 @@ router.post('/insertInventoryIn', async (ctx) => {
         const item = data[i]
         const currentTime = new Date().getTime()
         const sentQty = item.sentQty || 0
-        await query(`INSERT INTO inventoryIn (prd, qty, sentQty, time, createTime) VALUES (${item.prd}, ${item.qty}, ${sentQty}, ${item.time}, ${currentTime})`)
+        await query(`INSERT INTO inventoryin (prd, qty, sentQty, time, createTime) VALUES (${item.prd}, ${item.qty}, ${sentQty}, ${item.time}, ${currentTime})`)
         const result = await query(`SELECT * FROM inventory WHERE prd = ${item.prd}`)
         if (result.length === 0) {
           await query(`INSERT INTO inventory (prd, qty, sentQty, createTime, updateTime) VALUES (${item.prd}, ${item.qty}, ${sentQty}, ${currentTime}, ${currentTime})`)
@@ -51,7 +51,7 @@ router.post('/getInventoryList', async (ctx) => {
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
     const type = data && data.type
-    const database = type === 'in' ? 'inventoryIn' : 'inventory'
+    const database = type === 'in' ? 'inventoryin' : 'inventory'
     let inventory
     if (data && data.prd) {
       inventory = await query(`SELECT * FROM ${database} WHERE type = 0 AND off != 1 ORDER BY createTime ASC`)
@@ -90,7 +90,7 @@ router.post('/deleteInventoryIn', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const sentQty = item.sentQty || 0
-      await query(`UPDATE inventoryIn SET off = 1, updateTime = ${new Date().getTime()} WHERE id = ${item.id}`)
+      await query(`UPDATE inventoryin SET off = 1, updateTime = ${new Date().getTime()} WHERE id = ${item.id}`)
       const result = await query(`SELECT * FROM inventory WHERE prd = ${item.prd}`)
       await query(`UPDATE inventory SET qty = ${Number(result[0].qty) - Number(item.qty)}, 
         sentQty = ${Number(result[0].sentQty) - Number(sentQty)},
@@ -113,13 +113,13 @@ router.post('/updInventoryIn', async (ctx) => {
     const data = ctx.request.body.data
     const sentQty = data.sentQty || 0
     const currentTime = new Date().getTime()
-    const oldData = await query(`SELECT * FROM inventoryIn WHERE id = ${data.id}`)
-    await query(`UPDATE inventoryIn SET qty = ${data.qty}, sentQty = ${sentQty}, time = ${data.time}, updateTime = ${currentTime} WHERE id = ${data.id}`)
+    const oldData = await query(`SELECT * FROM inventoryin WHERE id = ${data.id}`)
+    await query(`UPDATE inventoryin SET qty = ${data.qty}, sentQty = ${sentQty}, time = ${data.time}, updateTime = ${currentTime} WHERE id = ${data.id}`)
     const inventory = await query(`SELECT * FROM inventory WHERE off != 1 AND prd = ${data.prd}`)
     await query(`UPDATE inventory SET qty = ${Number(inventory[0].qty) - Number(oldData[0].qty) + Number(data.qty)}, 
       sentQty = ${Number(inventory[0].sentQty) - Number(oldData[0].sentQty) + Number(sentQty)}`)
 
-    const result = await query(`SELECT p.name as prdm, p.model as model, i.id, i.qty, i.sentQty, i.time FROM product p, inventoryIn i 
+    const result = await query(`SELECT p.name as prdm, p.model as model, i.id, i.qty, i.sentQty, i.time FROM product p, inventoryin i 
           WHERE i.id = ${data.id} AND i.prd = p.id AND i.off != 1`)
     ctx.body = {code: 200, message: '更新成功', result: result}
   } catch(err) {
@@ -146,12 +146,12 @@ router.post('/getInventoryOut', async (ctx) => {
     sql += prd ? ` AND i.prd = ${prd}` : ''
     sql += time && time.length !== 0 ? ` AND i.sentTime >= ${time[0]} AND i.sentTime <= ${time[1]}` : ''
     let inventory
-    const count = await query(`SELECT COUNT(*) as count FROM inventoryOut i WHERE i.off != 1 ${sql}`)
-    inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryOut i 
+    const count = await query(`SELECT COUNT(*) as count FROM inventoryout i WHERE i.off != 1 ${sql}`)
+    inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryout i 
       WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.sentTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
     
     if (data.export) {
-      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryOut i 
+      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryout i 
         WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.sentTime ASC`)
       fileName = await exportToExcel(inventory)
       ctx.body = {code: 200, message: inventory, fileLink: `./exportFile/${fileName}`}
@@ -162,21 +162,6 @@ router.post('/getInventoryOut', async (ctx) => {
     throw new Error(err)
   }
 })
-
-// router.get('/exportData', async (ctx) => {
-//   try {
-//     const delivery = await query(`SELECT * FROM delivery WHERE off != 1`)
-//     const currentTime = new Date().getTime()
-//     for (let i = 0, len = delivery.length; i < len; i++) {
-//       const item = delivery[i]
-//       const qty = item.qty || 0
-//       await query(`INSERT INTO inventoryOut (delivery, prd, sentQty, sentTime, cust, createTime) VALUES ('${item.id}', ${item.prd}, ${qty}, ${item.time}, ${item.cust}, ${currentTime})`)
-//     }
-//     ctx.body = '导数据'
-//   } catch(err) {
-//     throw new Error(err)
-//   }
-// })
 
 function exportToExcel(data) {
   return new Promise((resolve, reject) => {
