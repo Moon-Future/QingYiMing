@@ -92,7 +92,7 @@
       },
       currentChange(pageNo) {
         this.currentPage = pageNo
-        this.getOrder(pageNo)
+        this.getOrderHistory(pageNo)
       },
       changeCustomer(cust, row) {
         row.productOptions = this.customerProduct[cust]
