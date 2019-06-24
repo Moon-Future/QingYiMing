@@ -62,11 +62,11 @@
       }
     },
     created() {
-      this.siftMap = {}
       this.getOrderHistory()
     },
     methods: {
       getOrderHistory(pageNo = 1) {
+        this.siftMap = {}
         this.$http.post(apiUrl.getOrderHistory, {
           data: {pageNo, pageSize: this.pageSize}
         }).then(res => {
