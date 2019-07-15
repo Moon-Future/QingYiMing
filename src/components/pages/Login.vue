@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="background" v-if="!mobileFlag">
-      <img src="https://source.unsplash.com/random/1080x720" alt="">
+      <!-- <img src="https://source.unsplash.com/random/1080x720" alt=""> -->
     </div>
     <div class="login-wrapper">
       <h1>情义明</h1>
@@ -252,6 +252,7 @@
       left: 0;
       right: 0;
       z-index: -1;
+      background: #ddd;
       img {
         width: 100%;
       }

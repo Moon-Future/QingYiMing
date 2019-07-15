@@ -1,5 +1,5 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+// import Vue from 'vue'
+// import Router from 'vue-router'
 import Login from '@/components/pages/Login'
 import Home from '@/components/pages/Home'
 import Product from '@/components/pages/Product'
@@ -14,9 +14,9 @@ import InventoryList from '@/components/pages/InventoryList'
 import InventoryIn from '@/components/pages/InventoryIn'
 import InventoryOut from '@/components/pages/InventoryOut'
 
-Vue.use(Router)
+Vue.use(VueRouter)
 
-export default new Router({
+export default new VueRouter({
   routes: [
     {
       path: '/',
@@ -30,58 +30,58 @@ export default new Router({
         {
           path: '/baseinfo/product',
           name: 'Product',
-          component: Product
+          component: () => import('@/components/pages/Product'),
         },
         {
           path: '/baseinfo/company',
           name: 'Company',
-          component: Company
+          component: () => import('@/components/pages/Company'),
         },
         {
           path: '/baseinfo/unit',
           name: 'Unit',
-          component: Unit
+          component: () => import('@/components/pages/Unit'),
         },
         {
           path: '/supply',
           name: 'Supply',
-          component: Supply
+          component: () => import('@/components/pages/Supply'),
         },
         {
           path: '/order/latest',
           name: 'order',
-          component: Order
+          component: () => import('@/components/pages/Order'),
         },
         {
           path: '/order/history',
           name: 'OrderHistory',
-          component: OrderHistory
+          component: () => import('@/components/pages/OrderHistory'),
         },
         {
           path: '/invoice/delivery',
           name: 'Delivery',
-          component: Delivery
+          component: () => import('@/components/pages/Delivery'),
         },
         {
           path: '/invoice/history',
           name: 'DeliveryHistory',
-          component: DeliveryHistory
+          component: () => import('@/components/pages/DeliveryHistory'),
         },
         {
           path: '/inventory/list',
           name: 'InventoryList',
-          component: InventoryList
+          component: () => import('@/components/pages/InventoryList'),
         },
         {
           path: '/inventory/in',
           name: 'InventoryIn',
-          component: InventoryIn
+          component: () => import('@/components/pages/InventoryIn'),
         },
         ,
         {
           path: '/inventory/out',
           name: 'InventoryOut',
-          component: InventoryOut
+          component: () => import('@/components/pages/InventoryOut'),
         }
       ]
     },
