@@ -175,6 +175,7 @@
     },
     methods: {
       print() {
+        this.deliveryTime = new Date()
         if (this.selectData.length === 0) {
           this.$message.error('请先选择数据')
           return
@@ -234,6 +235,7 @@
         })
       },
       changeCustomer({customerId, customer}) {
+        this.deliveryTime = new Date()
         this.selectCustomerMap = {customerId, customer}
         const template = this.customerMap[customerId].template
         this.template = template
@@ -280,6 +282,7 @@
         this.listShowFlag = false
       },
       selectionChange(data) {
+        this.deliveryTime = new Date()
         this.selectData = data
       },
       select(selection, row) {
@@ -376,13 +379,14 @@
       },
       dataFormat() {
         let result = []
+        let deliveryTime = new Date()
         this.selectData.forEach(ele => {
           const data = {
             prd: ele.prd, prdm: ele.prdm, cust: ele.cust, custm: ele.custm,
             model: ele.model, nun: ele.nun || '', unit: ele.unit, unitm: ele.unitm,
             qty: ele.qty || '', qtyR: ele.qtyR || '', sentQty: ele.sentQty || 0, ordQty: ele.ordQty || 0,
             ptime: ele.ptime && new Date(ele.ptime).getTime() || 0,
-            lot: ele.lot || '', remark: ele.remark || '', time: this.deliveryTime.getTime(),
+            lot: ele.lot || '', remark: ele.remark || '', time: deliveryTime.getTime(),
             no: this.counter.number, counter: this.counter.id, ord: ele.ord || '', template: this.template,
             ordId: ele.id || '', ordUuid: ele.uuid || '', ordTemplate: this.template === 3 ? true : false,
             qtyAll: ele.qtyAll || 0, sentAll: ele.sentAll || 0
