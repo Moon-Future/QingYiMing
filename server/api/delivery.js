@@ -141,7 +141,8 @@ router.post('/deleteDelivery', async (ctx) => {
       return
     }
     
-    const currentTime = new Date().getTime()
+    const dateNow = new Date()
+    const currentTime = dateNow.getTime()
     const data = ctx.request.body.data
     const deliveryData = data.deliveryData
     const template = data.template
@@ -157,8 +158,14 @@ router.post('/deleteDelivery', async (ctx) => {
     str = str.slice(0, str.length - 1)
     await query(`UPDATE deliverygrp SET off = 1 WHERE id = ${grp}`)
     await query(`UPDATE delivery SET off = 1 WHERE id IN (${str})`)
-    await query(`UPDATE counter SET number = ${no}, time = ${new Date().getTime()} WHERE id = ${counter}`)
     await query(`UPDATE inventoryout SET off = 1 WHERE delivery IN (${str})`)
+
+    const time = new Date(deliveryData[0].createTime)
+    if (dateNow.getFullYear() + '_' + (dateNow.getMonth() + 1) === time.getFullYear() + '_' + (time.getMonth() + 1)) {
+      await query(`UPDATE counter SET number = ${no} WHERE id = ${counter}`)
+    } else {
+      await query(`UPDATE counter SET number = 0, time = ${new Date().getTime()} WHERE id = ${counter}`)
+    }
 
     if (template === 3) {
       let ordMap = {}, sentAll = 0
