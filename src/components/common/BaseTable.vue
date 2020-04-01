@@ -36,7 +36,7 @@
       <el-table border size="mini" :data="dataAdd">
         <el-table-column
           type="selection"
-          width="35">
+          width="40">
         </el-table-column>
         <template v-for="(item, i) in fieldAdd">
           <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select|| item.date">

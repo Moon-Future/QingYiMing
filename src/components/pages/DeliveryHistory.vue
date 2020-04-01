@@ -3,7 +3,8 @@
     <search 
       :showElements="showElements" 
       :customerOptions="customerOptions"
-      @changeCustomer="changeCustomer">
+      @changeCustomer="changeCustomer"
+      @search="search">
     </search>
     <div class="page-wrapper">
       <el-pagination
@@ -152,6 +153,9 @@
             })
           }
         })
+      },
+      search({customerId, productId, time}) {
+        
       },
       changeCustomer({customerId, customer}) {
         this.customer = customerId == '' ? '-1' : customerId

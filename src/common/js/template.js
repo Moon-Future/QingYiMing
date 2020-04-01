@@ -54,7 +54,7 @@ const templateDelivery = {
   3: {
     selectField: [
       {prop: 'ord', label: '订单编号', width: '150'},
-      {prop: 'checked', label: '', checkBox: true, width: '30'},
+      {prop: 'checked', label: '', checkBox: true, width: '40'},
       {prop: 'model', label: '产品型号', width: '150'},
       {prop: 'qty', label: '数量', width: '60'},
       {prop: 'sentQty', label: '已送数量', width: '80'},

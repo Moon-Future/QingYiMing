@@ -195,9 +195,5 @@
         width: initial;
       }
     }
-    .search-btn {
-      // position: absolute;
-      // right: 10px;
-    }
   }
 </style>

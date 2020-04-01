@@ -24,7 +24,7 @@
             @selection-change="selectionChange" 
             @select="select" 
             @select-all="selectAll">
-            <el-table-column type="selection" width="35"></el-table-column>
+            <el-table-column type="selection" width="40"></el-table-column>
             <el-table-column v-for="(item, i) in selectField" :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
           </el-table>
           <el-table 
@@ -379,7 +379,7 @@
       },
       dataFormat() {
         let result = []
-        let deliveryTime = new Date()
+        let deliveryTime = this.deliveryTime
         this.selectData.forEach(ele => {
           const data = {
             prd: ele.prd, prdm: ele.prdm, cust: ele.cust, custm: ele.custm,

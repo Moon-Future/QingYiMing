@@ -146,22 +146,53 @@ router.post('/getInventoryOut', async (ctx) => {
     sql += prd ? ` AND i.prd = ${prd}` : ''
     sql += time && time.length !== 0 ? ` AND i.sentTime >= ${time[0]} AND i.sentTime <= ${time[1]}` : ''
     let inventory
-    const count = await query(`SELECT COUNT(*) as count FROM inventoryout i WHERE i.off != 1 ${sql}`)
-    inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryout i 
-      WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.sentTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
     
     if (data.export) {
       inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime FROM product p, company c, inventoryout i 
         WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.sentTime ASC`)
+      inventory = await setOff(inventory)
       fileName = await exportToExcel(inventory)
       ctx.body = {code: 200, message: inventory, fileLink: `./exportFile/${fileName}`}
     } else {
+      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.delivery, i.sentTime, i.createTime FROM product p, company c, inventoryout i 
+        WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 ${sql} ORDER BY i.sentTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+      inventory = await setOff(inventory)
+      const count = await query(`SELECT COUNT(*) as count FROM inventoryout i WHERE i.off != 1 ${sql}`)
       ctx.body = {code: 200, message: inventory, count: count[0].count}
     }
   } catch(err) {
     throw new Error(err)
   }
 })
+
+// 本来已经删除，但数据未更改成功 (容错)
+function setOff(inventory) {
+  return new Promise(async (resolve, reject) => {
+    let deliveryGrp = await query(`SELECT * FROM deliverygrp`)
+    let obj = {}, array = [], ids = []
+    deliveryGrp.forEach(item => {
+      obj[item.delivery] = item.off
+    })
+    for (let i = 0, len = inventory.length; i < len; i++) {
+      let item = inventory[i]
+      if (obj[item.delivery] == 1 && item.off != 1) {
+        ids.push(item.id)
+      } else {
+        array.push(item)
+      }
+    }
+    inventory = array
+    if (ids.length !== 0) {
+      let str = ''
+      ids.forEach(id => {
+        str += `'${id}',`
+      })
+      str = str.slice(0, str.length - 1)
+      await query(`UPDATE inventoryout SET off = 1 WHERE id IN (${str})`)
+    }
+    resolve(inventory)
+  })
+}
 
 function exportToExcel(data) {
   return new Promise((resolve, reject) => {
