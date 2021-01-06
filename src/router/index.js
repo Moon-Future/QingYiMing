@@ -13,10 +13,12 @@ import OrderHistory from '@/components/pages/OrderHistory'
 import InventoryList from '@/components/pages/InventoryList'
 import InventoryIn from '@/components/pages/InventoryIn'
 import InventoryOut from '@/components/pages/InventoryOut'
+import apiUrl from '@/serviceAPI.config.js'
+import { Message } from 'element-ui'
 
 Vue.use(VueRouter)
 
-export default new VueRouter({
+const router = new VueRouter({
   routes: [
     {
       path: '/',
@@ -92,3 +94,26 @@ export default new VueRouter({
     }
   ]
 })
+
+router.beforeEach((to, from, next) => {
+  if (to.path === '/login') {
+    next()
+  } else {
+    axios.post(apiUrl.getSession).then(res => {
+      if (res.data.code === 200) {
+        next()
+      } else {
+        Message({
+          message: res.data.message,
+          duration: 1000
+        })
+        next({path: '/login'})
+      }
+    }).catch(err => {
+      next({path: '/login'})
+      Message.error(res.data.message)
+    })
+  }
+})
+
+export default router
