@@ -192,9 +192,11 @@
             printPanel.innerHTML = ''
             app.style.display = 'block'
             this.printFlag = false
-            this.$confirm('是否已打印？', '请确认', {
-              confirmButtonText: '已打印',
-              cancelButtonText: '未打印',
+            this.$confirm('是否保存数据？', '请确认', {
+              confirmButtonText: '保存',
+              cancelButtonText: '不保存',
+              confirmButtonClass: 'confirm-button',
+              cancelButtonClass: 'cancel-button',
               closeOnClickModal: false,
               closeOnPressEscape: false,
               showClose: false,

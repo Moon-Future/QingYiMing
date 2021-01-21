@@ -92,3 +92,13 @@
 .el-table .finished-row {
   background: #f0f9eb;
 }
+
+
+.cancel-button {
+  background: red;
+  color: #fff;
+  &:hover {
+    background: #F56C6C;
+    color: #fff;
+  }
+}
