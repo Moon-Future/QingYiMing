@@ -108,6 +108,21 @@
         </div>
       </div>
     </div>
+
+    <el-dialog
+      title="请确认"
+      :visible.sync="dialogVisible"
+      width="40%"
+      append-to-body
+      :close-on-click-modal="false"
+      :show-close="false">
+      <div class="dialog-title">是 否 保 存 数 据 ?</div>
+      <div class="dialog-info">若 无 操 作，5 秒 后 自 动 保 存 ！！！</div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cancelSave">不 保 存</el-button>
+        <el-button type="primary" @click="saveDelivery">保 存</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -139,7 +154,8 @@
         listShowFlag: false,
         maxRow: 9,
         counter: {number: 1},
-        loading: false
+        loading: false,
+        dialogVisible: false
       }
     },
     computed: {
@@ -172,8 +188,21 @@
     },
     created() {
       this.getCompany()
+      window.addEventListener('beforeunload', this.windowUnload)
+    },
+    destroyed() {
+      console.log('-------destroyed')
+      window.removeEventListener('beforeunload', this.windowUnload)
     },
     methods: {
+      windowUnload(event) {
+        // 打印后若刷新或关闭页面，则默认保存
+        console.log('------------windowUnload', this.afterPrint)
+        if (!this.afterPrint) return
+        event.preventDefault()
+        console.log('保存--')
+        this.saveDelivery()
+      },
       print() {
         this.deliveryTime = new Date()
         if (this.selectData.length === 0) {
@@ -183,6 +212,8 @@
         this.printFlag = true
         this.$nextTick(() => {
           setTimeout(() => {
+            // 打印后
+            this.afterPrint = true
             const printHtml = this.$refs.printWrapper.innerHTML
             const app = document.getElementById('app')
             const printPanel = document.getElementById('printPanel')
@@ -192,34 +223,56 @@
             printPanel.innerHTML = ''
             app.style.display = 'block'
             this.printFlag = false
-            this.$confirm('是否保存数据？', '请确认', {
-              confirmButtonText: '保存',
-              cancelButtonText: '不保存',
-              confirmButtonClass: 'confirm-button',
-              cancelButtonClass: 'cancel-button',
-              closeOnClickModal: false,
-              closeOnPressEscape: false,
-              showClose: false,
-              type: 'info'
-            }).then(() => {
-              this.$http.post(apiUrl.saveDelivery, {
-                data: {counter: this.counter, deliveryData: this.dataFormat(this.selectData)}
-              }).then(res => {
-                this.counter.number += 1
-                if (this.template === 3) {
-                  this.selectData = []
-                  this.tableData = []
-                  this.changeCustomer(this.selectCustomerMap)
-                  this.listShowFlag = false
-                } else {
-                  this.$refs.listTable.clearSelection()
-                }
-              }).catch(err => {
+            this.dialogVisible = true
+            // const confirm = this.$confirm('是否保存数据？10 秒后默认保存！！！', '请确认', {
+            //   confirmButtonText: '保存',
+            //   cancelButtonText: '不保存',
+            //   confirmButtonClass: 'confirm-button',
+            //   cancelButtonClass: 'cancel-button',
+            //   closeOnClickModal: false,
+            //   closeOnPressEscape: false,
+            //   showClose: false,
+            //   type: 'info'
+            // }).then(() => {
+            //   this.saveDelivery()
+            // }).catch(() => {
+            //   console.log(222)
+            // })
 
-              })
-            }).catch(() => {
-            })
+            // 若5秒没操作，则默认保存
+            this.afterPrintTimer = setTimeout(() => {
+              console.log('5s自动保存')
+              this.saveDelivery()
+            }, 5000)
           }, 50)
+        })
+      },
+      cancelSave() {
+        this.afterPrint = false
+        this.dialogVisible = false
+        clearTimeout(this.afterPrintTimer)
+        this.$message.info('未保存！')
+      },
+      saveDelivery() {
+        this.afterPrint = false
+        this.dialogVisible = false
+        clearTimeout(this.afterPrintTimer)
+        this.$http.post(apiUrl.saveDelivery, {
+          data: {counter: this.counter, deliveryData: this.dataFormat(this.selectData)}
+        }).then(res => {
+          this.$message.success('保存成功！')
+          this.counter.number += 1
+          if (this.template === 3) {
+            this.selectData = []
+            this.tableData = []
+            this.changeCustomer(this.selectCustomerMap)
+            this.listShowFlag = false
+          } else {
+            this.$refs.listTable.clearSelection()
+          }
+        }).catch(err => {
+          this.$message.error('保存失败！')
+          console.log(err)
         })
       },
       getCompany() {
@@ -454,5 +507,15 @@
         margin: 0 20px;
       }
     }
+  }
+  .dialog-title {
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 26px;
+  }
+  .dialog-info {
+    color: red;
+    font-weight: bold;
+    font-size: 26px;
   }
 </style>
