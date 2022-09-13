@@ -10,7 +10,7 @@ const router = require('./router')
 
 const CONFIG = {
   key: 'koa:sess',
-  maxAge: 86400000,
+  maxAge: 86400000 * 365,
   autoCommit: true,
   overwrite: true,
   httpOnly: true,
