@@ -20,6 +20,7 @@
     <div class="delivery-wrapper" v-for="(data, i) in deliveryHistory" :key="i">
       <div class="operate">
         <el-button size="mini" type="primary" @click="print(i)">重新打印</el-button>
+        <!-- <el-button size="mini" type="primary" @click="edit(data)">编辑</el-button> -->
         <el-button size="mini" type="danger" v-if="cust[data[0].cust] === data[0].id" @click="deleteOne(i)">删除</el-button>
       </div>
       <div ref="printWrapper">
@@ -110,6 +111,9 @@
       this.getCompany()
     },
     methods: {
+      edit(data) {
+        console.log(data)
+      },
       getDeliveryHistory(pageNo = 1) {
         this.loading = true
         this.$http.post(apiUrl.getDeliveryHistory, {
