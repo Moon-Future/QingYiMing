@@ -77,7 +77,7 @@ router.post('/saveDelivery', async (ctx) => {
     // 库存出库数量记录
     for (let i = 0, len = delivery.length; i < len; i++) {
       let item = delivery[i]
-      await query(`INSERT INTO inventoryout (delivery, prd, sentQty, sentTime, cust, createTime) VALUES ('${id}', ${item.prd}, ${item.qty}, ${item.time}, ${item.cust}, ${currentTime})`)
+      await query(`INSERT INTO inventoryout (delivery, prd, sentQty, sentTime, cust, createTime) VALUES (?, ?, ?, ?, ?, ?)`, [id, item.prd, item.qty || 0, item.time, item.cust, currentTime])
       const inventory = await query(`SELECT * FROM inventory WHERE prd = ${item.prd}`)
       if (inventory.length !== 0) {
         await query(`UPDATE inventory SET qty = ${Number(inventory[0].qty) - Number(item.qty)}, 
