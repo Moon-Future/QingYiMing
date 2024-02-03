@@ -43,7 +43,7 @@
             </el-table>
           </div>
           <div class="delivery-table" v-show="printFlag">
-            <table style="width: 740px" :class="{morePadding: data[0].template === 3}">
+            <table style="width: 740px;" :class="{morePadding: data[0].template === 3}">
               <tr>
                 <th v-for="(item, i) in templateDelivery[data[0].template].history" :width="item.printWidth ? item.printWidth : ''" :key="i">{{ item.label }}</th>
               </tr>

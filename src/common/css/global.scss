@@ -13,7 +13,9 @@
   display: flex;
   justify-content: center;
   height: 100%;
-  font-family: Arial, Microsoft YaHei, SimHei, SimSun;
+  position: relative;
+  left: -20px;
+  font-family: cursive, sans-serif, Arial, Microsoft YaHei, SimHei, SimSun;
   .print-wrapper {
     border: none;
     margin: 0;
@@ -23,7 +25,7 @@
         padding: 3px;
         text-align: center;
         white-space: nowrap;
-        font-size: 14px;
+        font-size: 16px;
       }
       &.morePadding {
         th, td {

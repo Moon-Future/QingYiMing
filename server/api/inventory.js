@@ -10,7 +10,11 @@ const exprotFilePath = path.join(__dirname, '../../dist/exportFile')
 
 const exists = fs.existsSync(exprotFilePath)
 if (!exists) {
-  fs.mkdirSync(exprotFilePath)
+  try {
+    fs.mkdirSync(exprotFilePath)
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 router.post('/insertInventoryIn', async (ctx) => {
