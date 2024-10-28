@@ -2,8 +2,8 @@
 module.exports = {
   host: 'localhost',
   user: 'root',
-  password: '8023',
+  password: 'mysql_8023.',
   database: 'qym',
   port: '3306',
-  multipleStatements: true
+  multipleStatements: true,
 }
