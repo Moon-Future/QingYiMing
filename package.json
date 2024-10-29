@@ -8,8 +8,8 @@
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
     "build": "node build/build.js",
-    "start:prod": "pm2 start ./server/index.js --name qym_service",
-    "stop": "pm2 stop qym_service"
+    "pm2start": "pm2 start ./server/index.js --name qym_service",
+    "pm2stop": "pm2 stop qym_service"
   },
   "dependencies": {
     "axios": "^0.18.0",
