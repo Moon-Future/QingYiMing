@@ -1,5 +1,10 @@
 @import 'common/css/variable.scss';
 
+@font-face {
+  font-family: 'printFont';
+  src: url(/static/fonts/printFont-Regular.ttf);
+}
+
 .field-required::after {
   content: ' *';
   color: red;
@@ -15,7 +20,7 @@
   height: 100%;
   position: relative;
   left: -20px;
-  font-family: cursive, sans-serif, Arial, Microsoft YaHei, SimHei, SimSun;
+  font-family: printFont, cursive, sans-serif, Arial, Microsoft YaHei, SimHei, SimSun;
   .print-wrapper {
     border: none;
     margin: 0;
