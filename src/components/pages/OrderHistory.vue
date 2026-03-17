@@ -48,6 +48,7 @@
           { prop: 'ord', label: '订单编号'},
           { prop: 'custm', label: '客户'},
           { prop: 'model', label: '产品'},
+          { prop: 'version', label: '版本', minWidth: '50'},
           { prop: 'qty', label: '数量', minWidth: '35'},
           { prop: 'sentQty', label: '已送数量', minWidth: '40'},
           { prop: 'restQty', label: '待送数量', minWidth: '40'},
@@ -105,14 +106,14 @@
           return
         }
         if (this.siftMap[row.ord + row.cust].rowIndex === rowIndex) {
-          if ([0, 1, 7, 8].indexOf(columnIndex) !== -1) {
+          if ([0, 1, 8, 9].indexOf(columnIndex) !== -1) {
             return {
               rowspan: this.siftMap[row.ord + row.cust].num,
               colspan: 1
             }
           }
         } else {
-          if ([0, 1, 7, 8].indexOf(columnIndex) !== -1) {
+          if ([0, 1, 8, 9].indexOf(columnIndex) !== -1) {
             return {
               rowspan: 0,
               colspan: 0
@@ -121,11 +122,11 @@
         }
       },
       cellStyle({row, column, rowIndex, columnIndex}) {
-        if (columnIndex === 3) {
+        if (columnIndex === 4) {
           return 'color: blue'
-        } else if (columnIndex === 4) {
-          return 'color: #00CC33'
         } else if (columnIndex === 5) {
+          return 'color: #00CC33'
+        } else if (columnIndex === 6) {
           return 'color: red'
         }
       },
