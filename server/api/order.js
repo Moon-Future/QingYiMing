@@ -31,12 +31,12 @@ router.post('/insertOrder', async (ctx) => {
         qtyAll += Number(ele.qty)
         let list = [
           `'${uuid}'`, `'${item.ord}'`, item.cust, `'${item.custm}'`, ele.prd, `'${ele.prdm}'`, `'${ele.model}'`,
-          ele.qty, currentTime, item.time
+          ele.qty, currentTime, item.time, `'${ele.version || ''}'`
         ]
         str += `( ${list.join()} ),`
       })
       str = str.slice(0, str.length - 1)
-      await query(`INSERT INTO ord (uuid, ord, cust, custm, prd, prdm, model, qty, createTime, time) VALUES ${str}`)
+      await query(`INSERT INTO ord (uuid, ord, cust, custm, prd, prdm, model, qty, createTime, time, version) VALUES ${str}`)
       await query(`INSERT INTO ordgrp (ord, cust, qtyAll, createTime) VALUES ('${uuid}', ${item.cust}, ${qtyAll}, ${currentTime})`)
     }
     if (result.length === 0) {
@@ -68,7 +68,7 @@ router.post('/getOrder', async (ctx) => {
       for (let i = 0, len = ids.length; i < len; i++) {
         let list = await query(
           `
-          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model, u.name as unitm, u.id as unit
+          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, o.version, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model, u.name as unitm, u.id as unit
           FROM ord o, company c, product p, unit u
           WHERE o.cust = c.id AND o.prd = p.id AND p.unit = u.id
           AND o.off != 1 AND o.uuid = '${ids[i].ord}'
@@ -99,7 +99,7 @@ router.post('/getOrder', async (ctx) => {
       for (let i = 0, len = ids.length; i < len; i++) {
         let list = await query(
           `
-          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model
+          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, o.version, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model
           FROM ord o, company c, product p
           WHERE o.cust = c.id AND o.prd = p.id
           AND o.off != 1 AND o.uuid = '${ids[i].ord}'
@@ -136,7 +136,7 @@ router.post('/getOrderHistory', async (ctx) => {
     for (let i = 0, len = ids.length; i < len; i++) {
       let list = await query(
         `
-        SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model
+        SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, o.version, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model
         FROM ord o, company c, product p
         WHERE o.cust = c.id AND o.prd = p.id
         AND o.off != 1 AND o.uuid = '${ids[i].ord}'
@@ -176,7 +176,7 @@ router.post('/updOrder', async (ctx) => {
         if (ele.id === undefined) {
           let list = [
             `'${item.uuid}'`, `'${item.ord}'`, item.cust, `'${item.custm}'`, ele.prd, `'${ele.prdm}'`, `'${ele.model}'`,
-            ele.qty, currentTime, item.time
+            ele.qty, currentTime, item.time, `'${ele.version || ''}'`
           ]
           strInsert += `( ${list.join()} ),`
         } else if (ele.off === 1) {
@@ -184,13 +184,13 @@ router.post('/updOrder', async (ctx) => {
           await query(`UPDATE ord SET off = 1 WHERE id = ${ele.id}`)
         } else {
           let finished = Number(ele.sentQty) >= Number(ele.qty) ? 1 : 0
-          await query(`UPDATE ord SET prd = ${ele.prd}, prdm = '${ele.prdm}', model = '${ele.model}', 
-            qty = ${ele.qty}, finished = ${finished}, time = ${item.time}, updateTime = ${currentTime} WHERE id = ${ele.id}`)
+          await query(`UPDATE ord SET prd = ${ele.prd}, prdm = '${ele.prdm}', model = '${ele.model}',
+            qty = ${ele.qty}, finished = ${finished}, time = ${item.time}, updateTime = ${currentTime}, version = '${ele.version || ''}' WHERE id = ${ele.id}`)
         }
       }
       if (strInsert !== '') {
         strInsert = strInsert.slice(0, strInsert.length - 1)
-        await query(`INSERT INTO ord (uuid, ord, cust, custm, prd, prdm, model, qty, createTime, time) VALUES ${strInsert}`)
+        await query(`INSERT INTO ord (uuid, ord, cust, custm, prd, prdm, model, qty, createTime, time, version) VALUES ${strInsert}`)
       }
       let finished = sentAll >= qtyAll ? 1 : 0
       await query(`UPDATE ordgrp SET qtyAll = ${qtyAll}, finished = ${finished}, updateTime = ${currentTime}, off = ${off} WHERE ord = '${item.uuid}'`)
