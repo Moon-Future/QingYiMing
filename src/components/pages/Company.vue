@@ -31,16 +31,18 @@
           fieldSift: [
             { prop: 'name', label: '名称'},
             { prop: 'alias', label: '简称'},
+            { prop: 'address', label: '公司地址'},
             { prop: 'templatem', label: '货运单模板'}
           ],
           fieldAdd: [
             { prop: 'name', label: '名称', required: true, input: true, placeholder: '输入公司名称' },
             { prop: 'alias', label: '简称', input: true, placeholder: '输入公司简称' },
+            { prop: 'address', label: '公司地址', input: true, placeholder: '输入公司地址' },
             { prop: 'template', label: '货运单模板', required: true, select: true, options: templateOptions}
           ],
           checkRepeat: {field: ['name'], message: '名称重复'},
           dataSift: [],
-          addTemplate: { name: '', alias: '' },
+          addTemplate: { name: '', alias: '', address: '' },
           addApi: apiUrl.insertCompany,
           deleteApi: apiUrl.deleteCompany,
           updApi: apiUrl.updCompany
