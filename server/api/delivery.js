@@ -38,7 +38,7 @@ router.post('/saveDelivery', async (ctx) => {
       ele.createTime = currentTime
       list.push(`'${id}'`, `'${ele.ord}'`, `'${ele.ordId}'`, `'${ele.ordUuid}'`, sentQty, sentAll,
         ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
-        `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime)
+        `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime, `'${ele.version || ''}'`)
       str += `( ${list.join()} ),`
     });
     str = str.slice(0, str.length - 1)
@@ -49,7 +49,7 @@ router.post('/saveDelivery', async (ctx) => {
     }
     await query(
       `
-      INSERT INTO delivery (id, ord, ordId, ordUuid, sentQty, sentAll, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime)
+      INSERT INTO delivery (id, ord, ordId, ordUuid, sentQty, sentAll, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime, version)
       VALUES
       ${str}
       `
@@ -57,7 +57,7 @@ router.post('/saveDelivery', async (ctx) => {
     await query(`INSERT INTO deliverygrp (cust, delivery, createTime) VALUES (${cust}, '${id}', ${currentTime})`)
 
     // 订单已送数量更新
-    if (template === 3) {
+    if (template === 3 || template === 4) {
       for (let i = 0, len = delivery.length; i < len; i++) {
         let ele = delivery[i]
         let sentQty = Number(ele.sentQty) + Number(ele.qty)
@@ -167,7 +167,7 @@ router.post('/deleteDelivery', async (ctx) => {
       await query(`UPDATE counter SET number = 0, time = ${new Date().getTime()} WHERE id = ${counter}`)
     }
 
-    if (template === 3) {
+    if (template === 3 || template === 4) {
       let ordMap = {}, sentAll = 0
       for (let i = 0, len = deliveryData.length; i < len; i++) {
         let ele = deliveryData[i]

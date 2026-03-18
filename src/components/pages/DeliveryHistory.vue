@@ -25,42 +25,93 @@
       </div>
       <div ref="printWrapper">
         <div class="print-wrapper print-wrapper-border"
-          :class="{'time-mark': !printFlag, 'has-sum-table': !templateDelivery[data[0].template].sumFlag}">
+          :class="{'time-mark': !printFlag, 'has-sum-table': !templateDelivery[data[0].template].sumFlag,}">
           <div class="print-time" v-show="!printFlag">{{ data[0].createTime | timeFilter }}</div>
-          <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
-          <div class="delivery-message">
-            <div class="receive-company">收货单位：{{ data[0].custm }}</div>
-            <div class="delivery-number">
-              <span>送货日期：{{ new Date(data[0].time).getFullYear() }} 年 {{ new Date(data[0].time).getMonth() + 1 }} 月 {{ new Date(data[0].time).getDate() }} 日</span>
-              <span v-show="data[0].template !== 3">NO:{{ data[0].no | noFilter }}</span>
+          <template v-if="data[0].template !== 4">
+            <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
+            <div class="delivery-message">
+              <div class="receive-company">收货单位：{{ data[0].custm }}</div>
+              <div class="delivery-number">
+                <span>送货日期：{{ new Date(data[0].time).getFullYear() }} 年 {{ new Date(data[0].time).getMonth() + 1 }} 月 {{ new Date(data[0].time).getDate() }} 日</span>
+                <span v-show="data[0].template !== 3">NO:{{ data[0].no | noFilter }}</span>
+              </div>
             </div>
-          </div>
-          <div class="delivery-table" v-show="!printFlag">
-            <el-table size="mini" :show-summary="templateDelivery[data[0].template].sumFlag" :summary-method="getSummaries" :data="data" :class="{morePadding: data[0].template === 3}">
-              <template v-for="(item, i) in templateDelivery[data[0].template].history">
-                <el-table-column :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
-              </template>
-            </el-table>
-          </div>
-          <div class="delivery-table" v-show="printFlag">
-            <table style="width: 740px;" :class="{morePadding: data[0].template === 3}">
-              <tr>
-                <th v-for="(item, i) in templateDelivery[data[0].template].history" :width="item.printWidth ? item.printWidth : ''" :key="i">{{ item.label }}</th>
-              </tr>
-              <tr v-for="(trData, i) in data" :key="i">
-                <td v-for="(item, j) in templateDelivery[data[0].template].history" :key="j">{{ trData[item.prop] }}</td>
-              </tr>
-              <tr v-if="templateDelivery[data[0].template].sumFlag">
-                <td v-for="(item, i) in templateDelivery[data[0].template].history" :key="i">{{ data | summaryFilter(item, i) }}</td>
-              </tr>
-            </table>
-          </div>
-          <div class="delivery-footer">
-            <div class="delivery-company">送货人: 情义明</div>
-            <div class="receive-psn">收货人: </div>
-            <div class="receive-time"><span>年</span><span>月</span><span>日</span></div>
-            <div class="provider-company">供货单位（盖章）</div>
-          </div>
+            <div class="delivery-table" v-show="!printFlag">
+              <el-table size="mini" :show-summary="templateDelivery[data[0].template].sumFlag" :summary-method="getSummaries" :data="data" :class="{'morePadding': data[0].template === 3}">
+                <el-table-column v-for="(item, i) in templateDelivery[data[0].template].history" :prop="item.prop" :label="item.label" :key="i" :width="item.width ? item.width : ''"></el-table-column>
+              </el-table>
+            </div>
+            <div class="delivery-table" v-show="printFlag">
+              <table style="width: 740px;" :class="{'morePadding': data[0].template === 3}">
+                <tr>
+                  <th v-for="(item, i) in templateDelivery[data[0].template].history" :width="item.printWidth ? item.printWidth : ''" :key="i">{{ item.label }}</th>
+                </tr>
+                <tr v-for="(trData, i) in data" :key="i">
+                  <td v-for="(item, j) in templateDelivery[data[0].template].history" :key="j">{{ trData[item.prop] }}</td>
+                </tr>
+                <tr v-if="templateDelivery[data[0].template].sumFlag">
+                  <td v-for="(item, i) in templateDelivery[data[0].template].history" :key="i">{{ data | summaryFilter(item, i) }}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="delivery-footer">
+              <div class="delivery-company">送货人: 情义明</div>
+              <div class="receive-psn">收货人: </div>
+              <div class="receive-time"><span>年</span><span>月</span><span>日</span></div>
+              <div class="provider-company">供货单位（盖章）</div>
+            </div>
+          </template>
+          <template v-else>
+            <div class="delivery-title">襄阳情义明木业有限公司送货单</div>
+            <div class="delivery-message delivery-message-alt">
+              <div class="message-row">客户名称：{{ data[0].custm }}</div>
+              <div class="message-row">送货地址：{{ getCustomerAddress(data[0].cust) }}</div>
+            </div>
+            <div class="delivery-table" v-show="!printFlag">
+              <table class="signature-table">
+                <tr>
+                  <th v-for="(item, i) in templateDelivery[data[0].template].history" :width="item.printWidth ? item.printWidth : ''" :key="i">{{ item.label }}</th>
+                </tr>
+                <tr v-for="(trData, i) in data" :key="i">
+                  <td v-for="(item, j) in templateDelivery[data[0].template].history" :key="j">{{ trData[item.prop] }}</td>
+                </tr>
+                <tr>
+                  <td colspan="9" class="signature-row">
+                    <div class="signature-item">发货人： &nbsp;&nbsp;陈强</div>
+                    <div class="signature-item">供方盖章：</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="9" class="signature-row">收货人签字确认：</td>
+                </tr>
+                <tr>
+                  <td colspan="9" class="signature-row">收货人盖章：</td>
+                </tr>
+              </table>
+            </div>
+            <div class="delivery-table" v-show="printFlag">
+              <table style="width: 740px" class="signature-table">
+                <tr>
+                  <th v-for="(item, i) in templateDelivery[data[0].template].history" :width="item.printWidth ? item.printWidth : ''" :key="i">{{ item.label }}</th>
+                </tr>
+                <tr v-for="(trData, i) in data" :key="i">
+                  <td v-for="(item, j) in templateDelivery[data[0].template].history" :key="j">{{ trData[item.prop] }}</td>
+                </tr>
+                <tr>
+                  <td colspan="9" class="signature-row">
+                    <div class="signature-item">发货人： &nbsp;&nbsp;陈强</div>
+                    <div class="signature-item">供方盖章：</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="9" class="signature-row">收货人签字确认：</td>
+                </tr>
+                <tr>
+                  <td colspan="9" class="signature-row">收货人盖章：</td>
+                </tr>
+              </table>
+            </div>
+          </template>
         </div>
       </div>  
     </div>
@@ -98,6 +149,7 @@
         customer: '-1',
         deliveryHistory: [],
         templateDelivery: templateDelivery,
+        companyMap: {},
         loading: false,
         total: 0,
         currentPage: 1,
@@ -150,13 +202,18 @@
           data: {type: 0}
         }).then(res => {
           this.customerOptions = []
+          this.companyMap = {}
           if (res.data.code === 200) {
             const customer = res.data.message
             customer.forEach(ele => {
               this.customerOptions.push({value: ele.id, label: ele.name})
+              this.companyMap[ele.id] = {name: ele.name, address: ele.address || ''}
             })
           }
         })
+      },
+      getCustomerAddress(customerId) {
+        return (this.companyMap[customerId] && this.companyMap[customerId].address) || ''
       },
       search({customerId, productId, time}) {
         
@@ -338,6 +395,15 @@
       margin-bottom: 5px;
       .delivery-number span {
         margin-left: 10px;
+      }
+      &.delivery-message-alt {
+        display: block;
+        padding: 0;
+        margin: 0;
+        .message-row {
+          margin-bottom: 4px;
+          text-align: left;
+        }
       }
     }
     .delivery-footer {

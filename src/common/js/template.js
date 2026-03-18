@@ -77,18 +77,55 @@ const templateDelivery = {
     sumFlag: false,
     sumIndex: 2
   },
+  4: {
+    selectField: [
+      {prop: 'ord', label: '订单编号', width: '150'},
+      {prop: 'checked', label: '', checkBox: true, width: '40'},
+      {prop: 'model', label: '产品型号', width: '150'},
+      {prop: 'version', label: '版本', width: '60'},
+      {prop: 'qty', label: '数量', width: '60'},
+      {prop: 'sentQty', label: '已送数量', width: '80'},
+      {prop: 'restQty', label: '待送数量', width: '80'},
+    ],
+    field: [
+      {prop: 'ord', label: '采购订单号', printWidth: '120'},
+      {prop: 'nun', label: 'NC编码', printWidth: '80'},
+      {prop: 'prdm', label: '名称', printWidth: '90'},
+      {prop: 'model', label: '规格/型号', printWidth: '120'},
+      {prop: 'unitm', label: '单位', width: '50', printWidth: '50'},
+      {prop: 'qty', label: '数量', width: '50', input: true, type: 'number', printWidth: '50'},
+      {prop: 'lot', label: '批次', input: false, width: '60', printWidth: '60'},
+      {prop: 'version', label: '版本', input: false, width: '50', printWidth: '50'},
+      {prop: 'remark', label: '备注', input: true, printWidth: '70'}
+    ],
+    history: [
+      {prop: 'ord', label: '采购订单号', printWidth: '120'},
+      {prop: 'nun', label: 'NC编码', printWidth: '80'},
+      {prop: 'prdm', label: '名称', printWidth: '90'},
+      {prop: 'model', label: '规格/型号', printWidth: '120'},
+      {prop: 'unitm', label: '单位', width: '50', printWidth: '50'},
+      {prop: 'qty', label: '数量', width: '50', input: true, printWidth: '50'},
+      {prop: 'lot', label: '批次', input: true, width: '60', printWidth: '60'},
+      {prop: 'version', label: '版本', input: false, width: '50', printWidth: '50'},
+      {prop: 'remark', label: '备注', input: true, printWidth: '70'}
+    ],
+    sumFlag: false,
+    sumIndex: 5
+  }
 }
 
 const templateOptions = [
   {id: 1, name: '骆驼模板'},
   {id: 2, name: '回天模板'},
-  {id: 3, name: '米克模板'}
+  {id: 3, name: '米克模板'},
+  {id: 4, name: '签字模板'},
 ]
 
 const templateMap = {
   1: '骆驼模板',
   2: '回天模板',
-  3: '米克模板'
+  3: '米克模板',
+  4: '签字模板',
 }
 
 module.exports = {templateDelivery, templateOptions, templateMap}

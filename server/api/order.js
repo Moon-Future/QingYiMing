@@ -68,10 +68,13 @@ router.post('/getOrder', async (ctx) => {
       for (let i = 0, len = ids.length; i < len; i++) {
         let list = await query(
           `
-          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, o.version, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model, u.name as unitm, u.id as unit
-          FROM ord o, company c, product p, unit u
-          WHERE o.cust = c.id AND o.prd = p.id AND p.unit = u.id
-          AND o.off != 1 AND o.uuid = '${ids[i].ord}'
+          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, o.version, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model, u.name as unitm, u.id as unit, s.nun
+          FROM ord o
+          INNER JOIN company c ON o.cust = c.id
+          INNER JOIN product p ON o.prd = p.id
+          INNER JOIN unit u ON p.unit = u.id
+          LEFT JOIN supply s ON o.cust = s.cust AND o.prd = s.prd AND s.off != 1
+          WHERE o.off != 1 AND o.uuid = '${ids[i].ord}'
           `
         )
         list.forEach(ele => {
@@ -99,10 +102,12 @@ router.post('/getOrder', async (ctx) => {
       for (let i = 0, len = ids.length; i < len; i++) {
         let list = await query(
           `
-          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, o.version, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model
-          FROM ord o, company c, product p
-          WHERE o.cust = c.id AND o.prd = p.id
-          AND o.off != 1 AND o.uuid = '${ids[i].ord}'
+          SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, o.version, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model, s.nun
+          FROM ord o
+          INNER JOIN company c ON o.cust = c.id
+          INNER JOIN product p ON o.prd = p.id
+          LEFT JOIN supply s ON o.cust = s.cust AND o.prd = s.prd AND s.off != 1
+          WHERE o.off != 1 AND o.uuid = '${ids[i].ord}'
           `
         )
         list.forEach(ele => {

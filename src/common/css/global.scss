@@ -38,6 +38,9 @@
         }
       }
     }
+    &.print-preview {
+      background-color: #f9f9f9;
+    }
   }
   .delivery-title, th {
     font-weight: initial;
@@ -107,5 +110,73 @@
   &:hover {
     background: #F56C6C;
     color: #fff;
+  }
+}
+
+#printPanel .print-wrapper table.signature-table {
+  width: 100%;
+  border-collapse: collapse;
+  th, td {
+    border: 1px solid $color-deepgray;
+    text-align: center;
+    font-size: 14px;
+    padding: 8px 0;
+    color: #000;
+  }
+  td {
+    padding: 4px 0;
+    input {
+      padding: 0 !important;
+    }
+  }
+  .signature-row {
+    text-align: left;
+    padding: 10px;
+  }
+  .signature-item {
+    width: 30%;
+    display: inline-block;
+    text-align: left;
+    &:first-child {
+      width: 60%;
+    }
+  }
+  input {
+    padding: 0;
+    height: 20px !important;
+  }
+}
+
+table.signature-table {
+  width: 100%;
+  border-collapse: collapse;
+  th, td {
+    border: 1px solid $color-deepgray;
+    text-align: center;
+    font-size: 14px;
+    padding: 8px 0;
+    color: #000;
+  }
+  td {
+    padding: 4px 0;
+    input {
+      padding: 0 !important;
+    }
+  }
+  .signature-row {
+    text-align: left;
+    padding: 10px;
+  }
+  .signature-item {
+    width: 30%;
+    display: inline-block;
+    text-align: left;
+    &:first-child {
+      width: 60%;
+    }
+  }
+  input {
+    padding: 0;
+    height: 20px !important;
   }
 }
