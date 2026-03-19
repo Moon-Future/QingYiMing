@@ -437,7 +437,7 @@
                 const year = batchDate.getFullYear().toString().slice(-2)
                 const month = (batchDate.getMonth() + 1).toString().padStart(2, '0')
                 const day = batchDate.getDate().toString().padStart(2, '0')
-                lotValue = year + month + day
+                lotValue = year + month + '01'
               }
               this.tableData.forEach((ele, index) => {
                 ele.restQty = Number(ele.qty) - Number(ele.sentQty)
