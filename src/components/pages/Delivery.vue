@@ -180,7 +180,7 @@
       :close-on-click-modal="false"
       :show-close="false">
       <div class="dialog-title">是 否 保 存 数 据 ?</div>
-      <div class="dialog-info">若 无 操 作，5 秒 后 自 动 保 存 ！！！</div>
+      <div class="dialog-info">若 无 操 作，{{ saveCountdown }} 秒 后 自 动 保 存 ！！！</div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancelSave">不 保 存</el-button>
         <el-button type="primary" @click="saveDelivery">保 存</el-button>
@@ -220,6 +220,7 @@
         counter: {number: 1},
         loading: false,
         dialogVisible: false,
+        saveCountdown: 5,
         tableId: '',
         printPreviewFlag: false,
       }
@@ -295,27 +296,21 @@
             printPanel.innerHTML = ''
             app.style.display = 'block'
             this.printFlag = false
+            this.saveCountdown = 5
             this.dialogVisible = true
-            // const confirm = this.$confirm('是否保存数据？10 秒后默认保存！！！', '请确认', {
-            //   confirmButtonText: '保存',
-            //   cancelButtonText: '不保存',
-            //   confirmButtonClass: 'confirm-button',
-            //   cancelButtonClass: 'cancel-button',
-            //   closeOnClickModal: false,
-            //   closeOnPressEscape: false,
-            //   showClose: false,
-            //   type: 'info'
-            // }).then(() => {
-            //   this.saveDelivery()
-            // }).catch(() => {
-            //   console.log(222)
-            // })
-
-            // 若5秒没操作，则默认保存
-            this.afterPrintTimer = setTimeout(() => {
-              console.log('5s自动保存')
-              this.saveDelivery()
-            }, 5000)
+            if (this.afterPrintTimer) {
+              clearInterval(this.afterPrintTimer)
+            }
+            this.afterPrintTimer = setInterval(() => {
+              if (this.saveCountdown <= 1) {
+                clearInterval(this.afterPrintTimer)
+                this.afterPrintTimer = null
+                console.log('倒计时结束自动保存')
+                this.saveDelivery()
+              } else {
+                this.saveCountdown -= 1
+              }
+            }, 1000)
           }, 50)
         })
       },
@@ -345,13 +340,19 @@
       cancelSave() {
         this.afterPrint = false
         this.dialogVisible = false
-        clearTimeout(this.afterPrintTimer)
+        if (this.afterPrintTimer) {
+          clearInterval(this.afterPrintTimer)
+          this.afterPrintTimer = null
+        }
         this.$message.info('未保存！')
       },
       saveDelivery() {
         this.afterPrint = false
         this.dialogVisible = false
-        clearTimeout(this.afterPrintTimer)
+        if (this.afterPrintTimer) {
+          clearInterval(this.afterPrintTimer)
+          this.afterPrintTimer = null
+        }
         this.$http.post(apiUrl.saveDelivery, {
           data: {counter: this.counter, deliveryData: this.dataFormat(this.selectData)}
         }).then(res => {
