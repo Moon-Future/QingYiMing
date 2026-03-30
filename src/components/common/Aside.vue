@@ -90,6 +90,11 @@
                 icon: 'icon-jiliang',
                 index: '/baseinfo/unit',
                 title: '单位'
+              },
+              {
+                icon: 'icon-tree',
+                index: '/baseinfo/qrcodeProduct',
+                title: '二维码产品'
               }
             ]
           },
