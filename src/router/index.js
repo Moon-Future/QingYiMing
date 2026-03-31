@@ -75,6 +75,11 @@ const router = new VueRouter({
           component: () => import('@/components/pages/DeliveryHistory'),
         },
         {
+          path: '/invoice/deliveryQrcode',
+          name: 'DeliveryQrcode',
+          component: () => import('@/components/pages/DeliveryQrcode'),
+        },
+        {
           path: '/inventory/list',
           name: 'InventoryList',
           component: () => import('@/components/pages/InventoryList'),

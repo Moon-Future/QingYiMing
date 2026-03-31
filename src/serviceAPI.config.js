@@ -9,6 +9,11 @@ const apiUrl = {
   deleteQrcodeProduct: 'api/qrcodeProduct/deleteQrcodeProduct',
   updQrcodeProduct: 'api/qrcodeProduct/updQrcodeProduct',
 
+  insertDeliveryQrcode: 'api/deliveryQrcode/insertDeliveryQrcode',
+  getDeliveryQrcode: 'api/deliveryQrcode/getDeliveryQrcode',
+  deleteDeliveryQrcode: 'api/deliveryQrcode/deleteDeliveryQrcode',
+  updDeliveryQrcode: 'api/deliveryQrcode/updDeliveryQrcode',
+
   insertUnit: 'api/unit/insertUnit',
   getUnit: 'api/unit/getUnit',
   deleteUnit: 'api/unit/deleteUnit',

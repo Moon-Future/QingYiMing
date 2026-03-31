@@ -163,6 +163,11 @@
                 icon: 'icon-history',
                 index: '/invoice/history',
                 title: '历史送货单'
+              },
+              {
+                icon: 'icon-shenqingfahuo',
+                index: '/invoice/deliveryQrcode',
+                title: '送货二维码'
               }
             ]
           }
