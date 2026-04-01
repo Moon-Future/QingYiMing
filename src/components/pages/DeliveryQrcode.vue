@@ -58,19 +58,19 @@
     </div>
 
     <div class="label-list" v-if="!showAddForm && !editId">
-      <div v-for="(item, index) in listData" :key="item.id" class="label-wrapper" v-if="editId !== item.id">
+      <div v-for="item in listData" :key="item.id" class="label-wrapper">
         <label-card :data="item"></label-card>
         <div class="label-actions">
-          <span style="font-size: 12px; margin-right: 10px;">{{ item.createTime }}</span>
-          <el-button type="text" size="small" @click="printLabel(item)">打印</el-button>
-          <el-button type="text" size="small" @click="openEditForm(item)">编辑</el-button>
-          <el-button type="text" size="small" class="delete-btn" @click="handleDelete(item)">删除</el-button>
+          <span style="font-size: 14px; margin-right: 10px;">{{ item.createTime }}</span>
+          <el-button type="primary" size="small" @click="printLabel(item)">打印</el-button>
+          <el-button type="text" size="large" @click="openEditForm(item)">编辑</el-button>
+          <el-button type="text" size="large" class="delete-btn" @click="handleDelete(item)">删除</el-button>
         </div>
       </div>
     </div>
 
     <el-pagination
-      v-if="!showAddForm && total > 0"
+      v-if="!showAddForm && !editId && total > 0"
       class="pagination"
       background
       layout="prev, pager, next"
