@@ -92,7 +92,7 @@
                 title: '单位'
               },
               {
-                icon: 'icon-tree',
+                icon: 'icon-tuopan',
                 index: '/baseinfo/qrcodeProduct',
                 title: '二维码产品'
               }
@@ -165,7 +165,7 @@
                 title: '历史送货单'
               },
               {
-                icon: 'icon-shenqingfahuo',
+                icon: 'icon-erweima',
                 index: '/invoice/deliveryQrcode',
                 title: '送货二维码'
               }
