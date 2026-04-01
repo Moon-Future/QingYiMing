@@ -5,7 +5,6 @@
     </div>
 
     <div class="add-form-wrapper" v-if="showAddForm">
-      <!-- <h4>新增</h4> -->
       <el-form :model="addForm" :rules="rules" ref="addFormRef" label-width="120px" class="add-form">
         <el-form-item label="二维码产品" prop="qrcodeProductId">
           <el-select v-model="addForm.qrcodeProductId" placeholder="请选择二维码产品" style="width: 300px;" @change="onAddProductChange">
@@ -80,6 +79,34 @@
       :current-page.sync="currentPage"
       @current-change="handlePageChange">
     </el-pagination>
+
+    <!-- 打印份数对话框 -->
+    <el-dialog title="打印" :visible.sync="printDialogVisible" width="350px" :modal-append-to-body="false">
+      <el-form label-width="80px">
+        <el-form-item label="打印份数">
+          <el-input-number v-model="printCopies" :min="1" :max="100" style="width: 100%;"></el-input-number>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="printDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handlePrint">确定</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 打印内容区域 -->
+    <div style="position: absolute; left: -9999px; top: 0;">
+      <div ref="printWrapper">
+        <div v-for="(page, pageIndex) in printPages" :key="pageIndex" class="print-page">
+          <div class="print-grid">
+            <div class="print-cell" v-for="(item, index) in page" :key="index">
+              <div class="label-card-wrapper" v-if="item">
+                <label-card :data="item"></label-card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -111,6 +138,9 @@
         showAddForm: false,
         editId: null,
         editingItem: null,
+        printDialogVisible: false,
+        printCopies: 1,
+        printingItem: null,
         qrcodeProductList: [],
         addForm: {
           qrcodeProductId: null,
@@ -131,6 +161,28 @@
           seq1: [{ required: true, message: '请输入序号1', trigger: 'blur' }],
           seq2: [{ required: true, message: '请输入序号2', trigger: 'blur' }]
         }
+      }
+    },
+    computed: {
+      printPages() {
+        if (!this.printingItem) return []
+        const pages = []
+        const totalCopies = this.printCopies
+        const totalPages = Math.ceil(totalCopies / 4)
+
+        for (let p = 0; p < totalPages; p++) {
+          const page = []
+          for (let i = 0; i < 4; i++) {
+            const copyIndex = p * 4 + i
+            if (copyIndex < totalCopies) {
+              page.push(this.printingItem)
+            } else {
+              page.push(null)
+            }
+          }
+          pages.push(page)
+        }
+        return pages
       }
     },
     created() {
@@ -273,7 +325,30 @@
         this.getList()
       },
       printLabel(item) {
-        console.log(item)
+        this.printingItem = item
+        this.printDialogVisible = true
+        this.printCopies = 1
+      },
+      handlePrint() {
+        if (!this.printCopies || this.printCopies < 1) {
+          this.$message.warning('请输入打印份数')
+          return
+        }
+        this.printDialogVisible = false
+        this.$nextTick(() => {
+          setTimeout(() => {
+            const printHtml = this.$refs.printWrapper.innerHTML
+            const app = document.getElementById('app')
+            const printPanel = document.getElementById('printPanel')
+            app.style.display = 'none'
+            printPanel.innerHTML = printHtml
+            printPanel.classList.add('print-qrcode')
+            window.print()
+            printPanel.innerHTML = ''
+            app.style.display = 'block'
+            printPanel.classList.remove('print-qrcode')
+          }, 100)
+        })
       }
     }
   }
@@ -331,5 +406,56 @@
   .pagination {
     margin-top: 20px;
     text-align: right;
+  }
+
+  /* 打印样式 */
+  .print-page {
+    width: 297mm;
+    height: 210mm;
+    box-sizing: border-box;
+    page-break-after: always;
+  }
+
+  .print-page:last-child {
+    page-break-after: avoid;
+  }
+
+  .print-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 5mm 0mm;
+    width: 100%;
+    height: 100%;
+  }
+
+  .print-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .label-card-wrapper {
+    transform: scale(1, 0.86);
+    transform-origin: center;
+    width: 140mm;
+  }
+
+  @media print {
+    .print-page {
+      page-break-after: always;
+      page-break-inside: avoid;
+    }
+    .print-page:last-child {
+      page-break-after: avoid;
+    }
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
   }
 </style>

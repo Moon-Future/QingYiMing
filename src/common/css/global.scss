@@ -45,6 +45,11 @@
   .delivery-title, th {
     font-weight: initial;
   }
+  &.print-qrcode {
+    flex-direction: column;
+    height: initial;
+    left: 0;
+  }
 }
 .print-wrapper {
   .el-table th, .el-table td {
