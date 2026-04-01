@@ -629,6 +629,10 @@
     border: 1px solid $color-deepgray;
     margin-top: 10px;
     box-sizing: border-box;
+    &.template-4 {
+      min-height: 9.4cm;
+      height: initial;
+    }
     &.print-template {
       border: none;
     }

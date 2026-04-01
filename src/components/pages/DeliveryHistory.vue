@@ -25,7 +25,7 @@
       </div>
       <div ref="printWrapper">
         <div class="print-wrapper print-wrapper-border"
-          :class="{'time-mark': !printFlag, 'has-sum-table': !templateDelivery[data[0].template].sumFlag,}">
+          :class="{'time-mark': !printFlag, 'has-sum-table': !templateDelivery[data[0].template].sumFlag, 'template-4': data[0].template === 4}">
           <div class="print-time" v-show="!printFlag">{{ data[0].createTime | timeFilter }}</div>
           <template v-if="data[0].template !== 4">
             <div class="delivery-title">襄阳情义明木业有限公司出库单</div>
@@ -375,6 +375,10 @@
     border: 1px solid $color-deepgray;
     margin-top: 10px;
     box-sizing: border-box;
+    &.template-4 {
+      min-height: 9.4cm;
+      height: initial;
+    }
     &.time-mark {
       overflow: hidden;
     }

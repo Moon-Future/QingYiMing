@@ -88,26 +88,26 @@ const templateDelivery = {
       {prop: 'restQty', label: '待送数量', width: '80'},
     ],
     field: [
-      {prop: 'ord', label: '采购订单号', printWidth: '120'},
+      {prop: 'ord', label: '采购订单号', printWidth: '160'},
       {prop: 'nun', label: 'NC编码', printWidth: '80'},
-      {prop: 'prdm', label: '名称', printWidth: '90'},
-      {prop: 'model', label: '规格/型号', printWidth: '120'},
+      {prop: 'prdm', label: '名称', printWidth: '70'},
+      {prop: 'model', label: '规格/型号', printWidth: '140'},
       {prop: 'unitm', label: '单位', width: '50', printWidth: '50'},
       {prop: 'qty', label: '数量', width: '50', input: true, type: 'number', printWidth: '50'},
       {prop: 'lot', label: '批次', input: false, width: '60', printWidth: '60'},
       {prop: 'version', label: '版本', input: false, width: '50', printWidth: '50'},
-      {prop: 'remark', label: '备注', input: true, printWidth: '70'}
+      {prop: 'remark', label: '备注', input: true, printWidth: '50'}
     ],
     history: [
-      {prop: 'ord', label: '采购订单号', printWidth: '120'},
+      {prop: 'ord', label: '采购订单号', printWidth: '160'},
       {prop: 'nun', label: 'NC编码', printWidth: '80'},
-      {prop: 'prdm', label: '名称', printWidth: '90'},
-      {prop: 'model', label: '规格/型号', printWidth: '120'},
+      {prop: 'prdm', label: '名称', printWidth: '70'},
+      {prop: 'model', label: '规格/型号', printWidth: '140'},
       {prop: 'unitm', label: '单位', width: '50', printWidth: '50'},
       {prop: 'qty', label: '数量', width: '50', input: true, printWidth: '50'},
       {prop: 'lot', label: '批次', input: true, width: '60', printWidth: '60'},
       {prop: 'version', label: '版本', input: false, width: '50', printWidth: '50'},
-      {prop: 'remark', label: '备注', input: true, printWidth: '70'}
+      {prop: 'remark', label: '备注', input: true, printWidth: '50'}
     ],
     sumFlag: false,
     sumIndex: 5
