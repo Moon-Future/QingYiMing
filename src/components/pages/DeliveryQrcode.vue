@@ -141,6 +141,7 @@
         printDialogVisible: false,
         printCopies: 1,
         printingItem: null,
+        printStyleEl: null,
         qrcodeProductList: [],
         addForm: {
           qrcodeProductId: null,
@@ -343,12 +344,29 @@
             app.style.display = 'none'
             printPanel.innerHTML = printHtml
             printPanel.classList.add('print-qrcode')
+            // 添加打印样式
+            this.addPrintStyle()
             window.print()
+            // 移除打印样式
+            this.removePrintStyle()
             printPanel.innerHTML = ''
             app.style.display = 'block'
             printPanel.classList.remove('print-qrcode')
           }, 100)
         })
+      },
+      addPrintStyle() {
+        if (this.printStyleEl) return
+        this.printStyleEl = document.createElement('style')
+        this.printStyleEl.setAttribute('id', 'print-qrcode-style')
+        this.printStyleEl.textContent = '@page { size: A4 landscape; margin: 0; }'
+        document.head.appendChild(this.printStyleEl)
+      },
+      removePrintStyle() {
+        if (this.printStyleEl) {
+          document.head.removeChild(this.printStyleEl)
+          this.printStyleEl = null
+        }
       }
     }
   }
@@ -452,10 +470,6 @@
     }
     .print-page:last-child {
       page-break-after: avoid;
-    }
-    @page {
-      size: A4 landscape;
-      margin: 0;
     }
   }
 </style>
