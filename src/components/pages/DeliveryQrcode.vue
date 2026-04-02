@@ -442,7 +442,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: 5mm 0mm;
     width: 100%;
     height: 100%;
   }
@@ -458,7 +457,7 @@
   }
 
   .label-card-wrapper {
-    transform: scale(1, 0.86);
+    transform: scale(1.1, 0.92);
     transform-origin: center;
     width: 140mm;
   }
