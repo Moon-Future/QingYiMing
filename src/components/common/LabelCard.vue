@@ -56,7 +56,7 @@
               </div>
             </div>
           </td>
-          <td rowspan="4">
+          <td rowspan="4" class="qr-img-cell">
             <img :src="qrImageUrl" class="qr-img" v-if="qrImageUrl">
           </td>
         </tr>
@@ -195,9 +195,14 @@
     }
   }
 
+  .qr-img-cell {
+    padding: 0 !important;
+    text-align: center;
+  }
+
   .qr-img {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
 
   /* 打印样式 */
