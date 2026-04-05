@@ -434,10 +434,9 @@
               // 如果是签字模板(template=4)，计算批次日期：当前日期-7天，格式为年后两位+月份+日期（如260311）
               let lotValue = ''
               if (this.template === 4) {
-                const batchDate = new Date(this.deliveryTime.getTime() - 7 * 24 * 60 * 60 * 1000)
+                const batchDate = new Date()
                 const year = batchDate.getFullYear().toString().slice(-2)
                 const month = (batchDate.getMonth() + 1).toString().padStart(2, '0')
-                const day = batchDate.getDate().toString().padStart(2, '0')
                 lotValue = year + month + '01'
               }
               this.tableData.forEach((ele, index) => {
