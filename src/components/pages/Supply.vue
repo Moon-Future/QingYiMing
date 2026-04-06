@@ -29,8 +29,8 @@
       return {
         tableOptions: {
           fieldAdd: [
-            { prop: 'cust', label: '客户', required: true, options: [], select: true, key: 'custm' },
-            { prop: 'prd', label: '产品', required: true, options: [], select: true, key: 'model' },
+            { prop: 'cust', label: '客户', required: true, options: [], select: true, key: 'custm', filterable: true },
+            { prop: 'prd', label: '产品', required: true, options: [], select: true, key: 'model', filterable: true },
             { prop: 'nun', label: '编码', input: true }
           ],
           fieldSift: [
