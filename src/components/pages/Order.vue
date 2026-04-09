@@ -46,6 +46,7 @@
           <th class="field-required">产品</th>
           <th>版本</th>
           <th class="field-required">数量</th>
+          <th>备注</th>
           <th width=50></th>
           <th>订单时间</th>
           <th width=100></th>
@@ -56,7 +57,7 @@
               <el-input size="mini" :readonly="updFlag" v-model="data.ord" placeholder="请输入订单编号"></el-input>
             </td>
             <td :rowspan="data.message.length + 1">
-              <el-select size="mini" v-if="!updFlag"  v-model="data.cust" @change="changeCustomer(data.cust, data)">
+              <el-select size="mini" v-if="!updFlag" filterable v-model="data.cust" @change="changeCustomer(data.cust, data)">
                 <el-option
                   v-for="option in customerOptions" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
@@ -64,7 +65,7 @@
               <template v-else>{{ data.cust | filterCustomer(customerMap) }}</template>
             </td>
             <td>
-              <el-select size="mini" v-model="data.message[0].prd">
+              <el-select size="mini" v-model="data.message[0].prd" filterable>
                 <el-option
                   v-for="option in data.productOptions" :label="option.name" :value="option.id" :key="option.id">
                 </el-option>
@@ -80,6 +81,9 @@
                 size="mini"
                 placeholder="请输入订单数量"
                 @blur="qtyBlur(data.message[0])"></el-input>
+            </td>
+            <td>
+              <el-input size="mini" v-model="data.message[0].remark" placeholder="请输入备注"></el-input>
             </td>
             <td></td>
             <td :rowspan="data.message.length + 1">
@@ -116,11 +120,14 @@
                   placeholder="请输入订单数量"
                   @blur="qtyBlur(data.message[index])"></el-input>
               </td>
+              <td>
+                <el-input size="mini" v-model="data.message[index].remark" placeholder="请输入备注"></el-input>
+              </td>
               <td><icon-font icon="icon-minus" @click.native="delPrdRow(data.message, index)"></icon-font></td>
             </tr>
           </template>
           <tr :key="`${i}_a`">
-            <td colspan="3">
+            <td colspan="4">
               <el-button class="btn-add" type="info" size="mini" @click="addPrdRow(data.message)">新增</el-button>
             </td>
             <td></td>
@@ -153,6 +160,7 @@
           { prop: 'model', label: '产品'},
           { prop: 'version', label: '版本', minWidth: '50'},
           { prop: 'qty', label: '数量', minWidth: '35'},
+          { prop: 'remark', label: '备注', minWidth: '30'},
           { prop: 'sentQty', label: '已送数量', minWidth: '40'},
           { prop: 'restQty', label: '待送数量', minWidth: '40'},
           { prop: 'finished', label: '完成', minWidth: '25'},
@@ -164,7 +172,7 @@
         dataUpd: [],
         dataDel: [],
         dataAdd: [
-          {ord: '', cust: '', message: [{prd: '', qty: '', version: ''}], productOptions: [], time: ''}
+          {ord: '', cust: '', message: [{prd: '', qty: '', version: '', remark: ''}], productOptions: [], time: ''}
         ],
         customerProduct: {},
         customerOptions: [],
@@ -212,14 +220,14 @@
                   ord: ele.ord,
                   cust: ele.cust,
                   time: ele.time,
-                  message: [{prd: ele.prd, qty: ele.qty, id: ele.id, sentQty: ele.sentQty, version: ele.version}],
+                  message: [{prd: ele.prd, qty: ele.qty, id: ele.id, sentQty: ele.sentQty, version: ele.version, remark: ele.remark}],
                   productOptions: [],
                   sentAll: ele.sentAll,
                   qtyAll: ele.qtyAll
                 }]
               } else {
                 this.siftMap[ele.ord + ele.cust].num += 1
-                this.editMap[this.siftMap[ele.ord + ele.cust].rowIndex][0].message.push({prd: ele.prd, qty: ele.qty, id: ele.id, sentQty: ele.sentQty, version: ele.version})
+                this.editMap[this.siftMap[ele.ord + ele.cust].rowIndex][0].message.push({prd: ele.prd, qty: ele.qty, id: ele.id, sentQty: ele.sentQty, version: ele.version, remark: ele.remark})
               }
               ele.time = dateFormat(ele.time, 'yyyy-MM-dd')
             })
@@ -269,7 +277,7 @@
           })
         } else {
           this.currentTime = new Date().getTime()
-          this.dataAdd = [{ord: '', cust: '', message: [{prd: '', qty: ''}], productOptions: [], time: this.currentTime}]
+          this.dataAdd = [{ord: '', cust: '', message: [{prd: '', qty: '', version: '', remark: ''}], productOptions: [], time: this.currentTime}]
         }
       },
       goBack() {
@@ -329,7 +337,7 @@
         })
       },
       addRow() {
-        this.dataAdd.push({ord: '', cust: '', message: [{prd: '', qty: '', version: ''}], productOptions: [], time: this.currentTime})
+        this.dataAdd.push({ord: '', cust: '', message: [{prd: '', qty: '', version: '', remark: ''}], productOptions: [], time: this.currentTime})
       },
       deleteRow(index) {
         this.dataAdd.splice(index, 1)
@@ -350,7 +358,7 @@
         })
       },
       addPrdRow(row) {
-        row.push({prd: '', qty: '', version: ''})
+        row.push({prd: '', qty: '', version: '', remark: ''})
       },
       delPrdRow(row, index) {
         if (row[index].id) {
@@ -380,14 +388,14 @@
           return
         }
         if (this.siftMap[row.ord + row.cust].rowIndex === rowIndex) {
-          if ([0, 1, 8, 9].indexOf(columnIndex) !== -1) {
+          if ([0, 1, 9, 10].indexOf(columnIndex) !== -1) {
             return {
               rowspan: this.siftMap[row.ord + row.cust].num,
               colspan: 1
             }
           }
         } else {
-          if ([0, 1, 8, 9].indexOf(columnIndex) !== -1) {
+          if ([0, 1, 9, 10].indexOf(columnIndex) !== -1) {
             return {
               rowspan: 0,
               colspan: 0
@@ -398,9 +406,9 @@
       cellStyle({row, column, rowIndex, columnIndex}) {
         if (columnIndex === 4) {
           return 'color: blue'
-        } else if (columnIndex === 5) {
-          return 'color: #00CC33'
         } else if (columnIndex === 6) {
+          return 'color: #00CC33'
+        } else if (columnIndex === 7) {
           return 'color: red'
         }
       },
