@@ -199,7 +199,7 @@
     data() {
       return {
         showElements: {
-          customer: {placeholder: '请选择出货单位'},
+          customer: {placeholder: '请选择出货单位', filterable: true},
         },
         customerOptions: [],
         customerMap: {},
@@ -551,11 +551,11 @@
       },
       cellStyle({row, column, rowIndex, columnIndex}) {
         if (this.template === 4) {
-          if (columnIndex === 5) {
+          if (columnIndex === 6) {
             return 'color: blue'
-          } else if (columnIndex === 6) {
-            return 'color: #00CC33'
           } else if (columnIndex === 7) {
+            return 'color: #00CC33'
+          } else if (columnIndex === 8) {
             return 'color: red'
           }
         } else {

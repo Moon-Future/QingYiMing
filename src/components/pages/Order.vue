@@ -45,8 +45,8 @@
           <th class="field-required">客户</th>
           <th class="field-required">产品</th>
           <th>版本</th>
-          <th class="field-required">数量</th>
           <th>备注</th>
+          <th class="field-required">数量</th>
           <th width=50></th>
           <th>订单时间</th>
           <th width=100></th>
@@ -75,15 +75,15 @@
               <el-input size="mini" v-model="data.message[0].version" placeholder="请输入版本"></el-input>
             </td>
             <td>
+              <el-input size="mini" v-model="data.message[0].remark" placeholder="请输入备注"></el-input>
+            </td>
+            <td>
               <el-input
                 v-model="data.message[0].qty"
                 type="number"
                 size="mini"
                 placeholder="请输入订单数量"
                 @blur="qtyBlur(data.message[0])"></el-input>
-            </td>
-            <td>
-              <el-input size="mini" v-model="data.message[0].remark" placeholder="请输入备注"></el-input>
             </td>
             <td></td>
             <td :rowspan="data.message.length + 1">
@@ -113,15 +113,15 @@
                 <el-input size="mini" v-model="data.message[index].version" placeholder="请输入版本"></el-input>
               </td>
               <td>
+                <el-input size="mini" v-model="data.message[index].remark" placeholder="请输入备注"></el-input>
+              </td>
+              <td>
                 <el-input
                   v-model="data.message[index].qty"
                   type="number"
                   size="mini"
                   placeholder="请输入订单数量"
                   @blur="qtyBlur(data.message[index])"></el-input>
-              </td>
-              <td>
-                <el-input size="mini" v-model="data.message[index].remark" placeholder="请输入备注"></el-input>
               </td>
               <td><icon-font icon="icon-minus" @click.native="delPrdRow(data.message, index)"></icon-font></td>
             </tr>
@@ -159,8 +159,8 @@
           { prop: 'custm', label: '客户'},
           { prop: 'model', label: '产品'},
           { prop: 'version', label: '版本', minWidth: '50'},
-          { prop: 'qty', label: '数量', minWidth: '35'},
           { prop: 'remark', label: '备注', minWidth: '30'},
+          { prop: 'qty', label: '数量', minWidth: '35'},
           { prop: 'sentQty', label: '已送数量', minWidth: '40'},
           { prop: 'restQty', label: '待送数量', minWidth: '40'},
           { prop: 'finished', label: '完成', minWidth: '25'},
@@ -404,7 +404,7 @@
         }
       },
       cellStyle({row, column, rowIndex, columnIndex}) {
-        if (columnIndex === 4) {
+        if (columnIndex === 5) {
           return 'color: blue'
         } else if (columnIndex === 6) {
           return 'color: #00CC33'

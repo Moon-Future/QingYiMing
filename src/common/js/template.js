@@ -84,6 +84,7 @@ const templateDelivery = {
       {prop: 'model', label: '产品型号', width: '150'},
       {prop: 'version', label: '版本', width: '60'},
       {prop: 'qty', label: '数量', width: '60'},
+      {prop: 'remark', label: '备注', width: '120'},
       {prop: 'sentQty', label: '已送数量', width: '80'},
       {prop: 'restQty', label: '待送数量', width: '80'},
     ],

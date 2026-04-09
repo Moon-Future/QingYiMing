@@ -141,7 +141,7 @@ router.post('/getOrderHistory', async (ctx) => {
     for (let i = 0, len = ids.length; i < len; i++) {
       let list = await query(
         `
-        SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, o.version, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model
+        SELECT o.id, o.uuid, o.ord, o.qty, o.sentQty, o.finished, o.time, o.createTime, o.version, o.remark, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model
         FROM ord o, company c, product p
         WHERE o.cust = c.id AND o.prd = p.id
         AND o.off != 1 AND o.uuid = '${ids[i].ord}'

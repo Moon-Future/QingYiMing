@@ -49,8 +49,8 @@
           { prop: 'custm', label: '客户'},
           { prop: 'model', label: '产品'},
           { prop: 'version', label: '版本', minWidth: '50'},
+          { prop: 'remark', label: '备注', minWidth: '30'},
           { prop: 'qty', label: '数量', minWidth: '35'},
-          { prop: 'remark', label: '备注', minWidth: '70'},
           { prop: 'sentQty', label: '已送数量', minWidth: '40'},
           { prop: 'restQty', label: '待送数量', minWidth: '40'},
           { prop: 'finished', label: '完成', minWidth: '25'},
@@ -123,7 +123,7 @@
         }
       },
       cellStyle({row, column, rowIndex, columnIndex}) {
-        if (columnIndex === 4) {
+        if (columnIndex === 5) {
           return 'color: blue'
         } else if (columnIndex === 6) {
           return 'color: #00CC33'
