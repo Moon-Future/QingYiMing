@@ -1,11 +1,12 @@
 <template>
-  <div class="product-container">
-    <search :showElements="showElements"></search>
+    <div class="product-container">
+      <search :showElements="showElements" @search="search"></search>
     <base-table
       :loading="loading"
       :tableOptions="tableOptions"
       :userInfo="userInfo"
       :total="total"
+      :pageNo="pageNo"
       @goBack="getProduct"
       @goAdd="goAdd"
       @delete="deleteRow"
@@ -34,9 +35,11 @@
     data() {
       return {
         showElements: {
-          product: {'allow-create': true, placeholder: '请选择或输入产品名'},
-          time: true,
+          model: {placeholder: '请输入型号'},
           searchBtn: true
+        },
+        searchCondition: {
+          model: '',
         },
         tableOptions: {
           fieldAdd: [
@@ -57,7 +60,8 @@
           updApi: apiUrl.updProduct
         },
         loading: false,
-        total: 0
+        total: 0,
+        pageNo: 1
       }
     },
     computed: {
@@ -70,10 +74,12 @@
       this.goAdd()
     },
     methods: {
-      getProduct(pageNo = 1) {
+      getProduct(pageNo) {
+        const currentPage = pageNo || this.pageNo || 1
+        this.pageNo = currentPage
         this.loading = true
         this.$http.post(apiUrl.getProduct, {
-          data: {pageNo}
+          data: {pageNo: currentPage, ...this.searchCondition}
         }).then(res => {
           this.loading = false
           if (res.data.code === 200) {
@@ -96,6 +102,10 @@
             this.tableOptions.fieldAdd[2].options = res.data.message
           }
         })
+      },
+      search({model}) {
+        this.searchCondition = {model: model.trim() || ''}
+        this.getProduct(1)
       },
       currentChange(pageNo) {
         this.getProduct(pageNo)

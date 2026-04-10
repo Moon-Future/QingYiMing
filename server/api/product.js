@@ -44,8 +44,26 @@ router.post('/getProduct', async (ctx) => {
     const data = ctx.request.body.data
     const pageNo = data && data.pageNo || 1
     const pageSize = data && data.pageSize || 10
-    const count = await query(`SELECT COUNT(*) as count FROM product WHERE off != 1`)
-    const result = await query(`SELECT p.id, p.name, p.model, u.name as unitm FROM product p, unit u WHERE p.unit = u.id AND p.off != 1 ORDER BY p.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    const productName = data && data.productId || ''
+    const model = data && data.model || ''
+    const time = data && data.time || []
+    const startTime = time && time[0] ? time[0] : ''
+    const endTime = time && time[1] ? time[1] : ''
+    let where = `WHERE p.unit = u.id AND p.off != 1`
+    if (productName) {
+      where += ` AND p.name LIKE '%${productName}%'`
+    }
+    if (model) {
+      where += ` AND p.model LIKE '%${model}%'`
+    }
+    if (startTime) {
+      where += ` AND p.createTime >= ${startTime}`
+    }
+    if (endTime) {
+      where += ` AND p.createTime <= ${endTime}`
+    }
+    const count = await query(`SELECT COUNT(*) as count FROM product p, unit u ${where}`)
+    const result = await query(`SELECT p.id, p.name, p.model, u.name as unitm FROM product p, unit u ${where} ORDER BY p.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
     ctx.body = {code: 200, message: result, count: count[0].count}
   } catch(err) {
     ctx.body = {code: 500, message: err}

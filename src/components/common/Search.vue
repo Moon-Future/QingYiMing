@@ -25,6 +25,15 @@
           v-for="item in productOptions" :label="item.label" :value="item.value" :key="item.value">
         </el-option>
       </el-select>
+      <el-input
+        class="search-model"
+        v-model="model"
+        clearable
+        :placeholder="showElements && showElements.model && showElements.model.placeholder"
+        v-if="showElements && showElements.model"
+        @clear="search"
+        @keyup.enter.native="search">
+      </el-input>
       <!-- <el-date-picker
         v-if="showElements && showElements.time"
         v-model="time"
@@ -87,10 +96,11 @@
     data() {
       return {
         customerId: '',
-        productId: '',
-        time: '',
-        startTime: null,
-        endTime: null,
+      productId: '',
+      model: '',
+      time: '',
+      startTime: null,
+      endTime: null,
         fileLink: '',
         pickerOptions: {
           shortcuts: [{
@@ -158,7 +168,7 @@
         const timeStart = this.startTime || new Date('2008-08-08').getTime()
         const timeEnd = this.endTime || new Date().getTime() + 3600 * 1000 * 24 * 1
         this.time = [timeStart, timeEnd]
-        this.$emit('search', {customerId: this.customerId, productId: this.productId, time: this.time})
+        this.$emit('search', {customerId: this.customerId, productId: this.productId, model: this.model, time: this.time})
       },
       exportToExcel() {
         let time = this.time
@@ -193,6 +203,9 @@
     .search-condition {
       .search-input {
         width: initial;
+      }
+      .search-model {
+        width: 220px;
       }
     }
   }
