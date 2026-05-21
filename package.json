@@ -9,7 +9,8 @@
     "start": "npm run dev",
     "build": "node build/build.js",
     "pm2start": "pm2 start ./server/index.js --name qym_service",
-    "pm2stop": "pm2 stop qym_service"
+    "pm2stop": "pm2 stop qym_service",
+    "pm2restart": "pm2 restart qym_service"
   },
   "dependencies": {
     "axios": "^0.18.0",
