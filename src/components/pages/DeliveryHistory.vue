@@ -65,7 +65,7 @@
             <div class="delivery-title">襄阳情义明木业有限公司送货单</div>
             <div class="delivery-message delivery-message-alt">
               <div class="message-row">客户名称：{{ data[0].custm }}</div>
-              <div class="message-row">送货地址：{{ getCustomerAddress(data[0].cust) }}</div>
+              <div class="message-row">送货地址：{{ data[0].address || getCustomerAddress(data[0].cust) }}</div>
             </div>
             <div class="delivery-table" v-show="!printFlag">
               <table class="signature-table">
@@ -207,13 +207,19 @@
             const customer = res.data.message
             customer.forEach(ele => {
               this.customerOptions.push({value: ele.id, label: ele.name})
-              this.companyMap[ele.id] = {name: ele.name, address: ele.address || ''}
+              this.companyMap[ele.id] = {name: ele.name, address: this.getFirstAddress(ele.address)}
             })
           }
         })
       },
       getCustomerAddress(customerId) {
         return (this.companyMap[customerId] && this.companyMap[customerId].address) || ''
+      },
+      getFirstAddress(address) {
+        if (!address) {
+          return ''
+        }
+        return String(address).split(/[,，\n]/).map(ele => ele.trim()).filter(ele => ele)[0] || ''
       },
       search({customerId, productId, time}) {
         

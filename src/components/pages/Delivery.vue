@@ -108,7 +108,22 @@
             <div class="delivery-title">襄阳情义明木业有限公司送货单</div>
             <div class="delivery-message delivery-message-alt">
               <div class="message-row">客户名称：{{ receiveCompany }}</div>
-              <div class="message-row">送货地址：{{ receiveAddress }}</div>
+              <div class="message-row">送货地址：<el-select
+                  class="address-select"
+                  size="mini"
+                  v-if="!printFlag && receiveAddressOptions.length > 1"
+                  v-model="receiveAddress"
+                  placeholder="请选择送货地址">
+                  <el-option
+                    v-for="item in receiveAddressOptions"
+                    :label="item"
+                    :value="item"
+                    :key="item">
+                  </el-option>
+                </el-select>
+                <span v-else>{{ receiveAddress }}</span>
+                <span class="address-warning" v-if="!printFlag && receiveAddressOptions.length > 1 && !receiveAddress">请选择送货地址</span>
+              </div>
             </div>
             <div class="delivery-table" v-show="!printFlag">
               <table border="1" class="signature-table">
@@ -203,6 +218,7 @@
         },
         customerOptions: [],
         customerMap: {},
+        receiveAddressOptions: [],
         orderMap: {},
         template: 1,
         tableData: [],
@@ -282,6 +298,9 @@
           this.$message.error('请先选择数据')
           return
         }
+        if (!this.checkReceiveAddress()) {
+          return
+        }
         this.printFlag = true
         this.$nextTick(() => {
           setTimeout(() => {
@@ -315,6 +334,9 @@
         })
       },
       printPreview() {
+        if (!this.checkReceiveAddress()) {
+          return
+        }
         this.printFlag = true
         this.printPreviewFlag = true
         this.$nextTick(() => {
@@ -380,7 +402,7 @@
             const customer = res.data.message
             customer.forEach(ele => {
               this.customerOptions.push({value: ele.id, label: ele.name})
-              this.customerMap[ele.id] = {name: ele.name, template: ele.template, address: ele.address || ''}
+              this.customerMap[ele.id] = {name: ele.name, template: ele.template, address: ele.address || '', addresses: this.formatAddressList(ele.address)}
             })
           }
         })
@@ -396,6 +418,7 @@
           this.sumFlag = false
           this.receiveCompany = ''
           this.receiveAddress = ''
+          this.receiveAddressOptions = []
           this.loading = false
           this.listShowFlag = false
           this.template = 1
@@ -413,7 +436,8 @@
         this.sumIndex = templateDelivery[template].sumIndex
         this.sumFlag = templateDelivery[template].sumFlag
         this.receiveCompany = customer
-        this.receiveAddress = this.customerMap[customerId].address || ''
+        this.receiveAddressOptions = this.customerMap[customerId].addresses || []
+        this.receiveAddress = this.receiveAddressOptions.length > 1 ? '' : this.receiveAddressOptions[0] || ''
         this.loading = true
         this.listShowFlag = true
         this.selectData = []
@@ -502,6 +526,19 @@
           row.qty = ''
         }
       },
+      formatAddressList(address) {
+        if (!address) {
+          return []
+        }
+        return String(address).split(/[,，\n]/).map(ele => ele.trim()).filter(ele => ele)
+      },
+      checkReceiveAddress() {
+        if (this.isNewTemplate && this.receiveAddressOptions.length > 1 && !this.receiveAddress) {
+          this.$message.error('请先选择送货地址')
+          return false
+        }
+        return true
+      },
       getSummaries(param) {
         const { columns, data } = param;
         const sums = [];
@@ -578,6 +615,7 @@
             prdm: ele.prdm, 
             cust: ele.cust, 
             custm: ele.custm,
+            address: this.receiveAddress || '',
             model: ele.model, 
             nun: ele.nun || '', 
             unit: ele.unit, 
@@ -657,6 +695,14 @@
         .message-row {
           margin-bottom: 4px;
           text-align: left;
+          .address-select {
+            width: 500px;
+          }
+          .address-warning {
+            margin-left: 8px;
+            color: #f56c6c;
+            font-weight: bold;
+          }
         }
       }
     }

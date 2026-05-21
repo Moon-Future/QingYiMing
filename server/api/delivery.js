@@ -35,21 +35,22 @@ router.post('/saveDelivery', async (ctx) => {
     delivery.forEach(ele => {
       let list = []
       let sentQty = Number(ele.sentQty) + Number(ele.qty)
+      const address = String(ele.address || '').replace(/'/g, "''")
       ele.createTime = currentTime
       list.push(`'${id}'`, `'${ele.ord}'`, `'${ele.ordId}'`, `'${ele.ordUuid}'`, sentQty, sentAll,
         ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
-        `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime, `'${ele.version || ''}'`)
+        `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime, `'${ele.version || ''}'`, `'${address}'`)
       str += `( ${list.join()} ),`
     });
     str = str.slice(0, str.length - 1)
     if (counter.id) {
       await query(`UPDATE counter SET number = ${counter.number}, time = ${currentTime} WHERE id = ${counter.id}`)
     } else {
-      await query(`INSERT INTO counter (number, cust, type, time) VALUES (${counter.number}, ${ele.cust}, 'delivery', ${currentTime})`)
+      await query(`INSERT INTO counter (number, cust, type, time) VALUES (${counter.number}, ${cust}, 'delivery', ${currentTime})`)
     }
     await query(
       `
-      INSERT INTO delivery (id, ord, ordId, ordUuid, sentQty, sentAll, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime, version)
+      INSERT INTO delivery (id, ord, ordId, ordUuid, sentQty, sentAll, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime, version, address)
       VALUES
       ${str}
       `

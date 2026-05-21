@@ -41,7 +41,7 @@
         <template v-for="(item, i) in fieldAdd">
           <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select|| item.date">
             <template slot-scope="scope">
-              <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :type="item.type || 'text'" :placeholder="item.placeholder"></el-input>
+              <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :type="item.type || 'text'" :rows="item.rows || 2" :placeholder="item.placeholder"></el-input>
               <el-select size="mini" v-if="item.select" v-model="scope.row[item.prop]" :filterable="item['allow-create'] || item.filterable" :allow-create="item['allow-create']" clearable :placeholder="item.placeholder">
                 <el-option
                   v-for="option in item.options" :label="option.name" :value="option.id" :key="option.id">
@@ -75,7 +75,7 @@
         <template v-for="(item, i) in fieldAdd">
           <el-table-column :prop="item.prop" :label="item.label" :key="i" :label-class-name="item.required ? 'field-required' : ''" v-if="item.input || item.select || item.date">
             <template slot-scope="scope">
-              <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :placeholder="item.placeholder"></el-input>
+              <el-input size="mini" v-if="item.input" v-model="scope.row[item.prop]" :type="item.type || 'text'" :rows="item.rows || 2" :placeholder="item.placeholder"></el-input>
               <el-select size="mini" v-if="item.select" v-model="scope.row[item.prop]" :disabled="item.disabled ? true : false" :filterable="item['allow-create'] || item.filterable" :allow-create="item['allow-create']" clearable :placeholder="item.placeholder">
                 <el-option
                   v-for="option in item.options" :label="option.name" :value="option.id" :key="option.id">
