@@ -162,14 +162,20 @@ router.post('/getInventoryOut', async (ctx) => {
     let inventory
 
     if (data.export) {
-      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.sentTime, s.nun FROM product p, company c, inventoryout i, supply s 
-        WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 AND p.id = s.prd ${sql} ORDER BY i.sentTime ASC`)
+      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.delivery, i.sentTime, s.nun FROM inventoryout i
+        INNER JOIN product p ON i.prd = p.id
+        INNER JOIN company c ON i.cust = c.id
+        LEFT JOIN (SELECT cust, prd, MAX(nun) AS nun FROM supply WHERE off != 1 GROUP BY cust, prd) s ON i.cust = s.cust AND i.prd = s.prd
+        WHERE i.off != 1 ${sql} ORDER BY i.sentTime ASC`)
       inventory = await setOff(inventory)
       fileName = await exportToExcel(inventory, isLuoTuo)
       ctx.body = { code: 200, message: inventory, fileLink: `./exportFile/${fileName}` }
     } else {
-      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.delivery, i.sentTime, i.createTime, s.nun FROM product p, company c, inventoryout i, supply s 
-        WHERE i.prd = p.id AND i.cust = c.id AND i.off != 1 AND p.id = s.prd ${sql} ORDER BY i.sentTime ASC LIMIT ${(pageNo - 1) *
+      inventory = await query(`SELECT p.name as prdm, p.model as model, c.name as custm, i.id, i.sentQty, i.delivery, i.sentTime, i.createTime, s.nun FROM inventoryout i
+        INNER JOIN product p ON i.prd = p.id
+        INNER JOIN company c ON i.cust = c.id
+        LEFT JOIN (SELECT cust, prd, MAX(nun) AS nun FROM supply WHERE off != 1 GROUP BY cust, prd) s ON i.cust = s.cust AND i.prd = s.prd
+        WHERE i.off != 1 ${sql} ORDER BY i.sentTime ASC LIMIT ${(pageNo - 1) *
         pageSize}, ${pageSize}`)
       inventory = await setOff(inventory)
       const count = await query(`SELECT COUNT(*) as count FROM inventoryout i WHERE i.off != 1 ${sql}`)
