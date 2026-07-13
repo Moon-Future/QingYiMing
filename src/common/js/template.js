@@ -55,6 +55,7 @@ const templateDelivery = {
     selectField: [
       {prop: 'ord', label: '订单编号', width: '150'},
       {prop: 'checked', label: '', checkBox: true, width: '40'},
+      {prop: 'nun', label: '物料编码', width: '100'},
       {prop: 'model', label: '产品型号', width: '150'},
       {prop: 'qty', label: '数量', width: '60'},
       {prop: 'sentQty', label: '已送数量', width: '80'},
@@ -81,6 +82,7 @@ const templateDelivery = {
     selectField: [
       {prop: 'ord', label: '订单编号', width: '150'},
       {prop: 'checked', label: '', checkBox: true, width: '40'},
+      {prop: 'nun', label: '物料编码', width: '100'},
       {prop: 'model', label: '产品型号', width: '150'},
       {prop: 'version', label: '版本', width: '60'},
       {prop: 'qty', label: '数量', width: '60'},
