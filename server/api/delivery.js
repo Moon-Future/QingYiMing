@@ -1,207 +1,165 @@
 const Router = require('koa-router')
-const router = new Router()
-const uuidv1 = require('uuid/v1');
+const uuid = require('uuid/v1')
 const query = require('../database/init')
 const checkRoot = require('./root')
+const router = new Router()
 
-router.post('/saveDelivery', async (ctx) => {
-  try {
-    const checkResult = checkRoot(ctx, true)
-    if (checkResult.code === 500) {
-      ctx.body = checkResult
-      return
+function requireValue(condition, message) {
+  if (!condition) throw Object.assign(new Error(message), { business: true })
+}
+
+function positiveId(value) {
+  const id = Number(value)
+  requireValue(Number.isSafeInteger(id) && id > 0, '记录编号无效')
+  return id
+}
+
+function month(timestamp) {
+  const date = new Date(Number(timestamp))
+  return date.getFullYear() * 12 + date.getMonth()
+}
+
+function endpoint(path, handler) {
+  router.post(path, async ctx => {
+    const permission = checkRoot(ctx, true)
+    if (permission.code !== 200) { ctx.body = permission; return }
+    try {
+      ctx.body = Object.assign({ code: 200 }, await handler(ctx.request.body.data || {}))
+    } catch (error) {
+      // 旧前端收到 HTTP 成功状态就会提示保存成功，业务校验失败时也必须返回错误状态。
+      ctx.status = error.business ? 409 : 500
+      ctx.body = { code: 500, message: error.business ? error.message : '送货操作失败' }
+      if (!error.business) ctx.app.emit('error', error, ctx)
     }
+  })
+}
 
-    const data = ctx.request.body.data
-    const counter = data.counter
-    const delivery = data.deliveryData
-    const cust = delivery[0].cust
-    const template = delivery[0].template
-    const id = uuidv1()
-    const currentTime = new Date().getTime()
-    let str = ''
-    let sentQtyMap = {}, sentAll = 0
-    delivery.forEach(ele => {
-      if (sentQtyMap[ele.ordUuid]) {
-        sentQtyMap[ele.ordUuid] += Number(ele.qty)
-      } else {
-        sentQtyMap[ele.ordUuid] = Number(ele.qty)
-      }
-    })
-    delivery.forEach(ele => {
-      sentAll = Number(ele.sentAll) + Number(sentQtyMap[ele.ordUuid])
-    })
+async function lockCustomer(run, id) {
+  const rows = await run('SELECT * FROM company WHERE id = ? FOR UPDATE', [positiveId(id)])
+  requireValue(rows.length === 1, '客户不存在')
+  return rows[0]
+}
 
-    delivery.forEach(ele => {
-      let list = []
-      let sentQty = Number(ele.sentQty) + Number(ele.qty)
-      const address = String(ele.address || '').replace(/'/g, "''")
-      ele.createTime = currentTime
-      list.push(`'${id}'`, `'${ele.ord}'`, `'${ele.ordId}'`, `'${ele.ordUuid}'`, sentQty, sentAll,
-        ele.prd, `'${ele.prdm}'`, ele.cust, `'${ele.custm}'`, `'${ele.model}'`, `'${ele.nun}'`, ele.unit, `'${ele.unitm}'`,
-        `'${ele.qty}'`, `'${ele.qtyR}'`, ele.ptime, `'${ele.lot}'`, `'${ele.remark}'`, ele.time, ele.no, ele.counter, ele.template, ele.createTime, `'${ele.version || ''}'`, `'${address}'`)
-      str += `( ${list.join()} ),`
-    });
-    str = str.slice(0, str.length - 1)
-    if (counter.id) {
-      await query(`UPDATE counter SET number = ${counter.number}, time = ${currentTime} WHERE id = ${counter.id}`)
-    } else {
-      await query(`INSERT INTO counter (number, cust, type, time) VALUES (${counter.number}, ${cust}, 'delivery', ${currentTime})`)
-    }
-    await query(
-      `
-      INSERT INTO delivery (id, ord, ordId, ordUuid, sentQty, sentAll, prd, prdm, cust, custm, model, nun, unit, unitm, qty, qtyR, ptime, lot, remark, time, no, counter, template, createTime, version, address)
-      VALUES
-      ${str}
-      `
-    )
-    await query(`INSERT INTO deliverygrp (cust, delivery, createTime) VALUES (${cust}, '${id}', ${currentTime})`)
-
-    // 订单已送数量更新
-    if (template === 3 || template === 4) {
-      for (let i = 0, len = delivery.length; i < len; i++) {
-        let ele = delivery[i]
-        let sentQty = Number(ele.sentQty) + Number(ele.qty)
-        let ordFinished = sentQty >= ele.ordQty ? 1 : 0
-        await query(`UPDATE ord SET sentQty = ${sentQty}, finished = ${ordFinished} WHERE id = ${ele.ordId}`)
-      }
-      for (let i = 0, len = delivery.length; i < len; i++) {
-        let ele = delivery[i]
-        let ordUuid = ele.ordUuid
-        let qtyAll = ele.qtyAll
-        let sentAll = Number(ele.sentAll) + Number(sentQtyMap[ele.ordUuid])
-        let finished = sentAll >= ele.qtyAll ? 1 : 0
-        await query(`UPDATE ordgrp SET sentAll = ${sentAll}, finished = ${finished} WHERE ord = '${ele.ordUuid}'`)
-      }
-    }
-
-    // 库存出库数量记录
-    for (let i = 0, len = delivery.length; i < len; i++) {
-      let item = delivery[i]
-      await query(`INSERT INTO inventoryout (delivery, prd, sentQty, sentTime, cust, createTime) VALUES (?, ?, ?, ?, ?, ?)`, [id, item.prd, item.qty || 0, item.time, item.cust, currentTime])
-      const inventory = await query(`SELECT * FROM inventory WHERE prd = ${item.prd}`)
-      if (inventory.length !== 0) {
-        await query(`UPDATE inventory SET qty = ${Number(inventory[0].qty) - Number(item.qty)}, 
-          sentQty = ${Number(inventory[0].sentQty) + Number(item.qty)}, 
-          updateTime = ${currentTime}`)
-      }
-    }
-
-    ctx.body = {code: 200, message: '已保存到历史'}
-  } catch(err) {
-    ctx.body = {code: 500, message: err}
-    throw new Error(err)
+async function changeOrder(run, item, delta, groups) {
+  const [order] = await run('SELECT * FROM ord WHERE id = ? AND off = 0 FOR UPDATE', [positiveId(item.ordId)])
+  requireValue(order && order.cust === Number(item.cust) && order.prd === Number(item.prd), '订单行与客户或产品不匹配')
+  // 历史送货量与订单明细对不上时，无法确定哪边正确，继续开单或撤销都会扩大差异。
+  const deliveries = await run('SELECT qty FROM delivery WHERE ordId = ? AND template IN (3,4) AND off = 0', [String(order.id)])
+  const recordedSent = deliveries.reduce((sum, delivery) => sum + Number(delivery.qty), 0)
+  requireValue(deliveries.every(delivery => Number.isSafeInteger(Number(delivery.qty)) && Number(delivery.qty) > 0)
+    && recordedSent === order.sentQty, '订单历史送货数量不一致，请先核对')
+  const sent = order.sentQty + delta
+  requireValue(Number.isSafeInteger(sent) && sent >= 0 && sent <= order.qty, '送货数量超出订单范围')
+  if (!groups.has(order.uuid)) {
+    const [group] = await run('SELECT * FROM ordgrp WHERE ord = ? AND off = 0 FOR UPDATE', [order.uuid])
+    requireValue(group, '订单已删除或不存在')
+    const [totals] = await run('SELECT COALESCE(SUM(qty),0) AS qty, COALESCE(SUM(sentQty),0) AS sent FROM ord WHERE uuid = ? AND off = 0', [order.uuid])
+    requireValue(group.qtyAll === totals.qty && group.sentAll === totals.sent,
+      '订单汇总与明细不一致，请先核对')
+    groups.set(order.uuid, group)
   }
-})
+  const group = groups.get(order.uuid)
+  group.sentAll += delta
+  await run('UPDATE ord SET sentQty = ?, finished = ? WHERE id = ?', [sent, Number(sent === order.qty), order.id])
+  return { ord: order.ord, ordUuid: order.uuid, ordId: order.id, sentQty: sent }
+}
 
-router.post('/getDeliveryHistory', async (ctx) => {
-  try {
-    const checkResult = checkRoot(ctx, true)
-    if (checkResult.code === 500) {
-      ctx.body = checkResult
-      return
-    }
-    
-    const data = ctx.request.body.data
-    const pageNo = data && data.pageNo || 1
-    const pageSize = data && data.pageSize || 5
-    const customer = data && data.customer
-    let result = [], cust = {}, ids, count
-    if (customer == '-1') {
-      count = await query(`SELECT COUNT(*) as count FROM deliverygrp WHERE off != 1`)
-      ids = await query(`SELECT * FROM deliverygrp WHERE off != 1 ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
-    } else {
-      count = await query(`SELECT COUNT(*) as count FROM deliverygrp WHERE off != 1 AND cust = ${customer}`)
-      ids = await query(`SELECT * FROM deliverygrp WHERE off != 1 AND cust = ${customer} ORDER BY createTime DESC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
-    }
-    for (let i = 0, len = ids.length; i < len; i++) {
-      let list = await query(`SELECT * FROM delivery WHERE id = '${ids[i].delivery}'`)
-      if (list.length !== 0) {
-        list.forEach(ele => {
-          ele.grp = ids[i].id
-          cust[ele.cust] === undefined ? cust[ele.cust] = ele.cust : false
-        })
-        result.push(list)
-      }
-    }
-    for (let key in cust) {
-      let list = await query(`SELECT * FROM delivery WHERE cust = ${key} AND off != 1 ORDER BY createTime DESC LIMIT 1`)
-      cust[key] = list[0].id
-    }
-    ctx.body = {code: 200, message: result, count: count[0].count, cust}
-  } catch(err) {
-    ctx.body = {code: 500, message: err}
+async function updateGroups(run, groups) {
+  for (const group of groups.values()) {
+    requireValue(group.sentAll >= 0 && group.sentAll <= group.qtyAll, '订单汇总存在差异，请核对后再操作')
+    await run('UPDATE ordgrp SET sentAll = ?, finished = ? WHERE id = ?',
+      [group.sentAll, Number(group.sentAll === group.qtyAll), group.id])
   }
-})
+}
 
-router.post('/deleteDelivery', async (ctx) => {
-  try {
-    const checkResult = checkRoot(ctx, true)
-    if (checkResult.code === 500) {
-      ctx.body = checkResult
-      return
-    }
-    
-    const dateNow = new Date()
-    const currentTime = dateNow.getTime()
-    const data = ctx.request.body.data
-    const deliveryData = data.deliveryData
-    const template = data.template
-    const grp = data.grp
-    const ids = data.ids
-    const counter = data.counter
-    const no = data.no - 1
-    const cust = data.cust
-    let str = ''
-    ids.forEach(id => {
-      str += `'${id}',`
-    })
-    str = str.slice(0, str.length - 1)
-    await query(`UPDATE deliverygrp SET off = 1 WHERE id = ${grp}`)
-    await query(`UPDATE delivery SET off = 1 WHERE id IN (${str})`)
-    await query(`UPDATE inventoryout SET off = 1 WHERE delivery IN (${str})`)
+async function stock(run, item, delta, now) {
+  await run('UPDATE inventory SET qty = qty - ?, sentQty = COALESCE(sentQty,0) + ?, updateTime = ? WHERE prd = ? AND off = 0',
+    [delta, delta, now, positiveId(item.prd)])
+}
 
-    const time = new Date(deliveryData[0].createTime)
-    if (dateNow.getFullYear() + '_' + (dateNow.getMonth() + 1) === time.getFullYear() + '_' + (time.getMonth() + 1)) {
-      await query(`UPDATE counter SET number = ${no} WHERE id = ${counter}`)
-    } else {
-      await query(`UPDATE counter SET number = 0, time = ${new Date().getTime()} WHERE id = ${counter}`)
-    }
-
-    if (template === 3 || template === 4) {
-      let ordMap = {}, sentAll = 0
-      for (let i = 0, len = deliveryData.length; i < len; i++) {
-        let ele = deliveryData[i]
-        let ordUuid = ele.ordUuid
-        sentAll = ele.sentAll
-        if (ordMap[ordUuid]) {
-          ordMap[ordUuid].qty += Number(ele.qty)
-        } else {
-          ordMap[ordUuid] = {uuid: ele.ordUuid, qty: Number(ele.qty)}
-        }
-        let qty = Number(ele.sentQty) - Number(ele.qty)
-        await query(`UPDATE ord SET sentQty = ${qty}, finished = 0 WHERE id = ${ele.ordId}`)
-      }
-      for (let key in ordMap) {
-        await query(`UPDATE ordgrp SET sentAll = ${sentAll - ordMap[key].qty}, finished = 0 WHERE ord = '${ordMap[key].uuid}'`)
-      }
-    }
-
-    for (let i = 0, len = deliveryData.length; i < len; i++) {
-      const item = deliveryData[i]
-      const inventory = await query(`SELECT * FROM inventory WHERE prd = ${item.prd}`)
-      if (inventory.length !== 0) {
-        await query(`UPDATE inventory SET qty = ${Number(inventory[0].qty) + Number(item.qty)}, 
-          sentQty = ${Number(inventory[0].sentQty) - Number(item.qty)}, 
-          updateTime = ${currentTime}`)
-      }
-    }
-
-    const result = await query(`SELECT * FROM delivery WHERE cust = ${cust} AND off != 1 ORDER BY createTime DESC LIMIT 1`)
-    ctx.body = {code: 200, message: '删除成功', cust: result.length === 0 ? '-1' : result[0].id}
-  } catch(err) {
-    ctx.body = {code: 500, message: err}
+endpoint('/saveDelivery', data => query.transaction(async run => {
+  const items = data.deliveryData
+  requireValue(Array.isArray(items) && items.length, '送货单不能为空')
+  const customer = await lockCustomer(run, items[0].cust)
+  const now = Date.now()
+  const [counter] = await run("SELECT * FROM counter WHERE cust = ? AND type = 'delivery' FOR UPDATE", [customer.id])
+  requireValue(customer.off === 0 && counter, '请重新选择客户')
+  const no = month(counter.time) === month(now) ? counter.number + 1 : 1
+  requireValue(data.counter && Number(data.counter.number) === no, '单号已变化，请刷新后重新打印')
+  const groups = new Map()
+  const id = uuid()
+  const rows = []
+  for (const item of items) {
+    requireValue(item && Number(item.cust) === customer.id && Number(item.template) === customer.template && Number(item.no) === no, '送货单信息不一致')
+    const qty = Number(item.qty)
+    requireValue(Number.isFinite(qty) && qty > 0, '送货数量必须为正数')
+    requireValue(Object.values(item).every(v => v === null || ['string','number','boolean'].includes(typeof v)), '单据字段格式错误')
+    const reference = [3,4].includes(customer.template) ? await changeOrder(run, item, qty, groups) : {ord:'',ordUuid:'',ordId:'',sentQty:qty}
+    rows.push(Object.assign({}, item, reference))
   }
-})
+  await updateGroups(run, groups)
+  for (const item of rows) {
+    const fields = ['prd','prdm','cust','custm','model','nun','unit','unitm','qty','qtyR','ptime','lot','remark','time','version','address']
+    const record = {id, ord:item.ord, ordId:item.ordId, ordUuid:item.ordUuid, sentQty:item.sentQty,
+      sentAll:groups.has(item.ordUuid) ? groups.get(item.ordUuid).sentAll : Number(item.qty), no, counter:counter.id, template:customer.template, createTime:now}
+    for (const key of fields) record[key] = item[key] == null ? null : item[key]
+    const columns = Object.keys(record)
+    await run(`INSERT INTO delivery (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`, Object.values(record))
+    await run('INSERT INTO inventoryout (delivery,prd,sentQty,sentTime,cust,createTime) VALUES (?,?,?,?,?,?)', [id,item.prd,item.qty,item.time,customer.id,now])
+    await stock(run, item, Number(item.qty), now)
+  }
+  await run('INSERT INTO deliverygrp (cust,delivery,createTime) VALUES (?,?,?)',[customer.id,id,now])
+  await run('UPDATE counter SET number=?, time=? WHERE id=?',[no,now,counter.id])
+  return {message:'已保存到历史'}
+}))
 
+const latestSql = 'SELECT * FROM deliverygrp WHERE cust=? AND off=0 ORDER BY createTime DESC,id DESC LIMIT 1'
+
+endpoint('/deleteDelivery', data => query.transaction(async run => {
+  const customer = await lockCustomer(run, data.cust)
+  const [group] = await run(latestSql + ' FOR UPDATE',[customer.id])
+  requireValue(group && group.id === positiveId(data.grp), '只能撤销该客户最新的有效送货单')
+  const items = await run('SELECT * FROM delivery WHERE id=? AND off=0 FOR UPDATE',[group.delivery])
+  requireValue(items.length, '缺少送货明细')
+  const now = Date.now()
+  const groups = new Map()
+  for (const item of items) {
+    const qty = Number(item.qty)
+    requireValue(Number.isFinite(qty), '历史数量需要核对')
+    if ([3,4].includes(item.template)) await changeOrder(run, item, -qty, groups)
+    await stock(run,item,-qty,now)
+  }
+  await updateGroups(run,groups)
+  await run('UPDATE delivery SET off=1 WHERE id=?',[group.delivery])
+  await run('UPDATE inventoryout SET off=1 WHERE delivery=?',[group.delivery])
+  await run('UPDATE deliverygrp SET off=1 WHERE id=?',[group.id])
+  const first = items[0]
+  // 单号按客户、按月计数。跨月撤销旧单时不能回退本月的计数器。
+  if (month(first.createTime) === month(now)) {
+    const result = await run('UPDATE counter SET number=? WHERE id=? AND cust=? AND number=?',[first.no-1,first.counter,customer.id,first.no])
+    requireValue(result.affectedRows === 1, '单号与计数器不一致')
+  }
+  const [latest] = await run(latestSql,[customer.id])
+  return {message:'删除成功',cust:latest ? latest.delivery : '-1'}
+}))
+
+endpoint('/getDeliveryHistory', async data => {
+  const all = String(data.customer) === '-1'
+  const where = all ? 'off=0' : 'off=0 AND cust=?'
+  const params = all ? [] : [positiveId(data.customer)]
+  const size = positiveId(data.pageSize || 5)
+  const offset = (positiveId(data.pageNo || 1)-1)*size
+  const [count] = await query('SELECT COUNT(*) AS count FROM deliverygrp WHERE '+where,params)
+  const groups = await query('SELECT * FROM deliverygrp WHERE '+where+' ORDER BY createTime DESC,id DESC LIMIT ?,?',params.concat(offset,size))
+  const message = [], cust = {}
+  for (const group of groups) {
+    const rows = await query('SELECT * FROM delivery WHERE id=?',[group.delivery])
+    if (rows.length) message.push(rows.map(row => Object.assign(row,{grp:group.id})))
+    if (!cust[group.cust]) {
+      const [latest] = await query(latestSql,[group.cust])
+      cust[group.cust] = latest && latest.delivery
+    }
+  }
+  return {message,count:count.count,cust}
+})
 module.exports = router

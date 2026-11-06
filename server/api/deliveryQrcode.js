@@ -13,7 +13,7 @@ router.post('/insertDeliveryQrcode', async (ctx) => {
 
     const data = ctx.request.body.data
     const currentTime = new Date().getTime()
-    await query(`INSERT INTO delivery_qrcode (qrcodeProductId, versionNo, seq1, seq2, qrContent, createTime) VALUES (${data.qrcodeProductId}, '${data.versionNo}', '${data.seq1}', '${data.seq2}', '${data.qrContent}', ${currentTime})`)
+    await query(`INSERT INTO delivery_qrcode (qrcodeProductId, versionNo, seq1, seq2, qrContent, createTime) VALUES (?, ?, ?, ?, ?, ?)`, [data.qrcodeProductId, data.versionNo, data.seq1, data.seq2, data.qrContent, currentTime])
     ctx.body = {code: 200, message: '新增成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -39,8 +39,8 @@ router.post('/getDeliveryQrcode', async (ctx) => {
       LEFT JOIN qrcode_product p ON d.qrcodeProductId = p.id AND p.off != 1
       WHERE d.off != 1
       ORDER BY d.createTime DESC
-      LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}
-    `)
+      LIMIT ?, ?
+    `, [(pageNo - 1) * pageSize, Number(pageSize)])
     ctx.body = {code: 200, message: result, count: count[0].count}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -56,7 +56,7 @@ router.post('/deleteDeliveryQrcode', async (ctx) => {
     }
 
     const data = ctx.request.body.data
-    await query(`UPDATE delivery_qrcode SET off = 1, updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
+    await query(`UPDATE delivery_qrcode SET off = 1, updateTime = ? WHERE id = ?`, [new Date().getTime(), data.id])
     ctx.body = {code: 200, message: '删除成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -72,7 +72,7 @@ router.post('/updDeliveryQrcode', async (ctx) => {
     }
 
     const data = ctx.request.body.data
-    await query(`UPDATE delivery_qrcode SET qrcodeProductId = ${data.qrcodeProductId}, versionNo = '${data.versionNo}', seq1 = '${data.seq1}', seq2 = '${data.seq2}', qrContent = '${data.qrContent}', updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
+    await query(`UPDATE delivery_qrcode SET qrcodeProductId = ?, versionNo = ?, seq1 = ?, seq2 = ?, qrContent = ?, updateTime = ? WHERE id = ?`, [data.qrcodeProductId, data.versionNo, data.seq1, data.seq2, data.qrContent, new Date().getTime(), data.id])
     ctx.body = {code: 200, message: '更新成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
