@@ -79,7 +79,7 @@ async function main() {
     console.log(JSON.stringify({mode:'audit',...before}, null, 2))
     return
   }
-  const dir = backup()
+  const dir = await backup()
   fs.writeFileSync(path.join(dir,'audit.json'), JSON.stringify(before,null,2))
   await query.transaction(async run => {
     const locked = await run('SELECT id FROM ordgrp WHERE off=0 FOR UPDATE')
