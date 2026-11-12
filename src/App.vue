@@ -6,13 +6,13 @@
     <div v-if="$route.path !== '/login'" class="assistant-widget">
       <section v-if="assistantOpen" class="assistant-panel">
         <header class="assistant-header">
-          <span>情义明助手</span>
+          <span>情义明智能助手</span>
           <button type="button" aria-label="关闭助手" @click="assistantOpen = false">×</button>
         </header>
         <iframe
           class="assistant-frame"
-          src="http://127.0.0.1:8080/chat/gMPdThcJH8hZkhmj"
-          title="情义明业务助手"
+          src="https://udify.app/chat/SRsgf6fHd1W4eiuk"
+          title="情义明智能助手"
           allow="microphone"
         ></iframe>
       </section>
@@ -22,7 +22,7 @@
         class="assistant-launcher"
         @click="assistantOpen = true"
       >
-        情义明助手
+        情义明智能助手
       </button>
     </div>
   </div>
