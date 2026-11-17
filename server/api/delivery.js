@@ -54,8 +54,11 @@ async function changeOrder(run, item, delta, groups) {
     const [group] = await run('SELECT * FROM ordgrp WHERE ord = ? AND off = 0 FOR UPDATE', [order.uuid])
     requireValue(group, '订单已删除或不存在')
     const [totals] = await run('SELECT COALESCE(SUM(qty),0) AS qty, COALESCE(SUM(sentQty),0) AS sent FROM ord WHERE uuid = ? AND off = 0', [order.uuid])
-    requireValue(group.qtyAll === totals.qty && group.sentAll === totals.sent,
-      '订单汇总与明细不一致，请先核对')
+    // 老订单组汇总可能已过期。以有效明细为准在本事务内重算，让这次送货后订单汇总恢复一致。
+    requireValue(totals.qty > 0 && totals.sent >= 0 && totals.sent <= totals.qty,
+      '订单明细数量异常，请先核对')
+    group.qtyAll = totals.qty
+    group.sentAll = totals.sent
     groups.set(order.uuid, group)
   }
   const group = groups.get(order.uuid)
