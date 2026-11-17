@@ -16,13 +16,13 @@ router.post('/insertCompany', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const currentTime = new Date().getTime()
-      const company = await query(`SELECT * FROM company WHERE name = '${item.name}' AND off != 1`)
+      const company = await query(`SELECT * FROM company WHERE name = ? AND off != 1`, [item.name])
       if (company.length !== 0) {
         result.push(item.name)
         continue
       }
-      const address = (item.address != null && item.address !== undefined) ? `'${String(item.address).replace(/'/g, "''")}'` : 'NULL'
-      await query(`INSERT INTO company (name, alias, address, createTime, template) VALUES ('${item.name}', '${item.alias}', ${address}, ${currentTime}, ${item.template})`)
+      const address = item.address == null ? null : item.address
+      await query(`INSERT INTO company (name, alias, address, createTime, template) VALUES (?, ?, ?, ?, ?)`, [item.name, item.alias, address, currentTime, item.template])
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -51,7 +51,7 @@ router.post('/getCompany', async (ctx) => {
       ctx.body = {code: 200, message: company}
     } else {
       const count = await query(`SELECT COUNT(*) as count FROM company WHERE off != 1`)
-      company = await query(`SELECT * FROM company WHERE off != 1 ORDER BY createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+      company = await query(`SELECT * FROM company WHERE off != 1 ORDER BY createTime ASC LIMIT ?, ?`, [(pageNo - 1) * pageSize, Number(pageSize)])
       ctx.body = {code: 200, message: company, count: count[0].count}
     }
   } catch(err) {
@@ -72,7 +72,7 @@ router.post('/deleteCompany', async (ctx) => {
     data.forEach(ele => {
       ids.push(ele.id)
     })
-    await query(`UPDATE company SET off = 1, updateTime = ${new Date().getTime()} WHERE id IN ( ${ids.join()} )`)
+    await query(`UPDATE company SET off = 1, updateTime = ? WHERE id IN ( ${ids.map(() => '?').join(', ') || 'NULL'} )`, [new Date().getTime(), ...ids])
     ctx.body = {code: 200, message: '删除成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -88,14 +88,14 @@ router.post('/updCompany', async (ctx) => {
     }
     
     const data = ctx.request.body.data
-    const check = await query(`SELECT * FROM company WHERE name = '${data.name}' AND off != 1`)
+    const check = await query(`SELECT * FROM company WHERE name = ? AND off != 1`, [data.name])
     if (check.length !== 0 && check[0].id != data.id) {
       ctx.body = {code: 500, message: `公司 ${data.name} 已存在`}
       return
     }
-    const address = (data.address != null && data.address !== undefined) ? `'${String(data.address).replace(/'/g, "''")}'` : 'NULL'
-    const upd = await query(`UPDATE company SET name = '${data.name}', alias = '${data.alias}', address = ${address}, updateTime = ${new Date().getTime()}, template = ${data.template} WHERE id = ${data.id}`)
-    const result = await query(`SELECT * FROM company WHERE off != 1 AND id = ${data.id}`)
+    const address = data.address == null ? null : data.address
+    const upd = await query(`UPDATE company SET name = ?, alias = ?, address = ?, updateTime = ?, template = ? WHERE id = ?`, [data.name, data.alias, address, new Date().getTime(), data.template, data.id])
+    const result = await query(`SELECT * FROM company WHERE off != 1 AND id = ?`, [data.id])
     ctx.body = {code: 200, message: '更新成功', result: result}
   } catch(err) {
     ctx.body = {code: 500, message: err}

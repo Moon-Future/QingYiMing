@@ -16,12 +16,12 @@ router.post('/insertProduct', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const currentTime = new Date().getTime()
-      const product = await query(`SELECT * FROM product WHERE model = '${item.model}' AND off != 1`)
+      const product = await query(`SELECT * FROM product WHERE model = ? AND off != 1`, [item.model])
       if (product.length !== 0) {
         result.push(item.model)
         continue
       }
-      await query(`INSERT INTO product (name, model, unit, provider, createTime) VALUES ('${item.name}', '${item.model}', ${item.unit}, ${1}, ${currentTime})`)
+      await query(`INSERT INTO product (name, model, unit, provider, createTime) VALUES (?, ?, ?, ?, ?)`, [item.name, item.model, item.unit, 1, currentTime])
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -49,21 +49,26 @@ router.post('/getProduct', async (ctx) => {
     const time = data && data.time || []
     const startTime = time && time[0] ? time[0] : ''
     const endTime = time && time[1] ? time[1] : ''
+    const filters = []
     let where = `WHERE p.unit = u.id AND p.off != 1`
     if (productName) {
-      where += ` AND p.name LIKE '%${productName}%'`
+      where += ' AND p.name LIKE ?'
+      filters.push(`%${productName}%`)
     }
     if (model) {
-      where += ` AND p.model LIKE '%${model}%'`
+      where += ' AND p.model LIKE ?'
+      filters.push(`%${model}%`)
     }
     if (startTime) {
-      where += ` AND p.createTime >= ${startTime}`
+      where += ' AND p.createTime >= ?'
+      filters.push(startTime)
     }
     if (endTime) {
-      where += ` AND p.createTime <= ${endTime}`
+      where += ' AND p.createTime <= ?'
+      filters.push(endTime)
     }
-    const count = await query(`SELECT COUNT(*) as count FROM product p, unit u ${where}`)
-    const result = await query(`SELECT p.id, p.name, p.model, u.name as unitm FROM product p, unit u ${where} ORDER BY p.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}`)
+    const count = await query(`SELECT COUNT(*) as count FROM product p, unit u ${where}`, [...filters])
+    const result = await query(`SELECT p.id, p.name, p.model, u.name as unitm FROM product p, unit u ${where} ORDER BY p.createTime ASC LIMIT ?, ?`, [...filters, (pageNo - 1) * pageSize, Number(pageSize)])
     ctx.body = {code: 200, message: result, count: count[0].count}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -83,7 +88,7 @@ router.post('/deleteProduct', async (ctx) => {
     data.forEach(ele => {
       ids.push(ele.id)
     })
-    await query(`UPDATE product SET off = 1, updateTime = ${new Date().getTime()} WHERE id IN ( ${ids.join()} )`)
+    await query(`UPDATE product SET off = 1, updateTime = ? WHERE id IN ( ${ids.map(() => '?').join(', ') || 'NULL'} )`, [new Date().getTime(), ...ids])
     ctx.body = {code: 200, message: '删除成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -99,13 +104,13 @@ router.post('/updProduct', async (ctx) => {
     }
     
     const data = ctx.request.body.data
-    const check = await query(`SELECT * FROM product WHERE model = '${data.model}' AND off != 1`)
+    const check = await query(`SELECT * FROM product WHERE model = ? AND off != 1`, [data.model])
     if (check.length !== 0 && check[0].id != data.id) {
       ctx.body = {code: 500, message: `型号 ${data.model} 已存在`}
       return
     }
-    const upd = await query(`UPDATE product SET name = '${data.name}', model = '${data.model}', unit = ${data.unit}, updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
-    const result = await query(`SELECT p.id, p.name, p.model, u.name as unitm FROM product p, unit u WHERE p.unit = u.id AND p.off != 1 AND p.id = ${data.id}`)
+    const upd = await query(`UPDATE product SET name = ?, model = ?, unit = ?, updateTime = ? WHERE id = ?`, [data.name, data.model, data.unit, new Date().getTime(), data.id])
+    const result = await query(`SELECT p.id, p.name, p.model, u.name as unitm FROM product p, unit u WHERE p.unit = u.id AND p.off != 1 AND p.id = ?`, [data.id])
     ctx.body = {code: 200, message: '更新成功', result: result}
   } catch(err) {
     ctx.body = {code: 500, message: err}

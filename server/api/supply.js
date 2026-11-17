@@ -16,12 +16,12 @@ router.post('/insertSupply', async (ctx) => {
     for (let i = 0 , len = data.length; i < len; i++) {
       const item = data[i]
       const currentTime = new Date().getTime()
-      const supply = await query(`SELECT * FROM supply WHERE cust = ${item.cust} AND prd = ${item.prd} AND off != 1`)
+      const supply = await query(`SELECT * FROM supply WHERE cust = ? AND prd = ? AND off != 1`, [item.cust, item.prd])
       if (supply.length !== 0) {
         result.push(item.nun)
         continue
       }
-      await query(`INSERT INTO supply (cust, prd, nun, createTime) VALUES (${item.cust}, ${item.prd}, '${item.nun}', ${currentTime})`)
+      await query(`INSERT INTO supply (cust, prd, nun, createTime) VALUES (?, ?, ?, ?)`, [item.cust, item.prd, item.nun, currentTime])
     }
     if (result.length === 0) {
       ctx.body = {code: 200, message: '新增成功'}
@@ -50,29 +50,25 @@ router.post('/getSupply', async (ctx) => {
     if (data) {
       if (data.pageNo) {
         count = await query(`SELECT COUNT(*) as count FROM supply WHERE off != 1`)
-        supplyList = await query(
-          `
+        supplyList = await query(`
           SELECT s.id, s.nun, c.name as custm, p.name as prdm, p.model, u.name as unitm 
           FROM supply s, company c, product p, unit u 
           WHERE s.cust = c.id AND s.prd = p.id AND p.unit = u.id
-          AND s.off != 1 ORDER BY s.createTime ASC LIMIT ${(pageNo - 1) * pageSize}, ${pageSize}
-          `
-        )
+          AND s.off != 1 ORDER BY s.createTime ASC LIMIT ?, ?
+          `, [(pageNo - 1) * pageSize, Number(pageSize)])
         ctx.body = {code: 200, message: supplyList, count: count[0].count}
       } else if (data.customerId) {
         const customerId = data.customerId
-        supplyList = await query(
-          `
+        supplyList = await query(`
           SELECT s.id, s.nun, c.name as custm, c.id as cust, p.name as prdm, p.model, p.id as prd, u.name as unitm, u.id as unit
           FROM supply s, company c, product p, unit u 
-          WHERE s.cust = ${customerId} AND s.cust = c.id AND s.prd = p.id AND p.unit = u.id
+          WHERE s.cust = ? AND s.cust = c.id AND s.prd = p.id AND p.unit = u.id
           AND s.off != 1 ORDER BY s.createTime ASC
-          `
-        )
-        number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND cust = ${customerId}`)
+          `, [customerId])
+        number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND cust = ?`, [customerId])
         if (number.length === 0) {
-          await query(`INSERT INTO counter (number, cust, type, time) VALUES (0, ${customerId}, 'delivery', ${new Date().getTime()})`)
-          number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND cust = ${customerId}`)
+          await query(`INSERT INTO counter (number, cust, type, time) VALUES (0, ?, 'delivery', ?)`, [customerId, new Date().getTime()])
+          number = await query(`SELECT * FROM counter WHERE type = 'delivery' AND cust = ?`, [customerId])
         } else {
           // 下个月重置为0
           const time = new Date(number[0].time)
@@ -84,14 +80,12 @@ router.post('/getSupply', async (ctx) => {
         ctx.body = {code: 200, message: {supplyList, number}}
       }
     } else {
-      supplyList = await query(
-        `
+      supplyList = await query(`
         SELECT s.id, s.nun, c.name as custm, c.id as cust, p.name as prdm, p.id as prd, p.model, u.name as unitm 
         FROM supply s, company c, product p, unit u 
         WHERE s.cust = c.id AND s.prd = p.id AND p.unit = u.id
         AND s.off != 1 ORDER BY s.createTime ASC
-        `
-      )
+        `)
       ctx.body = {code: 200, message: supplyList}
     }
   } catch(err) {
@@ -112,7 +106,7 @@ router.post('/deleteSupply', async (ctx) => {
     data.forEach(ele => {
       ids.push(ele.id)
     })
-    await query(`UPDATE supply SET off = 1, updateTime = ${new Date().getTime()} WHERE id IN ( ${ids.join()} )`)
+    await query(`UPDATE supply SET off = 1, updateTime = ? WHERE id IN ( ${ids.map(() => '?').join(', ') || 'NULL'} )`, [new Date().getTime(), ...ids])
     ctx.body = {code: 200, message: '删除成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -128,20 +122,18 @@ router.post('/updSupply', async (ctx) => {
     }
     
     const data = ctx.request.body.data
-    const check = await query(`SELECT * FROM supply WHERE cust = ${data.cust} AND prd = ${data.prd} AND off != 1`)
+    const check = await query(`SELECT * FROM supply WHERE cust = ? AND prd = ? AND off != 1`, [data.cust, data.prd])
     if (check.length !== 0 && check[0].id != data.id) {
       ctx.body = {code: 500, message: '已存在相同数据'}
       return
     }
-    const upd = await query(`UPDATE supply SET cust = ${data.cust}, prd = ${data.prd}, nun = '${data.nun}', updateTime = ${new Date().getTime()} WHERE id = ${data.id}`)
-    const result = await query(
-        `
+    const upd = await query(`UPDATE supply SET cust = ?, prd = ?, nun = ?, updateTime = ? WHERE id = ?`, [data.cust, data.prd, data.nun, new Date().getTime(), data.id])
+    const result = await query(`
         SELECT s.id, s.nun, c.name as custm, p.name as prdm, p.model, u.name as unitm
         FROM supply s, company c, product p, unit u 
         WHERE s.cust = c.id AND s.prd = p.id AND p.unit = u.id
-        AND c.off != 1 AND s.id = ${data.id}
-        `
-      )
+        AND c.off != 1 AND s.id = ?
+        `, [data.id])
     ctx.body = {code: 200, message: '更新成功', result: result}
   } catch(err) {
     ctx.body = {code: 500, message: err}

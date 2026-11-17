@@ -5,7 +5,11 @@ const { rootCode } = require('../secret.js')
 
 router.post('/register', async (ctx) => {
   try {
-    const data = ctx.request.body.data
+    const data = ctx.request.body.data || {}
+    if (![data.name, data.account, data.password, data.root].every(value => typeof value === 'string' && value.length > 0)) {
+      ctx.body = {code: 500, message: '注册信息不完整'}
+      return
+    }
     const name = data.name
     const account = data.account
     const password = data.password
@@ -14,12 +18,13 @@ router.post('/register', async (ctx) => {
       ctx.body = {code: 500, message: '注册码错误'}
       return
     }
-    const result = await query(`SELECT * FROM user WHERE account = '${account}'`)
+    const result = await query('SELECT * FROM user WHERE account = ?', [account])
     if (result.length !== 0) {
       ctx.body = {code: 500, message: `用户 ${account} 已存在`}
       return
     }
-    await query(`INSERT INTO user (name, account, password, root, createTime) VALUES ( '${name}', '${account}', '${password}', ${root == rootCode['1'] ? 1 : 0}, ${new Date().getTime()} )`)
+    await query('INSERT INTO user (name, account, password, root, createTime) VALUES (?, ?, ?, ?, ?)',
+      [name, account, password, root == rootCode['1'] ? 1 : 0, Date.now()])
     ctx.body = {code: 200, message: '注册成功'}
   } catch(err) {
     ctx.body = {code: 500, message: err}
@@ -28,10 +33,14 @@ router.post('/register', async (ctx) => {
 
 router.post('/login', async (ctx) => {
   try {
-    const data = ctx.request.body.data
+    const data = ctx.request.body.data || {}
+    if (typeof data.account !== 'string' || typeof data.password !== 'string') {
+      ctx.body = {code: 500, message: '账号或密码格式错误'}
+      return
+    }
     const account = data.account
     const password = data.password
-    const result = await query(`SELECT * FROM user WHERE account = '${account}'`)
+    const result = await query('SELECT * FROM user WHERE account = ?', [account])
     if (result.length === 0) {
       ctx.body = {code: 500, message: '用户不存在'}
     } else if(result[0].password !== password) {
